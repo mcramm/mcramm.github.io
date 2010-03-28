@@ -1,0 +1,41 @@
+@import base.sass
+
+body
+	padding-top: 100px
+	font-size: 1.5em
+	font-family: "Helvetica Neue"
+	color= !font_color
+	
+h1
+	font-size: 4em
+	+centered
+
+a
+	+link_stan
+	
+a:visited
+	+link_stan
+	
+a:hover
+	color= !link_base + #333
+
+#container
+	width: 800px
+	margin: 0px auto
+	
+#header
+	width: 100%
+
+#body
+	margin: 70px 0px
+
+#construction-info
+	+centered
+	color: #555555
+	font-size: 0.80em
+	
+#footer
+	+centered
+	color: #909090
+	font-size: 0.65em
+	margin-top: 20px
