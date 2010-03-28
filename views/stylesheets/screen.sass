@@ -17,7 +17,7 @@ a:visited
 	+link_stan
 	
 a:hover
-	color= !link_base + #333
+	color= !link_hover
 
 #container
 	width: 800px
@@ -27,16 +27,26 @@ a:hover
 	width: 100%
 
 #body
-	margin: 100px 0px 150px
+	margin: 100px 0px 250px
 	line-height: 1.5em
 
 #construction-info
 	+centered
 	color: #555555
-	font-size: 0.80em
+	font-size: 0.60em
+	position: absolute
+	bottom: 50px
+	left: 0px
+	width: 100%
 	
 #footer
 	+centered
-	color: #909090
+	color: #FFFFFF
 	font-size: 0.65em
 	margin-top: 20px
+	background-color= !link_hover
+	position: absolute
+	bottom: 0
+	left: 0
+	padding: 5px 0px
+	width: 100%

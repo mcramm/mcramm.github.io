@@ -30,8 +30,8 @@ a:hover { color: #789abe; }
 
 #header { width: 100%; }
 
-#body { margin: 100px 0px 150px; line-height: 1.5em; }
+#body { margin: 100px 0px 250px; line-height: 1.5em; }
 
-#construction-info { text-align: center; color: #555555; font-size: 0.80em; }
+#construction-info { text-align: center; color: #555555; font-size: 0.60em; position: absolute; bottom: 50px; left: 0px; width: 100%; }
 
-#footer { text-align: center; color: #909090; font-size: 0.65em; margin-top: 20px; }
+#footer { text-align: center; color: #FFFFFF; font-size: 0.65em; margin-top: 20px; background-color: #789abe; position: absolute; bottom: 0; left: 0; padding: 5px 0px; width: 100%; }
