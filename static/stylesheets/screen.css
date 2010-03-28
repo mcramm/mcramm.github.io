@@ -30,7 +30,7 @@ a:hover { color: #789abe; }
 
 #header { width: 100%; }
 
-#body { margin: 70px 0px; }
+#body { margin: 100px 0px 150px; line-height: 1.5em; }
 
 #construction-info { text-align: center; color: #555555; font-size: 0.80em; }
 
