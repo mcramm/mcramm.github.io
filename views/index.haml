@@ -1,58 +1,27 @@
-!!!
-!!! XML
-!!! Strict
-%html{ :xmlns => "http://www.w3.org/1999/xhtml", :lang => 'en', 'xml:lang' => 'en' }
-	%head
-		%title mcramm
-		%meta{'http-equiv'=>"Content-Type", :content=>"text/html; charset=iso-8859-1"}/
-		%meta{'http-equiv'=>"Content-Language", :content=>"en-us"}/
-		%link{:href=>"/stylesheets/screen.css", :media=>"screen", :rel=>"stylesheet", :type=>"text/css"}/
-		%script{:type => 'text/javascript', :src => "/javascripts/script.js"}
-		
-	%body
-		#container
-			#header
-				%h1 mcramm.com
-			#body
-				%p
-					%a{:href => "http://www.google.com/profiles/104259733349257946709"} Michael Cramm 
-					is a Ruby/Rails hobbyist 
-					%a{:href => "http://github.com/mcramm"} who really hasn't done much of anything yet. 
-				#twitter-results
-					.tweet{:id => "tweet-1"}
-						%p= @timeline[0]['text']
-						#twitter-meta
-							via
-							%a{:href => "http://twitter.com/cramm"}twitter
-							on
-							=@timeline[0]['date']
-					- @timeline[1..9].each_with_index do |t, index|
-						.tweet{:id => "tweet-#{index+2}", :style=>"display:none"}
-							%p!= t['text']
-							#twitter-meta
-								via
-								%a{:href => "http://twitter.com/cramm"}twitter
-								@
-								=t['date']
-					%hr
-					#twitter-footer
-						%span{:id=>"prev-tweet", :class=> "tweet-button",:onClick => "getTweet(-1)"} prev
-						%span{:id=>"current-tweet"}1
-						\/ 10
-						%span{:id=>"next-tweet", :class=> "tweet-button", :onClick => "getTweet(1)"}next
+%p
+	%a{:href => "http://www.google.com/profiles/104259733349257946709"} Michael Cramm 
+	is a Ruby/Rails hobbyist 
+	%a{:href => "http://github.com/mcramm"} who really hasn't done much of anything yet. 
+#twitter-results
+	.tweet{:id => "tweet-1"}
+		%p= @timeline[0]['text']
+		#twitter-meta
+			via
+			%a{:href => "http://twitter.com/cramm"}twitter
+			on
+			=@timeline[0]['date']
+	- @timeline[1..9].each_with_index do |t, index|
+		.tweet{:id => "tweet-#{index+2}", :style=>"display:none"}
+			%p!= t['text']
+			#twitter-meta
+				via
+				%a{:href => "http://twitter.com/cramm"}twitter
+				@
+				=t['date']
+	%hr
+	#twitter-footer
+		%span{:id=>"prev-tweet", :class=> "tweet-button",:onClick => "getTweet(-1)"} prev
+		%span{:id=>"current-tweet"}1
+		\/ 10
+		%span{:id=>"next-tweet", :class=> "tweet-button", :onClick => "getTweet(1)"}next
 						
-			#construction-info
-				%p 
-					This site was built in 
-					%a{:href => "http://www.sinatrarb.com/"} Sinatra
-					using 
-					%a{:href => "http://wiki.github.com/chriseppstein/compass/"} Compass
-					(
-					%a{:href => "http://sass-lang.com/tutorial.html"}+Sass
-					) and 
-					%a{:href => "http://haml-lang.com/"} Haml.
-					Hosted on 
-					%a{:href => "http://heroku.com/"}Heroku.
-				
-			#footer
-				%p &copy 2010 Michael Cramm

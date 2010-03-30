@@ -1,0 +1,32 @@
+!!!
+!!! XML
+!!! Strict
+%html{ :xmlns => "http://www.w3.org/1999/xhtml", :lang => 'en', 'xml:lang' => 'en' }
+	%head
+		%title mcramm
+		%meta{'http-equiv'=>"Content-Type", :content=>"text/html; charset=iso-8859-1"}/
+		%meta{'http-equiv'=>"Content-Language", :content=>"en-us"}/
+		%link{:href=>"/stylesheets/screen.css", :media=>"screen", :rel=>"stylesheet", :type=>"text/css"}/
+		%script{:type => 'text/javascript', :src => "/javascripts/script.js"}
+		
+	%body
+		#container
+			#header
+				%h1 mcramm.com
+			#body
+				=yield
+			#construction-info
+				%p 
+					This site was built in 
+					%a{:href => "http://www.sinatrarb.com/"} Sinatra
+					using 
+					%a{:href => "http://wiki.github.com/chriseppstein/compass/"} Compass
+					(
+					%a{:href => "http://sass-lang.com/tutorial.html"}+Sass
+					) and 
+					%a{:href => "http://haml-lang.com/"} Haml.
+					Hosted on 
+					%a{:href => "http://heroku.com/"}Heroku.
+
+			#footer
+				%p &copy 2010 Michael Cramm
