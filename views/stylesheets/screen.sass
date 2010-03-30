@@ -27,9 +27,29 @@ a:hover
 	width: 100%
 
 #body
-	margin: 100px 0px 250px
+	margin: 100px 0px
 	line-height: 1.5em
 
+#twitter-results
+	margin-top: 25px
+	padding: 0px 15px
+	hr
+		border-color: #efefef
+		margin: 0
+.tweet
+	font-size: 0.7em
+	padding: 0px 5px
+	p
+		height: 100px
+	#twitter-meta
+		+tweet_meta
+
+#twitter-footer
+	+tweet_meta
+	
+	.tweet-button:hover
+		cursor: pointer
+	
 #construction-info
 	+centered
 	color: #555555
