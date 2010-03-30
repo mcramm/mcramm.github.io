@@ -1,3 +1,2 @@
 haml --version '>= 2.2.0'
 chriseppstein-compass --version '>= 0.8.7' --source gems.github.com
-twitter --version ">= 0.9.2"
