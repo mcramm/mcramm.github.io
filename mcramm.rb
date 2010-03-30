@@ -42,7 +42,15 @@ def get_timeline
     unless index > 9
       @timeline[index] = Hash.new
       @timeline[index]['id'] = status.elements['id'].text
-      @timeline[index]['text'] = status.elements['text'].text
+      tweet_content = status.elements['text'].text
+
+      tweet_content.gsub!(/’/,'\'')
+      tweet_content.gsub!(/”/,"\"")
+      tweet_content.gsub!(/“/,"\"")
+      tweet_content.gsub!(/\shttp:\/\/[www.]*[a-zA-Z0-9]+.[(com)(ca)(org]+(\/)*[a-zA-Z0-9]*/){ |match| "\s<a href='#{match.strip!}' target='_blank'>#{match}</a>\s"}
+      tweet_content.gsub!(/[^\s]*\@[a-zA-Z0-9]+\s/) { |match| "\s<a href='http://twitter.com/#{match.strip![1..match.length]} target='_blank'>#{match}</a>\s"}
+
+      @timeline[index]['text'] = tweet_content
       @timeline[index]['date'] = Time.parse(status.elements['created_at'].text).strftime("%a %b %d %I:%M %p")
       index += 1
     end
