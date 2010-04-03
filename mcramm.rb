@@ -47,7 +47,7 @@ def get_timeline
       tweet_content.gsub!(/’/,'\'')
       tweet_content.gsub!(/”/,"\"")
       tweet_content.gsub!(/“/,"\"")
-      tweet_content.gsub!(/\shttp:\/\/[www.]*[a-zA-Z0-9]+.[(com)(ca)(org]+(\/)*[a-zA-Z0-9]*/){ |match| "\s<a href='#{match.strip!}' target='_blank'>#{match}</a>\s"}
+      tweet_content.gsub!(/\shttp:\/\/[www.]*[a-zA-Z0-9]+.[(com)(ca)(org)(ly)]+(\/)*[a-zA-Z0-9]*/){ |match| "\s<a href='#{match.strip!}' target='_blank'>#{match}</a>\s"}
       tweet_content.gsub!(/[^\s]*\@[a-zA-Z0-9]+\s/) { |match| "\s<a href='http://twitter.com/#{match.strip![1..match.length]} target='_blank'>#{match}</a>\s"}
 
       @timeline[index]['text'] = tweet_content
