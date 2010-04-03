@@ -18,7 +18,7 @@ a:visited
 	
 a:hover
 	color= !link_hover
-
+	text-decoration: underline
 #container
 	width: 800px
 	margin: 0px auto
@@ -30,41 +30,63 @@ a:hover
 	margin: 100px 0px
 	line-height: 1.5em
 
+#twitter-results-wrap
+	background-color= !link_hover
+	position: absolute
+	left: 0
+	margin-top: 50px
+	width: 100%
+	
 #twitter-results
-	margin-top: 25px
-	padding: 0px 15px
+	margin: 0px auto
+	width: 800px
+	padding: 40px 15px
+	color: #FFFFFF
 	hr
 		border-color: #efefef
 		margin: 0
+
 .tweet
 	font-size: 0.7em
 	padding: 0px 5px
 	p
-		height: 100px
+		height: 65px
+
+	a
+		+tweet_link
+
+	a:hover
+		+tweet_link_hover
+
 	#twitter-meta
 		+tweet_meta
 
 #twitter-footer
 	+tweet_meta
+	padding-right: 9px
 	
+	.tweet-button
+		+tweet_link
+		
 	.tweet-button:hover
 		cursor: pointer
+		+tweet_link_hover
 	
 #construction-info
 	+centered
 	color: #555555
 	font-size: 0.60em
 	position: absolute
-	bottom: 50px
+	bottom: 35px
 	left: 0px
 	width: 100%
 	
 #footer
 	+centered
-	color: #FFFFFF
+	color: #AAAAAA
 	font-size: 0.65em
 	margin-top: 20px
-	background-color= !link_hover
+
 	position: absolute
 	bottom: 0
 	left: 0

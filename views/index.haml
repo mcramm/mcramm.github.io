@@ -1,28 +1,29 @@
 %p
 	%a{:href => "http://www.google.com/profiles/104259733349257946709"} Michael Cramm 
 	is a Ruby/Rails hobbyist 
-	%a{:href => "http://github.com/mcramm"} who really hasn't done much of anything yet. 
-#twitter-results
-	.tweet{:id => "tweet-1"}
-		%p= @timeline[0]['text']
-		#twitter-meta
-			via
-			%a{:href => "http://twitter.com/cramm"}twitter
-			on
-			=@timeline[0]['date']
-	- @timeline[1..(@timeline.size)-1].each_with_index do |t, index|
-		.tweet{:id => "tweet-#{index+2}", :style=>"display:none"}
-			%p!= t['text']
+	%a{:href => "http://github.com/mcramm"} who really hasn't done much of anything yet.
+#twitter-results-wrap 
+	#twitter-results
+		.tweet{:id => "tweet-1"}
+			%p= @timeline[0]['text']
 			#twitter-meta
 				via
 				%a{:href => "http://twitter.com/cramm"}twitter
-				@
-				=t['date']
-	%hr
-	#twitter-footer
-		%span{:id=>"prev-tweet", :class=> "tweet-button",:onClick => "getTweet(-1)"} prev
-		%span{:id=>"current-tweet"}1
-		\/
-		%span{:id=>"limit"}=@timeline.size
-		%span{:id=>"next-tweet", :class=> "tweet-button", :onClick => "getTweet(1)"}next
+				on
+				=@timeline[0]['date']
+		- @timeline[1..(@timeline.size)-1].each_with_index do |t, index|
+			.tweet{:id => "tweet-#{index+2}", :style=>"display:none"}
+				%p!= t['text']
+				#twitter-meta
+					via
+					%a{:href => "http://twitter.com/cramm"}twitter
+					@
+					=t['date']
+		%hr
+		#twitter-footer
+			%span{:id=>"prev-tweet", :class=> "tweet-button",:onClick => "getTweet(-1)"} prev
+			%span{:id=>"current-tweet"}1
+			\/
+			%span{:id=>"limit"}=@timeline.size
+			%span{:id=>"next-tweet", :class=> "tweet-button", :onClick => "getTweet(1)"}next
 						
