@@ -23,7 +23,7 @@ end
 
 get '/' do
   twitter = Twitter.new
-  @timeline = twitter.retrieve(15)
+  @timeline = twitter.retrieve
   haml :index
 end
 
