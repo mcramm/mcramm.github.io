@@ -29,19 +29,16 @@ a:hover
 #body
 	margin: 50px 100px
 	line-height: 1.5em
-	width: 500px
+	text-align: center
 
 #twitter-results-wrap
 	border: 3px dashed #262626
-	position: absolute
-	left: 0
 	margin: 50px 100px
-	width: 500px
 	
 #twitter-results
 	margin: 0px auto
 	padding: 10px
-
+	text-align: left
 	hr
 		border-color= !font_color
 		margin: 0
@@ -49,10 +46,15 @@ a:hover
 .tweet
 	font-size: 0.5em
 	padding: 0px 5px
-	height: 140px
-
+	height: 110px
+	position: relative
+	
 	#twitter-meta
 		+tweet_meta
+		position: absolute
+		bottom: 0px
+		right: 0px
+	
 
 #twitter-footer
 	+tweet_meta

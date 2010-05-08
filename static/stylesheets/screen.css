@@ -30,15 +30,15 @@ a:hover { color: #6f8cac; text-decoration: underline; }
 
 #header { width: 100%; }
 
-#body { margin: 50px 100px; line-height: 1.5em; width: 500px; }
+#body { margin: 50px 100px; line-height: 1.5em; text-align: center; }
 
-#twitter-results-wrap { border: 3px dashed #262626; position: absolute; left: 0; margin: 50px 100px; width: 500px; }
+#twitter-results-wrap { border: 3px dashed #262626; margin: 50px 100px; }
 
-#twitter-results { margin: 0px auto; padding: 10px; }
+#twitter-results { margin: 0px auto; padding: 10px; text-align: left; }
 #twitter-results hr { border-color: #919191; margin: 0; }
 
-.tweet { font-size: 0.5em; padding: 0px 5px; height: 140px; }
-.tweet #twitter-meta { text-align: right; font-size: 12px; padding-right: 5px; }
+.tweet { font-size: 0.5em; padding: 0px 5px; height: 110px; position: relative; }
+.tweet #twitter-meta { text-align: right; font-size: 12px; padding-right: 5px; position: absolute; bottom: 0px; right: 0px; }
 
 #twitter-footer { text-align: right; font-size: 12px; padding-right: 5px; padding-right: 9px; }
 #twitter-footer .tweet-button { color: #3c5979; }
