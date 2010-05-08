@@ -32,7 +32,7 @@ class Twitter
     s.gsub!(/”/,"\"")
     s.gsub!(/“/,"\"")
     s.gsub!(/\shttp:\/\/[www.]*[a-zA-Z0-9]+.[(com)(ca)(org)(ly)]+(\/)*[a-zA-Z0-9]*/){ |match| "\s<a href='#{match.strip!}' target='_blank'>#{match}</a>\s"}
-    s.gsub!(/[^\s]*\@[a-zA-Z0-9]+\s/) { |match| "\s<a href='http://twitter.com/#{match.strip![1..match.length]} target='_blank'>#{match}</a>\s"}
+    s.gsub!(/[^\s]*\@[a-zA-Z0-9]+\s/) { |match| "\s<a href='http://twitter.com/#{match.strip![1..match.length]}' target='_blank'>#{match}</a>\s"}
     return s
   end
   
