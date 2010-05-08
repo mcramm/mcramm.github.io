@@ -16,9 +16,9 @@ q:before, q:after, blockquote:before, blockquote:after { content: ""; }
 
 img a { border: none; }
 
-body { padding-top: 100px; font-size: 1.5em; font-family: "Helvetica Neue", Helvetica; color: #333333; }
+body { padding-top: 100px; font-size: 1.5em; font-family: Monaco, "Helvetica Neue", Helvetica; color: #919191; background-color: #101010; }
 
-h1 { font-size: 4em; text-align: center; }
+h1 { text-align: right; margin-right: 100px; font-size: 4em; }
 
 a { color: #3c5979; text-decoration: none; }
 
@@ -26,27 +26,24 @@ a:visited { color: #3c5979; text-decoration: none; }
 
 a:hover { color: #6f8cac; text-decoration: underline; }
 
-#container { width: 800px; margin: 0px auto; }
+#container { width: 100%; margin: 0px auto; }
 
 #header { width: 100%; }
 
-#body { margin: 100px 0px; line-height: 1.5em; }
+#body { margin: 50px 100px; line-height: 1.5em; width: 500px; }
 
-#twitter-results-wrap { background-color: #6f8cac; position: absolute; left: 0; margin-top: 50px; width: 100%; }
+#twitter-results-wrap { border: 3px dashed #262626; position: absolute; left: 0; margin: 50px 100px; width: 500px; }
 
-#twitter-results { margin: 0px auto; width: 800px; padding: 40px 15px; color: #FFFFFF; }
-#twitter-results hr { border-color: #efefef; margin: 0; }
+#twitter-results { margin: 0px auto; padding: 10px; }
+#twitter-results hr { border-color: #919191; margin: 0; }
 
-.tweet { font-size: 0.7em; padding: 0px 5px; }
-.tweet p { height: 65px; }
-.tweet a { color: #dcdcdc; }
-.tweet a:hover { color: white; text-decoration: underline; }
+.tweet { font-size: 0.5em; padding: 0px 5px; height: 140px; }
 .tweet #twitter-meta { text-align: right; font-size: 12px; padding-right: 5px; }
 
 #twitter-footer { text-align: right; font-size: 12px; padding-right: 5px; padding-right: 9px; }
-#twitter-footer .tweet-button { color: #dcdcdc; }
-#twitter-footer .tweet-button:hover { cursor: pointer; color: white; text-decoration: underline; }
+#twitter-footer .tweet-button { color: #3c5979; }
+#twitter-footer .tweet-button:hover { color: #6f8cac; cursor: pointer; text-decoration: underline; }
 
-#construction-info { text-align: center; color: #555555; font-size: 0.60em; position: absolute; bottom: 35px; left: 0px; width: 100%; }
+#construction-info { text-align: right; margin-right: 100px; font-size: 0.5em; margin-top: 15px; }
 
-#footer { text-align: center; color: #AAAAAA; font-size: 0.65em; margin-top: 20px; position: absolute; bottom: 0; left: 0; padding: 5px 0px; width: 100%; }
+#footer { text-align: right; margin-right: 100px; margin-top: 10px; font-size: 0.5em; }

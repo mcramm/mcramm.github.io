@@ -3,12 +3,12 @@
 body
 	padding-top: 100px
 	font-size: 1.5em
-	font-family: "Helvetica Neue", Helvetica
+	font-family: Monaco, "Helvetica Neue", Helvetica
 	color= !font_color
-	
+	background-color: #101010
 h1
+	+right_hand_side
 	font-size: 4em
-	+centered
 
 a
 	+link_stan
@@ -20,43 +20,36 @@ a:hover
 	color= !link_hover
 	text-decoration: underline
 #container
-	width: 800px
+	width: 100%
 	margin: 0px auto
 	
 #header
 	width: 100%
 
 #body
-	margin: 100px 0px
+	margin: 50px 100px
 	line-height: 1.5em
+	width: 500px
 
 #twitter-results-wrap
-	background-color= !link_hover
+	border: 3px dashed #262626
 	position: absolute
 	left: 0
-	margin-top: 50px
-	width: 100%
+	margin: 50px 100px
+	width: 500px
 	
 #twitter-results
 	margin: 0px auto
-	width: 800px
-	padding: 40px 15px
-	color: #FFFFFF
+	padding: 10px
+
 	hr
-		border-color: #efefef
+		border-color= !font_color
 		margin: 0
 
 .tweet
-	font-size: 0.7em
+	font-size: 0.5em
 	padding: 0px 5px
-	p
-		height: 65px
-
-	a
-		+tweet_link
-
-	a:hover
-		+tweet_link_hover
+	height: 140px
 
 	#twitter-meta
 		+tweet_meta
@@ -66,29 +59,19 @@ a:hover
 	padding-right: 9px
 	
 	.tweet-button
-		+tweet_link
+		color= !link_base
 		
 	.tweet-button:hover
+		color= !link_hover
 		cursor: pointer
-		+tweet_link_hover
+		text-decoration: underline
 	
 #construction-info
-	+centered
-	color: #555555
-	font-size: 0.60em
-	position: absolute
-	bottom: 35px
-	left: 0px
-	width: 100%
+	+right_hand_side
+	font-size= !under_header
+	margin-top: 15px
 	
 #footer
-	+centered
-	color: #AAAAAA
-	font-size: 0.65em
-	margin-top: 20px
-
-	position: absolute
-	bottom: 0
-	left: 0
-	padding: 5px 0px
-	width: 100%
+	+right_hand_side
+	margin-top: 10px
+	font-size= !under_header
