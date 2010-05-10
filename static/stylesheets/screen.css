@@ -18,7 +18,7 @@ img a { border: none; }
 
 body { padding-top: 100px; font-size: 1.5em; font-family: Monaco, "Helvetica Neue", Helvetica; color: #919191; background-color: #101010; }
 
-h1 { text-align: right; margin-right: 100px; font-size: 4em; }
+h1 { text-align: right; margin-right: 100px; font-size: 4em; height: 45px; }
 
 a { color: #3c5979; text-decoration: none; }
 
