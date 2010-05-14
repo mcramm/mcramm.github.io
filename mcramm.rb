@@ -14,7 +14,7 @@ set :public, "static"
 set :bind, '10.131.25.4'
 
 configure do 
-  Compass.configuration.parse(File.join(Sinatra::Application.root, 'config', 'compass.config'))
+  Compass.add_project_configuration(File.join(Sinatra::Application.root, 'config', 'compass.config'))
 end
 
 get '/stylesheets/:name.css' do
