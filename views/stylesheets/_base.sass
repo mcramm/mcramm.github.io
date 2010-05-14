@@ -1,14 +1,14 @@
-!font_color = #919191
-!link_base= #3C5979
-!link_hover= !link_base + #333
+$font_color : #919191
+$link_base: #3C5979
+$link_hover: $link_base + #333
 
-@import compass/reset.sass
+@import "compass/reset"
 
 =centered
 	text-align: center
 
 =link_stan
-	color= !link_base
+	color: $link_base
 	text-decoration: none
 	
 =tweet_meta
@@ -16,7 +16,7 @@
 	font-size: 12px
 	padding-right: 5px
 
-!under_header= 0.5em
+$under_header: 0.5em
 
 =right_hand_side
 	text-align: right
