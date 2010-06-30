@@ -1,3 +1,5 @@
+GITHUB_USERNAME='mcramm';
+
 function getTweet(value){
 	var current_tweet = parseInt(document.getElementById('current-tweet').innerHTML);
 	var tweet_limit = parseInt(document.getElementById('limit').innerHTML);

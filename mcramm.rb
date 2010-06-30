@@ -4,6 +4,7 @@ require 'sinatra'
 require 'haml'
 require 'net/http'
 require 'uri'
+require 'digest/md5'
 require 'rexml/document'
 require 'lib/twitter'
 
@@ -28,8 +29,11 @@ get '/' do
   haml :index
 end
 
-get '/feed' do
-  
+get '/info' do
+  email_address = "gmcramm@gmail.com"
+  hash = Digest::MD5.hexdigest(email_address)
+  @image_src = "http://www.gravatar.com/avatar/#{hash}"
+  haml :info
 end
 
 private
