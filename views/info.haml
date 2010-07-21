@@ -1,25 +1,28 @@
-#info-top
-	%img{:src => "http://www.gravatar.com/avatar/87aca8c72a55340bc0065de981ab1701?s=125"}
-	%span
-		Hi! My name is Mike
-	
-#info-main
-	%p
-		I've been playing with Ruby for over a year, though I've been building sites since I was about 14. 
-	%br
-	%p
-		I'm currently working at
-		%a{:href => "http://curvedental.com"} curvedental
-		%span>
-		, a web-based solution for dental offices.
-	%br
-	%p
-		You can check out some of my code, (including this site) at 
-		%a{:href => "http://github.com/mcramm"} Github
-		%span>
-		, and you can follow me on
-		
-		%a{:href => "http://twitter.com/cramm"} Twitter
-		%span>
-		\.
-	
+.info
+    .summary 
+        I've been building basic websites, (html + css), for a long time, and I've spent a lot of time getting experience with the following technologies:
+    %table
+        %tr
+            %td.list
+                %h2 Languages
+                %ul{:class => "languages"}
+                    %li Ruby
+                    %li PHP
+                    %li Javascript(Dojo, Jquery, Prototype) 
+            %td.list
+                %h2 Frameworks
+                %ul{:class => "misc"}
+                    %li Sinatra
+                    %li Rails 
+                    %li Akelos
+        %tr
+            %td.list
+                %h2 Misc. Technologies
+                %ul{:class => "misc"}
+                    %li Git
+                    %li Subversion 
+                    %li Haml
+                    %li Sass
+            %td.list
+                %h2 And a ton more.
+                %p That I'm just waiting to put here.

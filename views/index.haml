@@ -1,29 +1,34 @@
-%p{:id => "main_desc"}
-	%a{:href => "http://www.google.com/profiles/104259733349257946709"} Michael Cramm 
-	is a Ruby/Rails hobbyist 
-	%a{:href => "http://github.com/mcramm"} who really hasn't done much of anything yet.
-#twitter-results-wrap 
-	#twitter-results
-		.tweet{:id => "tweet-1"}
-			%p= @timeline[0]['text']
-			#twitter-meta
-				via
-				%a{:href => "http://twitter.com/cramm"}twitter
-				on
-				=@timeline[0]['date']
-		- @timeline[1..(@timeline.size)-1].each_with_index do |t, index|
-			.tweet{:id => "tweet-#{index+2}", :style=>"display:none"}
-				%p!= t['text']
-				#twitter-meta
-					via
-					%a{:href => "http://twitter.com/cramm"}twitter
-					on
-					=t['date']
-		%hr
-		#twitter-footer
-			%span{:id=>"prev-tweet", :class=> "tweet-button",:onClick => "getTweet(-1)"} prev
-			%span{:id=>"current-tweet"}1
-			\/
-			%span{:id=>"limit"}=@timeline.size
-			%span{:id=>"next-tweet", :class=> "tweet-button", :onClick => "getTweet(1)"}next
-						
+.index
+    .main
+        Hi. My name is Michael Cramm. 
+        %br
+        I am a Ruby/Rails Hobyist and fervent moviegoer.
+
+    .middleWrap
+        .middle
+            .left
+                %h2 What the heck is this?
+                %p
+                    This is just a persoanl landing page I setup for people trying to contact me. 
+                %p
+                    I used to have a blog here, but absolutely nothing to write about.
+                %p
+                    You can check out (some) of the random projects I've worked on by clicking 
+                    %a{:href => "http://github.com/mcramm"}
+                        here.
+                        
+                
+            .middle
+            .right
+                %h2 Twitter
+                #tweets
+                .tweets-bottom
+                    %a{:href=>"http://twitter.com/cramm"}
+                        See More
+
+    .bottom
+        %a{:href => "http://github.com/mcramm", :class => "left"}
+            Projects
+            %i (Comming Soon)
+        %a{:href => "/info", :class => "right"}
+            More Info

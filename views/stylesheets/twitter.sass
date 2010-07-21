@@ -1,0 +1,44 @@
+@import base.sass
+#twitter-results-wrap
+	border: 3px dashed #262626
+	width: 50%
+	margin: 50px 0px
+	
+#twitter-results
+	margin: 0px auto
+	padding: 5px
+	text-align: left
+	hr
+		border-color: $font_color
+		margin: 0
+
+.tweet
+	font-size: 0.5em
+	padding: 0px 5px
+	height: 110px
+	position: relative
+	
+	#twitter-meta
+		+tweet_meta
+		position: absolute
+		bottom: 0px
+		right: 0px
+	
+
+#twitter-footer
+	+tweet_meta
+	padding-right: 9px
+	-webkit-user-select: none
+	-moz-user-select: none
+	user-select: none
+	
+	.tweet-button
+		color: $link_base
+		
+		
+	.tweet-button:hover
+		color: $link_hover
+		cursor: pointer
+		text-decoration: underline
+	
+

@@ -1,102 +1,100 @@
 @import base.sass
 
 body
-	padding-top: 10px
-	font-size: 1.5em
-	font-family: Monaco, "Helvetica Neue", Helvetica
-	color: $font_color
-	background: #101010 !important
-	height: 50000px
-	overflow: hidden
+    padding-top: 10px
+    font-size: 1em
+    font-family: Monaco, "Helvetica Neue", Helvetica
+    color: $font_color
+    background: #101010 !important
+    height: 50000px
+    overflow: hidden
 
 h1
-	+right_hand_side
-	font-size: 4em
+    +right_hand_side
+    font-size: 4em
 
 a
-	+link_stan
+    +link_stan
 	
 a:visited
-	+link_stan
+    +link_stan
 	
 a:hover
-	color: $link_hover
-	text-decoration: underline
+    color: $link_hover
+    text-decoration: underline
 	
 #container
-	width: 100%
-	
+    max-width: 1400px
+    min-width: 990px
+    margin: 0px auto	
 #header
-	width: 100%
-	h1
-		a
-			color: $font-color
-		a:hover
-			color: $link_hover
+    width: 100%
+    h1
+        a
+            color: $font_color
+        a:hover
+            color: $link_hover
 #body
-	margin: 15px 100px
-	line-height: 1.5em
-	#main_desc
-		text-align: left
-		width: 70%
-		
-#twitter-results-wrap
-	border: 3px dashed #262626
-	width: 50%
-	margin: 50px 0px
-	
-#twitter-results
-	margin: 0px auto
-	padding: 5px
-	text-align: left
-	hr
-		border-color: $font_color
-		margin: 0
+    margin: 15px auto
+    line-height: 1.5em
+    width: 800px
 
-.tweet
-	font-size: 0.5em
-	padding: 0px 5px
-	height: 110px
-	position: relative
-	
-	#twitter-meta
-		+tweet_meta
-		position: absolute
-		bottom: 0px
-		right: 0px
-	
-
-#twitter-footer
-	+tweet_meta
-	padding-right: 9px
-	-webkit-user-select: none
-	-moz-user-select: none
-	user-select: none
-	
-	.tweet-button
-		color: $link_base
-		
-		
-	.tweet-button:hover
-		color: $link_hover
-		cursor: pointer
-		text-decoration: underline
-	
+    .main
+        text-align: left
+    .index
+        .bottom
+            margin-top: 30px
+            display: table
+            width: 100%
+            text-align: center
+            vertical-align: middle
+            a
+                vertical-align: middle
+                color: $font_color
+                height: 100px
+                width: 50%
+                display: table-cell
+                font-size: 1.5em
+            a:hover
+                background-color: #333
+                color: $font_color + #333
+                cursor: pointer
+                text-decoration: none
+            .left
+                i
+                    color: $font_color - #333
+        .middleWrap
+            width: 100%
+            margin-top: 25px
+            .middle
+                display: table
+                margin: 0px auto
+                .left, .right, .middle
+                    display: table-cell
+                    height: 50px
+                .left, .right
+                    width: 400px
+                .left
+                    padding-right: 5px
+                    p
+                        margin-top: 15px
+                .tweet
+                    font-size: 12px
+                    padding-bottom: 10px
+                    .date
+                        font-size: 10px
+                .tweets-bottom
+                    text-align: right
+                .middle
+                    width: 1px
+                    background-color: #eee
+                .right
+                    padding-left: 5px
 #construction-info
-	+right_hand_side
-	font-size: $under_header
-	margin-top: 15px
+    +right_hand_side
+    font-size: 0.8em
 	
 #footer
-	+right_hand_side
-	margin-top: 10px
-	font-size: $under_header
-	
-#info-top
-	img
-		vertical-align: bottom
-	span
-		font-size: 60px
-		margin-bottom: 15px
-		display: inline-block
-	margin-bottom: 25px
+    +right_hand_side
+    margin-top: 5px
+    font-size: 0.7em
