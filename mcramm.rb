@@ -4,7 +4,6 @@ require 'sinatra'
 require 'haml'
 require 'net/http'
 require 'uri'
-require 'digest/md5'
 require 'rexml/document'
 require 'lib/twitter'
 
@@ -12,7 +11,8 @@ set :app_file, __FILE__
 set :root, File.dirname(__FILE__)
 set :views, "views"
 set :public, "static"
-# set :bind, '10.131.25.4'
+#set :bind, '10.131.25.4'
+#set :bind, '192.168.0.17'
 
 configure do 
   Compass.add_project_configuration(File.join(Sinatra::Application.root, 'config', 'compass.config'))
@@ -25,13 +25,6 @@ end
 
 get '/' do
   haml :index
-end
-
-get '/info' do
-  email_address = "gmcramm@gmail.com"
-  hash = Digest::MD5.hexdigest(email_address)
-  @image_src = "http://www.gravatar.com/avatar/#{hash}"
-  haml :info
 end
 
 get "/tweets.json" do
