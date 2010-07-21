@@ -24,8 +24,7 @@ a:hover
     text-decoration: underline
 	
 #container
-    max-width: 1400px
-    min-width: 990px
+    width: 800px
     margin: 0px auto	
 #header
     width: 100%
@@ -37,58 +36,36 @@ a:hover
 #body
     margin: 15px auto
     line-height: 1.5em
-    width: 800px
 
     .main
         text-align: left
+        margin-top: 35px
     .index
-        .bottom
-            margin-top: 30px
-            display: table
-            width: 100%
-            text-align: center
-            vertical-align: middle
-            a
-                vertical-align: middle
-                color: $font_color
-                height: 100px
-                width: 50%
-                display: table-cell
-                font-size: 1.5em
-            a:hover
-                background-color: #333
-                color: $font_color + #333
-                cursor: pointer
-                text-decoration: none
-            .left
-                i
-                    color: $font_color - #333
         .middleWrap
-            width: 100%
-            margin-top: 25px
+            margin-top: 45px
             .middle
+                font-size: 12px
                 display: table
                 margin: 0px auto
-                .left, .right, .middle
+                .leftWrap, .rightWrap
                     display: table-cell
-                    height: 50px
+                    width: 50%
                 .left, .right
-                    width: 400px
+                    height: 220px
+                    h2
+                        font-size: 14px
                 .left
                     padding-right: 5px
                     p
                         margin-top: 15px
                 .tweet
-                    font-size: 12px
                     padding-bottom: 10px
                     .date
                         font-size: 10px
                 .tweets-bottom
                     text-align: right
-                .middle
-                    width: 1px
-                    background-color: #eee
                 .right
+                    border-left: 1px solid #eee
                     padding-left: 5px
 #construction-info
     +right_hand_side

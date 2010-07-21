@@ -6,29 +6,21 @@
 
     .middleWrap
         .middle
-            .left
-                %h2 What the heck is this?
-                %p
-                    This is just a persoanl landing page I setup for people trying to contact me. 
-                %p
-                    I used to have a blog here, but absolutely nothing to write about.
-                %p
-                    You can check out (some) of the random projects I've worked on by clicking 
-                    %a{:href => "http://github.com/mcramm"}
-                        here.
-                        
-                
-            .middle
-            .right
-                %h2 Twitter
-                #tweets
-                .tweets-bottom
-                    %a{:href=>"http://twitter.com/cramm"}
-                        See More
-
-    .bottom
-        %a{:href => "http://github.com/mcramm", :class => "left"}
-            Projects
-            %i (Comming Soon)
-        %a{:href => "/info", :class => "right"}
-            More Info
+            .leftWrap
+                .left
+                    %h2 What the heck is this?
+                    %p
+                        This is simply a persoanl landing page I setup for people trying to contact me. 
+                    %p
+                        I used to have a blog here, but absolutely nothing to write about.
+                    %p
+                        You can check out (some) of the projects I've worked on by clicking 
+                        %a{:href => "http://github.com/mcramm"}
+                            here.
+            .rightWrap
+                .right
+                    %h2 On Twitter
+                    #tweets
+                    .tweets-bottom
+                        %a{:href=>"http://twitter.com/cramm"}
+                            See More Updates
