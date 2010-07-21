@@ -24,8 +24,6 @@ get '/stylesheets/:name.css' do
 end
 
 get '/' do
-  twitter = Twitter.new
-  @timeline = twitter.retrieve
   haml :index
 end
 
@@ -36,4 +34,8 @@ get '/info' do
   haml :info
 end
 
+get "/tweets.json" do
+    twitter = Twitter.new
+    twitter.get_statuses
+end
 private

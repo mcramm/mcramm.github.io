@@ -1,28 +1,28 @@
 class Twitter
   def initialize()
-    uri = URI.parse('http://api.twitter.com/1/statuses/user_timeline/15446319.xml')
-    http = Net::HTTP.new(uri.host, uri.port)
-    req = Net::HTTP::Get.new(uri.request_uri)
-    response = http.request(req)
-    @tweets = REXML::Document.new(response.body)
-    @timeline = Array.new
+    uri = URI.parse('http://api.twitter.com/1/statuses/user_timeline/cramm.xml?count=3')
+    @http = Net::HTTP.new(uri.host, uri.port)
+    @req = Net::HTTP::Get.new(uri.request_uri)
   end
-  
-  def retrieve(limit = 10)
-    limit = 20 if limit > 20
-    limit = 10 if limit <= 0
-    index = 0
-    @tweets.elements.each('statuses/status') do |tweet|
-      unless index > limit - 1
-        @timeline[index] = Hash.new
-        @timeline[index]['id'] = tweet.elements['id'].text
-        @timeline[index]['text'] = sanitize(tweet.elements['text'].text)
-        @timeline[index]['date'] = Time.parse(tweet.elements['created_at'].text).strftime("%a %b %d %I:%M %p")
-        index += 1
-      end
+
+  def get_statuses
+    response = @http.request(@req)
+    tweets = REXML::Document.new(response.body)
+    
+    timeline = Array.new
+    json = '{"tweets":['
+    tweets.elements.each('statuses/status') do |tweet|
+        json << '{'
+        json << '"id":"' << tweet.elements['id'].text 
+        json << '", "text":"' << sanitize(tweet.elements['text'].text)
+        json << '", "date":"' << Time.parse(tweet.elements['created_at'].text).strftime("%a %b %d %I:%M %p")
+        json << '"},'
     end
-    return @timeline[0] if limit == 1
-    return @timeline
+
+    json.chop!
+    json << "]}"
+
+    json
   end
   
   private
