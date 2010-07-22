@@ -35,5 +35,9 @@ end
 #get "/reviews" do
 #    haml :reviews
 #end
+#
+get "/*" do
+    redirect "/"
+end
 
 private
