@@ -32,8 +32,8 @@ get "/tweets.json" do
     twitter.get_statuses
 end
 
-get "/reviews" do
-    haml :reviews
-end
+#get "/reviews" do
+#    haml :reviews
+#end
 
 private
