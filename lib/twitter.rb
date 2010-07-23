@@ -19,7 +19,10 @@ class Twitter
         json << '"},'
     end
 
-    json.chop!
+    if(json != '{"tweets":[')
+        json.chop!
+    end 
+
     json << "]}"
 
     json
