@@ -8,7 +8,7 @@ class Twitter
   def get_statuses
     response = @http.request(@req)
     tweets = REXML::Document.new(response.body)
-    
+
     timeline = Array.new
     json = '{"tweets":['
     tweets.elements.each('statuses/status') do |tweet|
@@ -27,16 +27,18 @@ class Twitter
 
     json
   end
-  
+
   private
-  
+
   def sanitize(s)
     s.gsub!(/’/,'\'')
     s.gsub!(/”/,"\"")
     s.gsub!(/“/,"\"")
-    s.gsub!(/\shttp:\/\/[www.]*[a-zA-Z0-9]+.[(com)(ca)(org)(ly)]+(\/)*[a-zA-Z0-9]*/){ |match| "\s<a href='#{match.strip!}' target='_blank'>#{match}</a>\s"}
-    s.gsub!(/[^\s]*\@[a-zA-Z0-9]+\s/) { |match| "\s<a href='http://twitter.com/#{match.strip![1..match.length]}' target='_blank'>#{match}</a>\s"}
+    s.gsub!(/(?i)\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/) do |match|
+      "\s<a href='#{match.strip!}' target='_blank'>#{match}</a>"
+    end
+    s.gsub!(/@([a-zA-Z0-9_]*)/) { |match| "\s<a href='http://twitter.com/#{match[1..match.length]}' target='_blank'>#{match}</a>"}
     return s
   end
-  
+
 end
