@@ -21,9 +21,7 @@ a {
   text-decoration: none;
   &:hover {
     text-decoration: underline;
-  }
-  &:visited {
-    color: $link_color;
+    color: $link_hover;
   }
 }
 
@@ -38,8 +36,9 @@ h2 {
 }
 
 p {
-  padding-bottom: 14px;
+  margin-bottom: $paragraph_break;
 }
+
 blockquote {
   border-left: 4px solid $line_color;
   padding-left: 40px;
@@ -53,6 +52,20 @@ hr {
   height: 2px;
   background-color: $line_color;
   border: none;
+  margin-bottom: $paragraph_break;
+}
+
+ul, ol {
+  margin-bottom: $paragraph_break;
+}
+ul {
+  list-style-type: disc;
+  margin-left: 15px;
+}
+
+ol {
+  list-style-type: decimal;
+  margin-left: 20px;
 }
 
 .header {
@@ -73,6 +86,15 @@ hr {
     position: relative;
     bottom: 8px;
     left: 10px;
+  }
+}
+
+.content > p:first-child {
+  &:first-letter {
+    float: left;
+    margin: 10px 3px 0 0;
+    font-size: 57px;
+    line-height: 69%;
   }
 }
 

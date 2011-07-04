@@ -82,53 +82,68 @@ body {
 
 /* line 19, ../sass/screen.scss */
 a {
-  color: #4c9ddc;
+  color: #d34831;
   text-decoration: none;
 }
 /* line 22, ../sass/screen.scss */
 a:hover {
   text-decoration: underline;
-}
-/* line 25, ../sass/screen.scss */
-a:visited {
-  color: #4c9ddc;
+  color: #ff7b64;
 }
 
-/* line 30, ../sass/screen.scss */
+/* line 28, ../sass/screen.scss */
 h1 {
   font-size: 2em;
   padding: 18px 0px 15px;
 }
 
-/* line 35, ../sass/screen.scss */
+/* line 33, ../sass/screen.scss */
 h2 {
   font-size: 1.5em;
   padding: 10px 0 3px;
 }
 
-/* line 40, ../sass/screen.scss */
+/* line 38, ../sass/screen.scss */
 p {
-  padding-bottom: 14px;
+  margin-bottom: 14px;
 }
 
-/* line 43, ../sass/screen.scss */
+/* line 42, ../sass/screen.scss */
 blockquote {
-  border-left: 4px solid #d5d5d5;
+  border-left: 4px solid #b3b09d;
   padding-left: 40px;
   margin-left: 0px;
   font-size: 0.9em;
   line-height: 20px;
 }
 
-/* line 51, ../sass/screen.scss */
+/* line 50, ../sass/screen.scss */
 hr {
   width: 50%;
   height: 2px;
-  background-color: #d5d5d5;
+  background-color: #b3b09d;
   border: none;
+  margin-bottom: 14px;
 }
 
-/* line 59, ../sass/screen.scss */
+/* line 58, ../sass/screen.scss */
+ul, ol {
+  margin-bottom: 14px;
+}
+
+/* line 61, ../sass/screen.scss */
+ul {
+  list-style-type: disc;
+  margin-left: 15px;
+}
+
+/* line 66, ../sass/screen.scss */
+ol {
+  list-style-type: decimal;
+  margin-left: 20px;
+}
+
+/* line 72, ../sass/screen.scss */
 .header a {
   text-shadow: -3px 2px 0px #514d46;
   letter-spacing: 3px;
@@ -137,7 +152,7 @@ hr {
   text-decoration: none;
   font-size: 4em;
 }
-/* line 69, ../sass/screen.scss */
+/* line 82, ../sass/screen.scss */
 .header .subtext {
   color: #aaaaaa;
   font-size: 0.9em;
@@ -147,7 +162,15 @@ hr {
   left: 10px;
 }
 
-/* line 80, ../sass/screen.scss */
+/* line 93, ../sass/screen.scss */
+.content > p:first-child:first-letter {
+  float: left;
+  margin: 10px 3px 0 0;
+  font-size: 57px;
+  line-height: 69%;
+}
+
+/* line 102, ../sass/screen.scss */
 .posts .post-date {
   font-family: Georgia;
   background-color: #333;
@@ -159,22 +182,22 @@ hr {
   bottom: 1px;
 }
 
-/* line 92, ../sass/screen.scss */
+/* line 114, ../sass/screen.scss */
 code {
   background-color: #d3d3d3;
   padding: 0px 3px;
   font-family: 'Kameron', serif;
 }
 
-/* line 98, ../sass/screen.scss */
+/* line 120, ../sass/screen.scss */
 .highlight {
-  background: #f5f5f5;
+  background: #fffff2;
   padding: 20px;
   line-height: 18px;
   margin-top: 20px;
   margin-bottom: 20px;
 }
-/* line 105, ../sass/screen.scss */
+/* line 127, ../sass/screen.scss */
 .highlight code {
-  background-color: #f5f5f5;
+  background-color: #fffff2;
 }

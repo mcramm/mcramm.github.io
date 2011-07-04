@@ -3,12 +3,17 @@
 $background_color: #E6E3D0;
 $color: #514D46;
 
-$link_color: #4C9DDC;
+$link_color: #D34831;
+$link_hover: $link_color + #333;
 
 $header_color: #D34831;
 $subtext_color: #AAAAAA;
 
-$line_color: #D5D5D5;
+$line_color: $background_color - #333;
 
 $command_bg: #D3D3D3;
-$codeblock_bg: #F5F5F5;
+//$codeblock_bg: #F5F5F5;
+$codeblock_bg: $background_color + #222;
+
+
+$paragraph_break: 14px;
