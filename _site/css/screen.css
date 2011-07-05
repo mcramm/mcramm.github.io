@@ -1,0 +1,180 @@
+/* Welcome to Compass.
+ * In this file you should write your main styles. (or centralize your imports)
+ * Import this file using the following HTML or equivalent:
+ * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
+/* line 17, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+/* line 20, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+body {
+  line-height: 1;
+}
+
+/* line 22, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+ol, ul {
+  list-style: none;
+}
+
+/* line 24, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* line 26, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+caption, th, td {
+  text-align: left;
+  font-weight: normal;
+  vertical-align: middle;
+}
+
+/* line 28, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+q, blockquote {
+  quotes: none;
+}
+/* line 101, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+q:before, q:after, blockquote:before, blockquote:after {
+  content: "";
+  content: none;
+}
+
+/* line 30, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+a img {
+  border: none;
+}
+
+/* line 115, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+/* line 8, ../sass/screen.scss */
+body {
+  font-family: "Minion Pro","Palatino","Hoefler Text","Times New Roman",serif;
+  font-size: 1em;
+  color: #514d46;
+  background: #e6e3d0;
+  width: 700px;
+  margin: 0px auto;
+  line-height: 27px;
+  padding-top: 40px;
+}
+
+/* line 19, ../sass/screen.scss */
+a {
+  color: #4c9ddc;
+  text-decoration: none;
+}
+/* line 22, ../sass/screen.scss */
+a:hover {
+  text-decoration: underline;
+}
+/* line 25, ../sass/screen.scss */
+a:visited {
+  color: #4c9ddc;
+}
+
+/* line 30, ../sass/screen.scss */
+h1 {
+  font-size: 2em;
+  padding: 18px 0px 15px;
+}
+
+/* line 35, ../sass/screen.scss */
+h2 {
+  font-size: 1.5em;
+  padding: 10px 0 3px;
+}
+
+/* line 40, ../sass/screen.scss */
+p {
+  padding-bottom: 14px;
+}
+
+/* line 43, ../sass/screen.scss */
+blockquote {
+  border-left: 4px solid #d5d5d5;
+  padding-left: 40px;
+  margin-left: 0px;
+  font-size: 0.9em;
+  line-height: 20px;
+}
+
+/* line 51, ../sass/screen.scss */
+hr {
+  width: 50%;
+  height: 2px;
+  background-color: #d5d5d5;
+  border: none;
+}
+
+/* line 59, ../sass/screen.scss */
+.header a {
+  text-shadow: -3px 2px 0px #514d46;
+  letter-spacing: 3px;
+  color: #d34831;
+  font-family: 'Arvo', serif;
+  text-decoration: none;
+  font-size: 4em;
+}
+/* line 69, ../sass/screen.scss */
+.header .subtext {
+  color: #aaaaaa;
+  font-size: 0.9em;
+  display: block;
+  position: relative;
+  bottom: 8px;
+  left: 10px;
+}
+
+/* line 80, ../sass/screen.scss */
+.posts .post-date {
+  font-family: Georgia;
+  background-color: #333;
+  color: #EEE;
+  font-size: 12px;
+  padding: 2px 5px;
+  margin-right: 15px;
+  position: relative;
+  bottom: 1px;
+}
+
+/* line 92, ../sass/screen.scss */
+code {
+  background-color: #d3d3d3;
+  padding: 0px 3px;
+  font-family: 'Kameron', serif;
+}
+
+/* line 98, ../sass/screen.scss */
+.highlight {
+  background: #f5f5f5;
+  padding: 20px;
+  line-height: 18px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+/* line 105, ../sass/screen.scss */
+.highlight code {
+  background-color: #f5f5f5;
+}
