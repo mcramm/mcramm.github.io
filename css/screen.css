@@ -201,3 +201,43 @@ code {
 .highlight code {
   background-color: #fffff2;
 }
+
+/* line 132, ../sass/screen.scss */
+.left, .right {
+  display: table-cell;
+}
+
+/* line 136, ../sass/screen.scss */
+.main {
+  padding-right: 15px;
+}
+/* line 138, ../sass/screen.scss */
+.main .buttons {
+  text-align: center;
+  margin-top: 25px;
+}
+/* line 141, ../sass/screen.scss */
+.main .buttons a {
+  display: inline-block;
+  background-color: #d5d2bf;
+  padding: 5px 15px;
+  color: #514d46;
+  margin-right: 30px;
+  font-size: 20px;
+}
+/* line 148, ../sass/screen.scss */
+.main .buttons a:hover {
+  text-decoration: none;
+  background-color: #d34831;
+  color: white;
+}
+/* line 154, ../sass/screen.scss */
+.main .buttons a:last-child {
+  margin-right: 0px;
+}
+
+/* line 161, ../sass/screen.scss */
+.right {
+  width: 25%;
+  padding-left: 15px;
+}

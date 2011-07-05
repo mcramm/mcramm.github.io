@@ -129,3 +129,37 @@ code {
   }
 }
 
+.left, .right {
+  display: table-cell;
+}
+
+.main {
+  padding-right: 15px;
+  .buttons {
+    text-align: center;
+    margin-top: 25px;
+    a {
+      display: inline-block;
+      background-color: $background_color - #111;
+      padding: 5px 15px;
+      color: $color;
+      margin-right: 30px;
+      font-size: 20px;
+      &:hover {
+        text-decoration: none;
+        background-color: $link-color;
+        color: white;
+      }
+
+      &:last-child {
+        margin-right: 0px;
+      }
+    }
+  }
+}
+
+.right {
+  width: 25%;
+  padding-left: 15px;
+}
+
