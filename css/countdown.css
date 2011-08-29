@@ -1,0 +1,68 @@
+/* line 1, ../sass/countdown.scss */
+body {
+  font-family: "Minion Pro","Palatino","Hoefler Text","Times New Roman",serif;
+  font-size: 1em;
+  background: #151515;
+  color: white;
+  width: 700px;
+  margin: 0px auto;
+  line-height: 27px;
+  padding-top: 40px;
+}
+
+/* line 12, ../sass/countdown.scss */
+.countdown {
+  margin: 50px auto 0px;
+  z-index: 1000;
+}
+/* line 14, ../sass/countdown.scss */
+.countdown td {
+  background-color: #222;
+  padding: 9px 12px;
+  text-align: center;
+  font-size: 25px;
+}
+/* line 21, ../sass/countdown.scss */
+.countdown td#seconds, .countdown td#minutes, .countdown td#hours {
+  width: 25px;
+}
+/* line 25, ../sass/countdown.scss */
+.countdown td#mil {
+  width: 50px;
+}
+
+/* line 31, ../sass/countdown.scss */
+.arrival {
+  text-align: center;
+  margin-top: 15px;
+  z-index: 1000;
+}
+/* line 34, ../sass/countdown.scss */
+.arrival label {
+  color: #AAA;
+  margin-right: 5px;
+}
+
+/* line 41, ../sass/countdown.scss */
+.percentage-wrap {
+  text-align: center;
+  margin: 0px auto;
+  width: 87px;
+}
+/* line 45, ../sass/countdown.scss */
+.percentage-wrap .percentage {
+  z-index: 1000;
+  position: relative;
+  bottom: 15px;
+  color: #AAA;
+  margin-left: 10px;
+}
+/* line 52, ../sass/countdown.scss */
+.percentage-wrap .overlay {
+  z-index: 20;
+  width: 40px;
+  height: 40px;
+  background-color: #151515;
+  position: relative;
+  top: 40px;
+}
