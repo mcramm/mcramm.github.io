@@ -59,3 +59,32 @@ body {
     left: 1px;
   }
 }
+
+#holder{
+  font-style: italic;
+  background-color: #222;
+  border-left: 30px solid #333;
+  padding: 10px 0px 10px 33px;
+  color: #DDD;
+  margin: 0px auto;
+  width: 450px;
+  overflow-x: hidden;
+}
+
+#explanation-wrap{
+  position: absolute;
+  top: 40px;
+  right: 32px;
+}
+#explanation{
+  width: 310px;
+  font-size: 13px;
+  background-color: #222;
+  padding: 1px 10px 14px 20px;
+  color: #DDD;
+  #info {
+    font-size: 1.5em;
+    font-style: italic;
+  }
+}
+

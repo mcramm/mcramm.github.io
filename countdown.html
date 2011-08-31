@@ -11,24 +11,40 @@
         type='text/javascript'></script>
   </head>
   <body>
-    <table class='countdown' cellspacing="10px">
-        <tr>
-            <td id='days'></td>
-            <td id='hours'></td>
-            <td id='minutes'></td>
-            <td id='seconds'></td>
-            <td id='mil'></td>
-        </tr>
-    </table>
-    <div class='arrival'>
-      <label>Approximate Time of Arrival:</label>
-      September 2nd @ 8:44pm
+    <div id='clock-wrap'>
+        <table class='countdown' id='clock' cellspacing="10px">
+            <tr>
+                <td id='days'></td>
+                <td id='hours'></td>
+                <td id='minutes'></td>
+                <td id='seconds'></td>
+                <td id='mil'></td>
+            </tr>
+        </table>
+        <div class='arrival'>
+          <label>Approximate Time of Arrival:</label>
+          September 2nd @ 8:44pm
+        </div>
+
+        <div class='percentage-wrap'>
+            <div class='overlay'></div>
+            <img src='https://lh4.googleusercontent.com/-iawZdgTjf6k/Tl1bgLxOm5I/AAAAAAAAAok/z25u71avU0s/daimg.png' height='40px' width='40px'/> </img>
+            <span class='percentage'><span id='percentage'></span>%</span>
+        </div>
     </div>
 
-    <div class='percentage-wrap'>
-        <div class='overlay'></div>
-        <img src='https://lh4.googleusercontent.com/-iawZdgTjf6k/Tl1bgLxOm5I/AAAAAAAAAok/z25u71avU0s/daimg.png' height='40px' width='40px'/> </img>
-        <span class='percentage'><span id='percentage'></span>%</span>
+    <div id='holder-wrap' style='display:none'>
+        <div id='holder'>
+        </div>
     </div>
+    <div id='explanation-wrap' style='display:none'>
+        <div id='explanation'>
+            <p>&larr; Possibly lame, but I think of you every time I hear this song.</p>
+            <p>See you in a few minutes :D</p>
+            <br />
+            <div id='info'></div>
+        </div>
+    </div>
+
   </body>
 </html>
