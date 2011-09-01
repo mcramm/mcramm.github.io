@@ -71,7 +71,7 @@ function setSpecial() {
     url: "/lyrics.html",
     success: function(data) {
       $('div#holder').html(data);
-      $('div#info').html("Daft Punk - \"Digital Love\"");
+      $('div#info').html("<a href='http://grooveshark.com/#/s/Digital+Love/2B6uN3' target='_blank'>Daft Punk - \"Digital Love\"</a>");
       showSpecial();
     }
   });

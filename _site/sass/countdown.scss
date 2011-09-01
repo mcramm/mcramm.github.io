@@ -82,9 +82,26 @@ body {
   background-color: #222;
   padding: 1px 10px 14px 20px;
   color: #DDD;
+  .arrow{
+    font-size: 1.3em;
+  }
+  .ps {
+    padding: 0px;
+    margin: 0px;
+    font-size: 0.85em;
+    color: #777;
+  }
   #info {
     font-size: 1.5em;
     font-style: italic;
+
+    a{
+      $hover_color: #DA477E + #333;
+      color: $hover_color;
+      &:hover {
+        color: $hover_color + #333;
+      }
+    }
   }
 }
 

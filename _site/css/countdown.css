@@ -96,7 +96,26 @@ body {
   color: #DDD;
 }
 /* line 85, ../sass/countdown.scss */
+#explanation .arrow {
+  font-size: 1.3em;
+}
+/* line 88, ../sass/countdown.scss */
+#explanation .ps {
+  padding: 0px;
+  margin: 0px;
+  font-size: 0.85em;
+  color: #777;
+}
+/* line 94, ../sass/countdown.scss */
 #explanation #info {
   font-size: 1.5em;
   font-style: italic;
+}
+/* line 98, ../sass/countdown.scss */
+#explanation #info a {
+  color: #ff7ab1;
+}
+/* line 101, ../sass/countdown.scss */
+#explanation #info a:hover {
+  color: #ffade4;
 }
