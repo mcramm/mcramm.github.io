@@ -2,7 +2,7 @@
  * In this file you should write your main styles. (or centralize your imports)
  * Import this file using the following HTML or equivalent:
  * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
-/* line 17, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 17, /Users/michaelcramm/.rvm/gems/ruby-1.9.2-p290@blog/gems/compass-0.11.5/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -24,47 +24,46 @@ time, mark, audio, video {
   vertical-align: baseline;
 }
 
-/* line 20, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 20, /Users/michaelcramm/.rvm/gems/ruby-1.9.2-p290@blog/gems/compass-0.11.5/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
 body {
   line-height: 1;
 }
 
-/* line 22, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 22, /Users/michaelcramm/.rvm/gems/ruby-1.9.2-p290@blog/gems/compass-0.11.5/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
 ol, ul {
   list-style: none;
 }
 
-/* line 24, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 24, /Users/michaelcramm/.rvm/gems/ruby-1.9.2-p290@blog/gems/compass-0.11.5/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
 table {
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-/* line 26, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 26, /Users/michaelcramm/.rvm/gems/ruby-1.9.2-p290@blog/gems/compass-0.11.5/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
 caption, th, td {
   text-align: left;
   font-weight: normal;
   vertical-align: middle;
 }
 
-/* line 28, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 28, /Users/michaelcramm/.rvm/gems/ruby-1.9.2-p290@blog/gems/compass-0.11.5/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
 q, blockquote {
   quotes: none;
 }
-/* line 101, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 101, /Users/michaelcramm/.rvm/gems/ruby-1.9.2-p290@blog/gems/compass-0.11.5/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
 q:before, q:after, blockquote:before, blockquote:after {
   content: "";
   content: none;
 }
 
-/* line 30, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 30, /Users/michaelcramm/.rvm/gems/ruby-1.9.2-p290@blog/gems/compass-0.11.5/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
 a img {
   border: none;
 }
 
-/* line 115, ../../../.rvm/gems/ruby-1.9.2-p180@jekyll/gems/compass-0.11.3/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
-article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
+/* line 114, /Users/michaelcramm/.rvm/gems/ruby-1.9.2-p290@blog/gems/compass-0.11.5/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section, summary {
   display: block;
 }
 
@@ -72,9 +71,9 @@ footer, header, hgroup, menu, nav, section {
 body {
   font-family: "Minion Pro","Palatino","Hoefler Text","Times New Roman",serif;
   font-size: 1em;
-  color: #514d46;
-  background: #e6e3d0;
-  width: 700px;
+  color: #211f1c;
+  background: #f5f5f5;
+  width: 900px;
   margin: 0px auto;
   line-height: 27px;
   padding-top: 40px;
@@ -82,13 +81,13 @@ body {
 
 /* line 19, ../sass/screen.scss */
 a {
-  color: #d34831;
+  color: #0062b8;
   text-decoration: none;
 }
 /* line 22, ../sass/screen.scss */
 a:hover {
   text-decoration: underline;
-  color: #ff7b64;
+  color: #3395eb;
 }
 
 /* line 28, ../sass/screen.scss */
@@ -116,7 +115,7 @@ em {
 
 /* line 47, ../sass/screen.scss */
 blockquote {
-  border-left: 4px solid #b3b09d;
+  border-left: 4px solid #c2c2c2;
   padding-left: 40px;
   margin-left: 0px;
   font-size: 0.9em;
@@ -127,7 +126,7 @@ blockquote {
 hr {
   width: 50%;
   height: 2px;
-  background-color: #b3b09d;
+  background-color: #c2c2c2;
   border: none;
   margin-bottom: 14px;
 }
@@ -150,25 +149,56 @@ ol {
 }
 
 /* line 77, ../sass/screen.scss */
-.header a {
-  text-shadow: -3px 2px 0px #514d46;
+.header a.header-text {
+  text-shadow: 3px 2px 0px #211f1c;
   letter-spacing: 3px;
-  color: #d34831;
+  color: #1495eb;
   font-family: 'Arvo', serif;
   text-decoration: none;
   font-size: 4em;
+  float: left;
 }
 /* line 87, ../sass/screen.scss */
-.header .subtext {
-  color: #aaaaaa;
-  font-size: 0.9em;
-  display: block;
+.header .buttons {
+  text-align: right;
+  float: right;
+}
+/* line 90, ../sass/screen.scss */
+.header .buttons a {
+  display: inline-block;
+  background-color: #DEDEDE;
+  padding: 5px 15px 5px 15px;
+  color: #211f1c;
+  margin-right: 30px;
+  font-size: 20px;
+}
+/* line 97, ../sass/screen.scss */
+.header .buttons a:hover {
+  text-decoration: none;
+  background-color: #3395eb;
+  color: white;
+}
+/* line 102, ../sass/screen.scss */
+.header .buttons a img {
+  float: left;
+}
+/* line 105, ../sass/screen.scss */
+.header .buttons a span {
+  padding-left: 9px;
   position: relative;
-  bottom: 8px;
-  left: 10px;
+  top: -8px;
+}
+/* line 111, ../sass/screen.scss */
+.header .buttons a:last-child {
+  margin-right: 0px;
 }
 
-/* line 98, ../sass/screen.scss */
+/* line 118, ../sass/screen.scss */
+.content {
+  margin-top: 50px;
+}
+
+/* line 122, ../sass/screen.scss */
 .content > p:first-child:first-letter {
   float: left;
   margin: 10px 3px 0 0;
@@ -176,7 +206,7 @@ ol {
   line-height: 69%;
 }
 
-/* line 107, ../sass/screen.scss */
+/* line 131, ../sass/screen.scss */
 .posts .post-date {
   font-family: Georgia;
   background-color: #333;
@@ -188,62 +218,78 @@ ol {
   bottom: 1px;
 }
 
-/* line 119, ../sass/screen.scss */
+/* line 143, ../sass/screen.scss */
 code {
-  background-color: #d3d3d3;
+  background-color: #dedede;
   padding: 0px 3px;
   font-family: 'Kameron', serif;
 }
 
-/* line 125, ../sass/screen.scss */
+/* line 149, ../sass/screen.scss */
 .highlight {
-  background: #fffff2;
+  background: white;
   padding: 20px;
   line-height: 18px;
   margin-top: 20px;
   margin-bottom: 20px;
 }
-/* line 132, ../sass/screen.scss */
+/* line 156, ../sass/screen.scss */
 .highlight code {
-  background-color: #fffff2;
+  background-color: white;
 }
 
-/* line 137, ../sass/screen.scss */
+/* line 161, ../sass/screen.scss */
 .left, .right {
   display: table-cell;
 }
 
-/* line 141, ../sass/screen.scss */
+/* line 165, ../sass/screen.scss */
 .main {
   padding-right: 15px;
 }
-/* line 143, ../sass/screen.scss */
-.main .buttons {
-  text-align: center;
-  margin-top: 25px;
-}
-/* line 146, ../sass/screen.scss */
-.main .buttons a {
-  display: inline-block;
-  background-color: #d5d2bf;
-  padding: 5px 15px;
-  color: #514d46;
-  margin-right: 30px;
-  font-size: 20px;
-}
-/* line 153, ../sass/screen.scss */
-.main .buttons a:hover {
-  text-decoration: none;
-  background-color: #d34831;
-  color: white;
-}
-/* line 159, ../sass/screen.scss */
-.main .buttons a:last-child {
-  margin-right: 0px;
-}
 
-/* line 166, ../sass/screen.scss */
+/* line 170, ../sass/screen.scss */
 .right {
   width: 25%;
   padding-left: 15px;
+}
+
+/* line 175, ../sass/screen.scss */
+.bio {
+  display: inline-block;
+  width: 600px;
+  padding-left: 15px;
+  position: relative;
+  top: -20px;
+}
+
+/* line 183, ../sass/screen.scss */
+.mugshot {
+  display: inline-block;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 279px;
+}
+
+/* line 190, ../sass/screen.scss */
+.sidebar {
+  clear: both;
+}
+/* line 192, ../sass/screen.scss */
+.sidebar a {
+  display: inline-block;
+  padding: 2px 5px;
+  font-family: Arvo;
+}
+/* line 196, ../sass/screen.scss */
+.sidebar a:hover {
+  text-decoration: none;
+  background-color: #3395eb;
+  color: white;
+}
+/* line 202, ../sass/screen.scss */
+.sidebar .current {
+  text-decoration: none;
+  background-color: #3395eb;
+  color: white;
 }

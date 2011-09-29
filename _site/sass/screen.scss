@@ -10,7 +10,7 @@ body {
   font-size: 1em;
   color: $color;
   background: $background_color;
-  width: 700px;
+  width: 900px;
   margin: 0px auto;
   line-height: 27px;
   padding-top: 40px;
@@ -74,26 +74,50 @@ ol {
 }
 
 .header {
-  a {
-    text-shadow: -3px 2px 0px $color;
+  a.header-text {
+    text-shadow: 3px 2px 0px $color;
     letter-spacing: 3px;
     color: $header_color;
     font-family: 'Arvo', serif;
 
     text-decoration: none;
     font-size: 4em;
+    float: left;
   }
+  .buttons {
+    text-align: right;
+    float: right;
+    a {
+      display: inline-block;
+      background-color: #DEDEDE;
+      padding: 5px 15px 5px 15px;
+      color: $color;
+      margin-right: 30px;
+      font-size: 20px;
+      &:hover {
+        text-decoration: none;
+        background-color: $link-hover;
+        color: white;
+      }
+      img {
+        float: left;
+      }
+      span {
+        padding-left: 9px;
+        position: relative;
+        top: -8px;
+      }
 
-  .subtext {
-    color: $subtext_color;
-    font-size: 0.9em;
-    display: block;
-    position: relative;
-    bottom: 8px;
-    left: 10px;
+      &:last-child {
+        margin-right: 0px;
+      }
+    }
   }
 }
 
+.content {
+  margin-top: 50px;
+}
 .content > p:first-child {
   &:first-letter {
     float: left;
@@ -140,31 +164,44 @@ code {
 
 .main {
   padding-right: 15px;
-  .buttons {
-    text-align: center;
-    margin-top: 25px;
-    a {
-      display: inline-block;
-      background-color: $background_color - #111;
-      padding: 5px 15px;
-      color: $color;
-      margin-right: 30px;
-      font-size: 20px;
-      &:hover {
-        text-decoration: none;
-        background-color: $link-color;
-        color: white;
-      }
-
-      &:last-child {
-        margin-right: 0px;
-      }
-    }
-  }
 }
+
 
 .right {
   width: 25%;
   padding-left: 15px;
 }
 
+.bio {
+  display: inline-block;
+  width: 600px;
+  padding-left: 15px;
+  position: relative;
+  top: -20px;
+}
+
+.mugshot {
+  display: inline-block;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 279px;
+}
+
+.sidebar {
+  clear: both;
+  a {
+    display: inline-block;
+    padding: 2px 5px;
+    font-family: Arvo;
+    &:hover {
+      text-decoration: none;
+      background-color: $link-hover;
+      color: white;
+    }
+  }
+  .current {
+      text-decoration: none;
+      background-color: $link-hover;
+      color: white;
+  }
+}

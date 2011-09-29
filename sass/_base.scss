@@ -1,17 +1,17 @@
 @import "compass/reset";
 
-$background_color: #E6E3D0;
-$color: #514D46;
+$background_color: #F5F5F5;
+$color: #211F1C;
 
-$link_color: #D34831;
+$header_color: #1495EB;
+
+$link_color: $header_color - #333;
 $link_hover: $link_color + #333;
 
-$header_color: #D34831;
-$subtext_color: #AAAAAA;
 
 $line_color: $background_color - #333;
 
-$command_bg: #D3D3D3;
+$command_bg: #DEDEDE;
 //$codeblock_bg: #F5F5F5;
 $codeblock_bg: $background_color + #222;
 
