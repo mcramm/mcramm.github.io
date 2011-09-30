@@ -1,0 +1,47 @@
+---
+layout: post
+---
+
+Over the past few years my VIM configuration has gotten out of hand. I
+have tried to maintain it as best I can, but its time for a reboot! I
+was inspired by Avdi Grimm's recent [Emacs Reboot](
+http://avdi.org/devblog/category/emacs-reboot/ ) series and decided to
+do something similar with VIM.
+
+I work on a Mac, which means I prefer MacVim to the "command-line"
+(ugly) version. The latest snapshot for Snow Leopard can be found at
+[http://code.google.com/p/macvim/](http://code.google.com/p/macvim/).
+Installing is as easy as you would expect. Simply download the
+snapshot, drag MacVim.app to Applications and move the mvim script to
+folder in your $PATH.
+
+{% highlight bash %}
+sudo cp mvim /usr/bin;
+{% endhighlight %}
+Then make it executeable.
+{% highlight bash %}
+sudo chmod +x /usr/bin/mvim
+{% endhighlight %}
+
+The first thing I decided to do was decide which plugins I was using and
+which ones were just taking up space. This list may change, but I am
+currently using the following plugins on a daily basis (in no particular
+order):
+
+1. [SnipMate](https://github.com/msanders/snipmate.vim)
+2. [Surround](https://github.com/tpope/vim-surround)
+3. [Unimpared](https://github.com/tpope/vim-unimpaired)
+4. [LustyJuggler](https://github.com/sjbach/lusty)
+5. [Command-T](http://www.vim.org/scripts/script.php?script_id=3025)
+6. [Fugitive](https://github.com/tpope/vim-fugitive)
+7. [NERD Tree](https://github.com/scrooloose/nerdtree)
+8. [NERD Commenter](https://github.com/scrooloose/nerdcommenter)
+9. [Endwise](https://github.com/tpope/vim-endwise)
+
+If you go through that list, you'll notice that [Tim Pope](https://github.com/tpope) is the author
+for a majority of them. The guy has created a ton of useful plugins and
+    I definitely recommend trolling through his projects for anything
+    useful.
+
+
+

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vim Reboot 1</title>
+    <link href='http://fonts.googleapis.com/css?family=Arvo&v2' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Kameron&v2' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet' href='/css/screen.css'></link>
+    <link rel='stylesheet' href='/css/highlight.css'></link>
+  </head>
+  <body>
+    <div class='header'>
+        <a class='header-text' href='/'>mcramm.com</a>
+            <div class='buttons'>
+                <a href='https://github.com/mcramm'><img src='/img/Octocat.png' width='40px'/></a>
+                <a href='http://twitter.com/cramm'><img src='/img/twitter_newbird_blue.png' width='40px'/></a>
+            </div>
+    </div>
+    <div class ='sidebar'>
+    <div class='navigation'>
+        <a href='/'>About</a>
+        <a class='current' href='/posts.html'>Posts</a>
+    </div>
+</div>
+<div class='content'>
+    <h1>Vim Reboot 1 </h1>
+    <p>Over the past few years my VIM configuration has gotten out of hand. I have tried to maintain it as best I can, but its time for a reboot! I was inspired by Avdi Grimm&#8217;s recent <a href='
+http://avdi.org/devblog/category/emacs-reboot/'>Emacs Reboot</a> series and decided to do something similar with VIM.</p>
+
+<p>I work on a Mac, which means I prefer MacVim to the &#8220;command-line&#8221; (ugly) version. The latest snapshot for Snow Leopard can be found at <a href='http://code.google.com/p/macvim/'>http://code.google.com/p/macvim/</a>. Installing is as easy as you would expect. Simply download the snapshot, drag MacVim.app to Applications and move the mvim script to folder in your $PATH.</p>
+<div class='highlight'><pre><code class='bash'>sudo cp mvim /usr/bin;
+</code></pre>
+</div>
+<p>Then make it executeable.</p>
+<div class='highlight'><pre><code class='bash'>sudo chmod +x /usr/bin/mvim
+</code></pre>
+</div>
+<p>The first thing I decided to do was decide which plugins I was using and which ones were just taking up space. This list may change, but I am currently using the following plugins on a daily basis (in no particular order):</p>
+
+<ol>
+<li><a href='https://github.com/msanders/snipmate.vim'>SnipMate</a></li>
+
+<li><a href='https://github.com/tpope/vim-surround'>Surround</a></li>
+
+<li><a href='https://github.com/tpope/vim-unimpaired'>Unimpared</a></li>
+
+<li><a href='https://github.com/sjbach/lusty'>LustyJuggler</a></li>
+
+<li><a href='http://www.vim.org/scripts/script.php?script_id=3025'>Command-T</a></li>
+
+<li><a href='https://github.com/tpope/vim-fugitive'>Fugitive</a></li>
+
+<li><a href='https://github.com/scrooloose/nerdtree'>NERD Tree</a></li>
+
+<li><a href='https://github.com/scrooloose/nerdcommenter'>NERD Commenter</a></li>
+
+<li><a href='https://github.com/tpope/vim-endwise'>Endwise</a></li>
+</ol>
+
+<p>If you go through that list, you&#8217;ll notice that <a href='https://github.com/tpope'>Tim Pope</a> is the author for a majority of them. The guy has created a ton of useful plugins and I definitely recommend trolling through his projects for anything useful.</p>
+</div>
+
+</body>
+</html>
