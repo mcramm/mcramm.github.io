@@ -1,7 +1,6 @@
 ---
 layout: post
 title: Parameter 'Nam
-published: false
 ---
 
 I recently finished a project to improve the design of the account
@@ -20,25 +19,9 @@ As the day approached, we started feeling more and more pressure to ship
 the feature, and of course, the code suffered.
 
 The following is a small excerpt from the class responsible for drawing
-text to the page.
-
-Short projects are fun. Long projects *sound* fun, but can get pretty
-arduous towards the end. Strap on a deadline, and a bunch of customers
-champing at the bit and you've got yourself a recipe for some pretty
-shitty code.
-
-This was a project that I finished recently and was forced to rush
-during the last few weeks to get it out the door in time. Thankfully I
-was given some time recently to go back over it and refactor anything
-that I can before my next project starts. This project was centered around
-drawing dynamic text to a PDF over and over again. The text itself could
-be aligned to the left/center/right and required some funky math to
-re-position it based on that attribute. Since I was on a deadline and
-coding like a madman, I came up with this solution:
-
-*Note: The original project was done in php. I've transposed it to ruby
+text to the page. Note that the original project was done in php. I've transposed it to ruby
 for the sake of simplicity and because I couldn't get Pygments to syntax
-highlight php code nicely.*
+highlight php code nicely.
 
 {% highlight ruby %}
 def drawStaticText(text, x, y, page=0, html_color="#000000", fontSize=0)
@@ -51,67 +34,53 @@ def drawStaticText(text, x, y, page=0, html_color="#000000", fontSize=0)
   self.page.drawText(text, x, y, 'UTF-8')
 end
 
-def drawCenteredText(text, x, y, page, html_color="#000000", font_size=0)
-  font_size = (font_size == 0) ? self.fontSize : font_size
+def drawCenteredText(text, x, y, page, html_color="#000000", fontSize=0)
+  fontSize = (fontSize == 0) ? self.fontSize : fontSize
 
-  width = getTextWidth(text, getFont(), font_size)
+  width = getTextWidth(text, getFont(), fontSize)
   x = x - width / 2
 
-  drawStaticText(text, x, y, page, html_color, font_size)
+  drawStaticText(text, x, y, page, html_color, fontSize)
 end
 
-def drawRightAlignedText(text, x, y, page, html_color="#000000", font_size=0)
-  font_size = (font_size == 0) ? self.fontSize : font_size
+def drawRightAlignedText(text, x, y, page, html_color="#000000", fontSize=0)
+  fontSize = (fontSize == 0) ? self.fontSize : fontSize
 
-  width = getTextWidth(text, getFont(), font_size)
+  width = getTextWidth(text, getFont(), fontSize)
   x = x - width
 
-  drawStaticText(text, x, y, page, html_color, font_size)
+  drawStaticText(text, x, y, page, html_color, fontSize)
 end
 {% endhighlight %}
 
-Ack! Look at that mess! I can see at least 3 things wrong here:
+Yikes, look at that mess! I can see at least 3 things wrong here:
 
 ### 1. Code Duplication
-I'm doing a few things over and over again in each of these methods. The
-bottom two are even calling ```drawStaticText```, which is defaulting
-the ```fontSize``` yet again!
-
-```getTextWidth()``` is also being called twice in order the get the
-text's width. This is required to reposition the text on the page based
-on the alignment.
+Each of these methods are overly similar. I'm defaulting
+`fontSize` in all three, and I'm calling `getTextWidth()` in
+the bottom two.
 
 ### 2. Poorly named methods
 The names of these methods aren't consistent, nor do I feel the
 correctly convey what they're doing. The person implmenting this
-code might not have a problem understanding what ```drawCenteredText```,
-does, but it would feel inconsistant next to ```drawRightAlignedText```.
-And why the word "Static" in ```drawStaticText```? What does that imply
+code might not have a problem understanding what `drawCenteredText`,
+does, but it would feel inconsistant next to `drawRightAlignedText`.
+And why the word "Static" in `drawStaticText`? What does that imply
 about the method?
 
-I might just be nitpicking here, but I think these methods should be
-renamed and/or removed if possible.
+This might sound like nitpicking, but method names are important.
 
 ### 3. Parameter Hell
-Wow. There are way too many parameters being passed around here.
-Some people regrard the passing of more than 2 parameters as a code
-smell, and I tend to agree. If you're passing in 3 or more parameters to
-a method, then you should think about different ways of doing what you
-want to accomplish. Maybe you can split the method out into two smaller
-methods, or maybe you can modify some logic within the method to reduce
-the requirement of so many parameters. In any case, there is almost
-always a better solution that will not only simplify/reduce your code,
-but also make it easier to test.
+There are _way_ too many parameters being passed around here. Some
+people regard the passing of anything more than 2 parameteres to a
+method as a code smell, and I tend to agree. The more parameters you
+pass into a method makes it harder to test, looks messy, and generally
+create brittle code. Sometimes there is no way around it, but you should
+try to avoid it where possible.
 
-My focus for the remainder of this post is getting rid of those crazy
-parameters from the example. These methods depend upon an underlying
-library ([Zend](http://framework.zend.com/manual/en/zend.pdf.html)) to
-render the pdf onto the page. This is called through the ```self.page.drawText()```
-method, and I won't be able to modify it without having to change a base
-lbrary that may be used by others. This means I'll be forced to
-pass in a number of parameters to this method at some point. I'll need
-to find a way of reducing the number of parameters being passed in, and
-yet still provide the necessary information to the underlying library.
+My focus for the remainder of this post will be in reducing the number
+of parameters being used. `self.page.drawText()` is off limits since
+thats the call to actual library. Everything else is fair game.
 
 I recently got Martin Fowler's "Refactoring: Improving the Design of
 Existing Code", and it has been an amazing reference for
@@ -123,14 +92,13 @@ number of parameters sent to a method with a parameter _object_ instead:
 > in several classes. Such a group of classes is a data clump that can
 > be replaced with an object that carries all of this data.
 
-Besides just removing the number of parameters (which may cause problems
-for anyone else implmenting this code), you get the added benefit of
-(possibly) being able to move some business logic into the object
-itself, having an easier to read/implment method call, and testing this
-class just became a lot easier.
-
-
-This seemed relativly trivial to do, and here is the resulting code:
+Moving these parameters into an object, and passing it in instead, feels
+like the right way to go. I should also be able to add the offset
+calculation required for centered/right aligned text onto the object,
+and remove that responsbility from the code higher up. I'm still going
+to have a problem with building the object itself, but I should be
+able to initialize it with a hash and reduce the chances of it being
+implemented incorrectly in the future.
 
 {% highlight ruby %}
 class TextObject
@@ -172,17 +140,11 @@ class TextObject
 end
 {% endhighlight %}
 
-You can see that not only did I move all of the required parameters into
-attributes themselves, but I also added in the
-```calculateOffsetForRight``` and ```calculateOffsetForCenter``` methods
-that should remove the requirement of having two slightly different
-methods higher up. Both of these methods simply return the ```x``` value
-that the text should start at based upon it's width.
-
-Now, thankfully, I can remove the needed parameters from the list, as
-well as the two other duplicated methods. At the same time, I'll rename
-```drawStaticText``` to ```drawText``` to better reflect what it is
-doing.
+You can see that this object is pretty small, and while the
+initialization looks a little complicated, it makes using it so much
+easier. I can now go ahead and remove replace all of the parameters with this
+new object. At the same time, I'll rename `drawStaticText` to `drawText` to
+better reflect what it is doing.
 
 {% highlight ruby %}
 
@@ -190,14 +152,14 @@ def drawText( text_obj, page=1 )
   font_size = (textObj.font_size == 0) ? self.font_size : text_obj.font_size
   getPage(page)
   setColor(text_obj.color)
-  self.page.setFont(get_font(), font_size)
+  self.page.setFont(getFont(), font_size)
   self.page.drawText(text_obj.value, text_obj.x, text_obj.y, 'UTF-8')
 end
 
 {% endhighlight %}
 
 Finally this code is starting to shape up. This is what it would look
-like to use that ```TextObject```:
+like to use that `TextObject`:
 
 {% highlight ruby %}
 
@@ -224,9 +186,9 @@ drawText( my_text_obj )
 
 I'm sure that there are other ways to refactor this code even further,
 but this is fine for the puroposes of getting rid of all those crazy
-parameters. Testing the ```drawText``` method now should be much easier,
-and I can write tests for the ```TextObject``` as well.
+parameters. Testing the `drawText` method now should be much easier,
+and I can write tests for the `TextObject` as well.
 
-Hopfully when I am in a rush from this point on, I'll try this solution
-first instead of writing method definations that require me to enable
-text-wrapping in VIM just so I can see them!
+There are still other areas of this project that could use some
+refactoring, but thats it for at least this section. At least I can
+browse through this file without having to enable text-wrapping in vim.
