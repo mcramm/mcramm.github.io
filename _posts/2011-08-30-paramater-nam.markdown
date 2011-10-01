@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Parameter 'Nam
+title: Parameter Nam
 ---
 
 I recently finished a project to improve the design of the account
