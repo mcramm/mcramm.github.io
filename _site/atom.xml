@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xml:lang="en-US" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ 
+  <title>mcramm.com</title>
+  <link href="http://mcramm.com/"/>
+  <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
+  <updated>2011-10-01T12:43:45-06:00</updated>
+  <id>http://mcramm.com/</id>
+  <author>
+    <name>Michael Cramm</name>
+    <email>mike@mcramm.com</email>
+  </author>
+
+  
+  <entry>
+    <id>http://mcramm.com/2011/08/30/paramater-nam</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2011/08/30/paramater-nam.html"/>
+    <title>Parameter 'Nam</title>
+    <updated>2011-08-30T00:00:00-06:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;p&gt;I recently finished a project to improve the design of the account statements our customers print off for patients. The new design was pretty heavy and I was going to need to draw a lot of variable-length text that could be aligned to the left, right or center.&lt;/p&gt;
+
+&lt;p&gt;We use a library called &lt;a href='http://framework.zend.com/manual/en/zend.pdf.html'&gt;Zend&lt;/a&gt; to generate all of our PDFs, and it has served us well so far. The problem is that all of the previous projects used it pretty lightly and there weren&amp;#8217;t any methods written that would help with such a dynamic design. This meant I was going to have to write a lot of the code myself, (which is fine since I &lt;strong&gt;am&lt;/strong&gt; a software developer), but would probably take the project past the deadline our clients were expecting. As the day approached, we began to feel more and more pressure to ship the feature and the code suffered because of it.&lt;/p&gt;
+
+&lt;p&gt;The following is a small excerpt from the class responsible for drawing text to the page. Note that the original project was done in php. I&amp;#8217;ve transposed it to ruby for the sake of simplicity and because I couldn&amp;#8217;t get Pygments to syntax highlight php code nicely.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;drawStaticText&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;text&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;html_color&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;#000000&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;fontSize&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;fontSize&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;fontSize&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;?&lt;/span&gt; &lt;span class='nb'&gt;self&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;fontSize&lt;/span&gt; &lt;span class='p'&gt;:&lt;/span&gt; &lt;span class='n'&gt;fontSize&lt;/span&gt;
+    &lt;span class='n'&gt;getPage&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+    &lt;span class='n'&gt;setColor&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;html_color&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='nb'&gt;self&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;setFont&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;getFont&lt;/span&gt;&lt;span class='p'&gt;(),&lt;/span&gt; &lt;span class='n'&gt;fontSize&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+    &lt;span class='nb'&gt;self&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;drawText&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;text&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;UTF-8&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+&lt;span class='k'&gt;end&lt;/span&gt;
+
+&lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;drawCenteredText&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;text&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;html_color&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;#000000&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;fontSize&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;fontSize&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;fontSize&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;?&lt;/span&gt; &lt;span class='nb'&gt;self&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;fontSize&lt;/span&gt; &lt;span class='p'&gt;:&lt;/span&gt; &lt;span class='n'&gt;fontSize&lt;/span&gt;
+
+    &lt;span class='n'&gt;width&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='n'&gt;getTextWidth&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;text&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;getFont&lt;/span&gt;&lt;span class='p'&gt;(),&lt;/span&gt; &lt;span class='n'&gt;fontSize&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;x&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt; &lt;span class='o'&gt;-&lt;/span&gt; &lt;span class='n'&gt;width&lt;/span&gt; &lt;span class='o'&gt;/&lt;/span&gt; &lt;span class='mi'&gt;2&lt;/span&gt;
+
+    &lt;span class='n'&gt;drawStaticText&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;text&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;html_color&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;fontSize&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+&lt;span class='k'&gt;end&lt;/span&gt;
+
+&lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;drawRightAlignedText&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;text&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;html_color&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;#000000&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;fontSize&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;fontSize&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;fontSize&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;?&lt;/span&gt; &lt;span class='nb'&gt;self&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;fontSize&lt;/span&gt; &lt;span class='p'&gt;:&lt;/span&gt; &lt;span class='n'&gt;fontSize&lt;/span&gt;
+
+    &lt;span class='n'&gt;width&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='n'&gt;getTextWidth&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;text&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;getFont&lt;/span&gt;&lt;span class='p'&gt;(),&lt;/span&gt; &lt;span class='n'&gt;fontSize&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;x&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt; &lt;span class='o'&gt;-&lt;/span&gt; &lt;span class='n'&gt;width&lt;/span&gt;
+
+    &lt;span class='n'&gt;drawStaticText&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;text&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;html_color&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;fontSize&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+&lt;span class='k'&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Yikes, look at that mess! I can see at least 3 things wrong here:&lt;/p&gt;
+
+&lt;h3 id='1_code_duplication'&gt;1. Code Duplication&lt;/h3&gt;
+
+&lt;p&gt;Each of these methods are overly similar. I&amp;#8217;m defaulting &lt;code&gt;fontSize&lt;/code&gt; in all three, and I&amp;#8217;m calling &lt;code&gt;getTextWidth()&lt;/code&gt; in the bottom two.&lt;/p&gt;
+
+&lt;h3 id='2_poorly_named_methods'&gt;2. Poorly named methods&lt;/h3&gt;
+
+&lt;p&gt;The names of these methods aren&amp;#8217;t consistent, nor do I feel the correctly convey what they&amp;#8217;re doing. The person implementing this code might not have a problem understanding what &lt;code&gt;drawCenteredText&lt;/code&gt;, does, but it would feel inconsistent next to &lt;code&gt;drawRightAlignedText&lt;/code&gt;. And why the word &amp;#8220;Static&amp;#8221; in &lt;code&gt;drawStaticText&lt;/code&gt;? What does that imply about the method?&lt;/p&gt;
+
+&lt;h3 id='3_parameter_hell'&gt;3. Parameter Hell&lt;/h3&gt;
+
+&lt;p&gt;There are &lt;em&gt;way&lt;/em&gt; too many parameters being passed around here. Some people regard the passing of anything more than 2 parameters to a method as a code smell, and I tend to agree. The more parameters you pass into a method makes it harder to test, looks messy, and generally create brittle code. Sometimes there is no way around it, but you should try to avoid it where possible.&lt;/p&gt;
+
+&lt;p&gt;My focus for the remainder of this post will be in reducing the number of parameters being used. &lt;code&gt;self.page.drawText()&lt;/code&gt; is off-limits since that&amp;#8217;s the call to actual library. Everything else is fair game.&lt;/p&gt;
+
+&lt;p&gt;I recently got Martin Fowler&amp;#8217;s &amp;#8220;Refactoring: Improving the Design of Existing Code&amp;#8221;, and it has been an amazing reference for refactorings like this. On page 295, it details the process of replacing a number of parameters sent to a method with a parameter &lt;em&gt;object&lt;/em&gt; instead:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Often you see a particular group of parameters that tend to be passed together. Several methods may use this group, either on one class or in several classes. Such a group of classes is a data clump that can be replaced with an object that carries all of this data.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Moving these parameters into an object, and passing it in instead, feels like the right way to go. I should also be able to add the offset calculation required for centered/right aligned text onto the object, and remove that responsibility from the code higher up. I&amp;#8217;m still going to have a problem with building the object itself, but I should be able to initialize it with a hash and reduce the chances of it being implemented incorrectly in the future.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;span class='k'&gt;class&lt;/span&gt; &lt;span class='nc'&gt;TextObject&lt;/span&gt;
+    &lt;span class='no'&gt;ATTRIBUTES&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='o'&gt;[&lt;/span&gt;
+        &lt;span class='ss'&gt;:value&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='ss'&gt;:x&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='ss'&gt;:y&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='ss'&gt;:alignment&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='ss'&gt;:color&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='ss'&gt;:font_size&lt;/span&gt;
+    &lt;span class='o'&gt;].&lt;/span&gt;&lt;span class='n'&gt;freeze&lt;/span&gt;
+
+    &lt;span class='no'&gt;ATTRIBUTES&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;each&lt;/span&gt; &lt;span class='k'&gt;do&lt;/span&gt; &lt;span class='o'&gt;|&lt;/span&gt;&lt;span class='kp'&gt;attr&lt;/span&gt;&lt;span class='o'&gt;|&lt;/span&gt;
+        &lt;span class='kp'&gt;attr_accessor&lt;/span&gt; &lt;span class='kp'&gt;attr&lt;/span&gt;
+    &lt;span class='k'&gt;end&lt;/span&gt;
+
+    &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;initialize&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;args&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;&lt;span class='kp'&gt;nil&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+        &lt;span class='no'&gt;ATTRIBUTES&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;each&lt;/span&gt; &lt;span class='k'&gt;do&lt;/span&gt; &lt;span class='o'&gt;|&lt;/span&gt;&lt;span class='kp'&gt;attr&lt;/span&gt;&lt;span class='o'&gt;|&lt;/span&gt;
+            &lt;span class='k'&gt;if&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt; &lt;span class='n'&gt;args&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;key?&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kp'&gt;attr&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;)&lt;/span&gt;
+                &lt;span class='nb'&gt;instance_variable_set&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;@&lt;/span&gt;&lt;span class='si'&gt;#{&lt;/span&gt;&lt;span class='kp'&gt;attr&lt;/span&gt;&lt;span class='si'&gt;}&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;args&lt;/span&gt;&lt;span class='o'&gt;[&lt;/span&gt;&lt;span class='kp'&gt;attr&lt;/span&gt;&lt;span class='o'&gt;]&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+            &lt;span class='k'&gt;end&lt;/span&gt;
+        &lt;span class='k'&gt;end&lt;/span&gt;
+    &lt;span class='k'&gt;end&lt;/span&gt;
+
+    &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;x&lt;/span&gt;
+        &lt;span class='k'&gt;return&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt; &lt;span class='k'&gt;unless&lt;/span&gt; &lt;span class='o'&gt;[&lt;/span&gt;&lt;span class='ss'&gt;:right&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='ss'&gt;:center&lt;/span&gt;&lt;span class='o'&gt;].&lt;/span&gt;&lt;span class='n'&gt;include?&lt;/span&gt; &lt;span class='nb'&gt;self&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;alignment&lt;/span&gt;
+        &lt;span class='k'&gt;return&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='nb'&gt;self&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;alignment&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='ss'&gt;:right&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;?&lt;/span&gt; &lt;span class='n'&gt;calculateOffsetForRight&lt;/span&gt; &lt;span class='p'&gt;:&lt;/span&gt; &lt;span class='n'&gt;calculateOffsetForCenter&lt;/span&gt;
+    &lt;span class='k'&gt;end&lt;/span&gt;
+
+    &lt;span class='kp'&gt;private&lt;/span&gt;
+
+    &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;calculateOffsetForRight&lt;/span&gt;
+        &lt;span class='k'&gt;return&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt; &lt;span class='o'&gt;-&lt;/span&gt; &lt;span class='n'&gt;getWidth&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt;
+    &lt;span class='k'&gt;end&lt;/span&gt;
+
+    &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;calculateOffsetForCenter&lt;/span&gt;
+        &lt;span class='k'&gt;return&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt; &lt;span class='o'&gt;-&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;getWidth&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt; &lt;span class='o'&gt;/&lt;/span&gt; &lt;span class='mi'&gt;2&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='k'&gt;end&lt;/span&gt;
+
+    &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;getWidth&lt;/span&gt;
+        &lt;span class='k'&gt;return&lt;/span&gt; &lt;span class='nb'&gt;self&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;value&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;size&lt;/span&gt;
+        &lt;span class='c1'&gt;# In reality, this method returns pixel value for the string based on font size / family.&lt;/span&gt;
+    &lt;span class='k'&gt;end&lt;/span&gt;
+&lt;span class='k'&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;You can see that this object is pretty small, and while the initialization looks a little complicated, it makes using it so much easier. I can now go ahead and remove replace all of the parameters with this new object. At the same time, I&amp;#8217;ll rename &lt;code&gt;drawStaticText&lt;/code&gt; to &lt;code&gt;drawText&lt;/code&gt; to better reflect what it is doing.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;drawText&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt; &lt;span class='n'&gt;text_obj&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt; &lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;font_size&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;textObj&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;font_size&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;?&lt;/span&gt; &lt;span class='nb'&gt;self&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;font_size&lt;/span&gt; &lt;span class='p'&gt;:&lt;/span&gt; &lt;span class='n'&gt;text_obj&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;font_size&lt;/span&gt;
+    &lt;span class='n'&gt;getPage&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;setColor&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;text_obj&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;color&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='nb'&gt;self&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;setFont&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;getFont&lt;/span&gt;&lt;span class='p'&gt;(),&lt;/span&gt; &lt;span class='n'&gt;font_size&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='nb'&gt;self&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;page&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;drawText&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;text_obj&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;value&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;text_obj&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;x&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;text_obj&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;y&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;UTF-8&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+&lt;span class='k'&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Finally this code is starting to shape up. This is what it would look like to use that &lt;code&gt;TextObject&lt;/code&gt;:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;span class='n'&gt;my_text_obj&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='kp'&gt;new&lt;/span&gt; &lt;span class='no'&gt;TextObject&lt;/span&gt;&lt;span class='p'&gt;({&lt;/span&gt;
+    &lt;span class='ss'&gt;:value&lt;/span&gt; &lt;span class='o'&gt;=&amp;gt;&lt;/span&gt; &lt;span class='s2'&gt;&amp;quot;Draw Me!&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;
+    &lt;span class='ss'&gt;:x&lt;/span&gt; &lt;span class='o'&gt;=&amp;gt;&lt;/span&gt; &lt;span class='mi'&gt;12&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;
+    &lt;span class='ss'&gt;:y&lt;/span&gt; &lt;span class='o'&gt;=&amp;gt;&lt;/span&gt; &lt;span class='mi'&gt;100&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;
+    &lt;span class='ss'&gt;:alignment&lt;/span&gt; &lt;span class='o'&gt;=&amp;gt;&lt;/span&gt; &lt;span class='ss'&gt;:left&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;
+    &lt;span class='ss'&gt;:color&lt;/span&gt; &lt;span class='o'&gt;=&amp;gt;&lt;/span&gt; &lt;span class='s2'&gt;&amp;quot;#000000&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;
+    &lt;span class='ss'&gt;:font_size&lt;/span&gt; &lt;span class='o'&gt;=&amp;gt;&lt;/span&gt; &lt;span class='mi'&gt;12&lt;/span&gt;
+&lt;span class='p'&gt;})&lt;/span&gt;
+
+&lt;span class='n'&gt;my_text_obj&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;x&lt;/span&gt;   &lt;span class='c1'&gt;# =&amp;gt; 12&lt;/span&gt;
+
+&lt;span class='n'&gt;my_text_obj&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;alignment&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='ss'&gt;:right&lt;/span&gt;
+&lt;span class='n'&gt;my_text_obj&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;x&lt;/span&gt;   &lt;span class='c1'&gt;# =&amp;gt; 4&lt;/span&gt;
+
+&lt;span class='n'&gt;my_text_obj&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;alignment&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='ss'&gt;:center&lt;/span&gt;
+&lt;span class='n'&gt;my_text_obj&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;x&lt;/span&gt;   &lt;span class='c1'&gt;# =&amp;gt; 8&lt;/span&gt;
+
+&lt;span class='n'&gt;drawText&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt; &lt;span class='n'&gt;my_text_obj&lt;/span&gt; &lt;span class='p'&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;I&amp;#8217;m sure that there are other ways to refactor this code even further, but this is fine for the purposes of getting rid of all those crazy parameters. Testing the &lt;code&gt;drawText&lt;/code&gt; method now should be much easier, and I can write tests for the &lt;code&gt;TextObject&lt;/code&gt; as well.&lt;/p&gt;
+
+&lt;p&gt;There are still other areas of this project that could use some refactoring, but thats it for at least this section. At least I can browse through this file without having to enable text-wrapping in vim.&lt;/p&gt;</content>
+  </entry>
+  
+
+</feed>
+
