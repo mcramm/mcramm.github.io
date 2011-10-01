@@ -23,27 +23,30 @@
 </div>
 <div class='content'>
     <h1>Vim Reboot 1 </h1>
-    <p>Over the past few years my VIM configuration has gotten out of hand. I have tried to maintain it as best I can, but its time for a reboot! I was inspired by Avdi Grimm&#8217;s recent <a href='
-http://avdi.org/devblog/category/emacs-reboot/'>Emacs Reboot</a> series and decided to do something similar with VIM.</p>
+    <p>Over the past few years my Vim configuration has gotten out of hand. I&#8217;ve tried to maintain it as best I can, but its time for a reboot. I was inspired by Avdi Grimm&#8217;s recent <a href='
+http://avdi.org/devblog/category/emacs-reboot/'>Emacs Reboot</a> series and decided to do something similar for Vim.</p>
 
-<p>I work on a Mac, which means I prefer to use MacVim where possible. The latest snapshot for Snow Leopard can be found at <a href='http://code.google.com/p/macvim/'>http://code.google.com/p/macvim/</a>. Installing is as easy as you would expect. Simply download the snapshot, drag MacVim.app to Applications and move the mvim script to folder in your path.</p>
+<p>I work on a Mac, which means I prefer to use MacVim where possible. The latest snapshot for Snow Leopard can be found at <a href='http://code.google.com/p/macvim/'>http://code.google.com/p/macvim/</a> and installing is as easy as you would expect. Simply download the snapshot, drag MacVim.app to Applications and move the mvim script to folder in your path:</p>
 <div class='highlight'><pre><code class='bash'>sudo mv mvim /usr/bin
 </code></pre>
 </div>
 <p>Using <code>mvim</code> from the command line at this point should launch MacVim as you would expect.</p>
 
-<p>At this point, you have two options. You can continue with this series of posts on customizing your environment by hand, or you can check out <a href='https://github.com/carlhuda/janus'>Janus</a> and get a very good default configuration.</p>
+<p>At this point, you have two options. You can continue with this series of posts on customizing your environment by hand, or you can check out <a href='https://github.com/carlhuda/janus'>Janus</a> and get a very good default configuration. I used this initially and copied a bit of my configuration directly from it.</p>
 
-<p>The first thing I wanted to do was fix the (ugly) default colorscheme and setup MacVim to work in fullscreen mode.</p>
+<p>The first thing I wanted to do was fix the (ugly) default color scheme and setup MacVim to work in fullscreen mode.</p>
 
 <p>Create a <code>.gvimrc</code> file:</p>
 <div class='highlight'><pre><code class='bash'>touch ~/.gvimrc
 </code></pre>
 </div>
-<p>And add the following options to it:</p>
+<p>And add the following to it:</p>
 <div class='highlight'><pre><code class='vim'><span class='k'>if</span> has<span class='p'>(</span><span class='s2'>&quot;gui_macvim&quot;</span><span class='p'>)</span>
 <span class='c'>    &quot; Make fullscreen mode take up the full screen</span>
     <span class='k'>set</span> fuoptions<span class='p'>=</span>maxhorz<span class='p'>,</span>maxvert
+
+<span class='c'>    &quot;set the font</span>
+    <span class='k'>set</span> <span class='nb'>guifont</span><span class='p'>=</span>Bitstream\ Vera\ Sans\ Mono:h10
 
 <span class='c'>    &quot; Command-Return toggles full screen mode</span>
     macmenu Window.Toggle\ Full\ Screen\ Mode <span class='nb'>key</span><span class='p'>=&lt;</span>D<span class='p'>-</span>CR<span class='p'>&gt;</span>
@@ -57,29 +60,20 @@ http://avdi.org/devblog/category/emacs-reboot/'>Emacs Reboot</a> series and deci
 <span class='k'>color</span> ir_black
 </code></pre>
 </div>
-<p>The first thing I decided to do was decide which plugins I was using and which ones were just taking up space. This list may change, but I am currently using the following plugins on a daily basis (in no particular order):</p>
+<p>Substitute the &#8220;Bitstream&#8221; font and &#8220;ir_black&#8221; color scheme with the font/scheme of your preference. I&#8217;ve found that these two work the best for me.</p>
 
-<ol>
-<li><a href='https://github.com/msanders/snipmate.vim'>SnipMate</a></li>
+<p><a href='http://ftp.gnome.org/pub/GNOME/sources/ttf-bitstream-vera/1.10/'>Bitstream can be found here</a>. Installation details can be found elsewhere on the website.</p>
 
-<li><a href='https://github.com/tpope/vim-surround'>Surround</a></li>
+<p>And ir_black can be found in a bunch of places, <a href='https://github.com/mcramm/dotfiles/blob/master/vim/colors/ir_black.vim'>the best of which is here</a>. You can use this scheme by doing:</p>
+<div class='highlight'><pre><code class='bash'>mkdir -p ~/.vim/colors
+mv ir_black.vim ~/.vim/colors/
+</code></pre>
+</div>
+<p>Running <code>mvim</code> from the command line should present the following:</p>
 
-<li><a href='https://github.com/tpope/vim-unimpaired'>Unimpared</a></li>
+<p><img alt='Vim' src='https://lh6.googleusercontent.com/-ntdKpA-y-dI/ToZhZlaVFMI/AAAAAAAAAsE/8PJ663BY_1E/vim1.png' /></p>
 
-<li><a href='https://github.com/sjbach/lusty'>LustyJuggler</a></li>
-
-<li><a href='http://www.vim.org/scripts/script.php?script_id=3025'>Command-T</a></li>
-
-<li><a href='https://github.com/tpope/vim-fugitive'>Fugitive</a></li>
-
-<li><a href='https://github.com/scrooloose/nerdtree'>NERD Tree</a></li>
-
-<li><a href='https://github.com/scrooloose/nerdcommenter'>NERD Commenter</a></li>
-
-<li><a href='https://github.com/tpope/vim-endwise'>Endwise</a></li>
-</ol>
-
-<p>If you go through that list, you&#8217;ll notice that <a href='https://github.com/tpope'>Tim Pope</a> is the author for a majority of them. The guy has created a ton of useful plugins and I definitely recommend trolling through his projects for anything useful.</p>
+<p>Next I&#8217;ll start setting up some standard vim options and a couple of custom mappings I use quite frequently.</p>
 </div>
 
 </body>

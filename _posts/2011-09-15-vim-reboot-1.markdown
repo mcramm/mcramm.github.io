@@ -1,0 +1,80 @@
+---
+layout: post
+title: Vim Reboot 1
+---
+
+Over the past few years my Vim configuration has gotten out of hand.
+I've tried to maintain it as best I can, but its time for a reboot. I
+was inspired by Avdi Grimm's recent [Emacs Reboot](
+http://avdi.org/devblog/category/emacs-reboot/ ) series and decided to
+do something similar for Vim.
+
+I work on a Mac, which means I prefer to use MacVim where possible. The
+latest snapshot for Snow Leopard can be found at
+[http://code.google.com/p/macvim/](http://code.google.com/p/macvim/)
+and installing is as easy as you would expect. Simply download the
+snapshot, drag MacVim.app to Applications and move the mvim script to
+folder in your path:
+
+{% highlight bash %}
+sudo mv mvim /usr/bin
+{% endhighlight %}
+
+Using ````mvim```` from the command line at this point should launch
+MacVim as you would expect.
+
+At this point, you have two options. You can continue with this series
+of posts on customizing your environment by hand, or you can check out
+[Janus](https://github.com/carlhuda/janus) and get a very good default
+configuration. I used this initially and copied a bit of my
+configuration directly from it.
+
+The first thing I wanted to do was fix the (ugly) default color scheme
+and setup MacVim to work in fullscreen mode.
+
+Create a ````.gvimrc```` file:
+{% highlight bash %}
+touch ~/.gvimrc
+{% endhighlight %}
+
+And add the following to it:
+
+{% highlight vim %}
+if has("gui_macvim")
+    " Make fullscreen mode take up the full screen
+    set fuoptions=maxhorz,maxvert
+
+    "set the font
+    set guifont=Bitstream\ Vera\ Sans\ Mono:h10
+
+    " Command-Return toggles full screen mode
+    macmenu Window.Toggle\ Full\ Screen\ Mode key=<D-CR>
+endif
+
+" Start with the toolbar hidden
+set guioptions-=T
+
+" Set the color scheme
+set background=dark
+color ir_black
+{% endhighlight %}
+
+Substitute the "Bitstream" font and "ir_black" color scheme with the
+font/scheme of your preference. I've found that these two work the best
+for me.
+
+[Bitstream can be found here](http://ftp.gnome.org/pub/GNOME/sources/ttf-bitstream-vera/1.10/). Installation details can be found elsewhere on the website.
+
+And ir_black can be found in a bunch of places, [the best of which is
+here](https://github.com/mcramm/dotfiles/blob/master/vim/colors/ir_black.vim). You can use this scheme by doing:
+{% highlight bash %}
+mkdir -p ~/.vim/colors
+mv ir_black.vim ~/.vim/colors/
+{% endhighlight %}
+
+Running ````mvim```` from the command line should present the following:
+
+![Vim](https://lh6.googleusercontent.com/-ntdKpA-y-dI/ToZhZlaVFMI/AAAAAAAAAsE/8PJ663BY_1E/vim1.png)
+
+Next I'll start setting up some standard vim options and a couple of
+custom mappings I use quite frequently.
