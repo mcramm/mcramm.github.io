@@ -44,6 +44,10 @@ em {
   font-weight: bold;
 }
 
+strong {
+  font-weight: bold;
+}
+
 blockquote {
   border-left: 4px solid $line_color;
   padding-left: 40px;
@@ -144,9 +148,10 @@ ol {
 }
 
 code {
+  font-size: 14px;
   background-color: $command_bg;
   padding:0px 3px;
-  font-family: 'Kameron', serif;
+  font-family: 'Chivo', sans-serif;
 }
 
 .highlight {

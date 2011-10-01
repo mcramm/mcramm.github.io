@@ -115,6 +115,11 @@ em {
 }
 
 /* line 47, ../sass/screen.scss */
+strong {
+  font-weight: bold;
+}
+
+/* line 51, ../sass/screen.scss */
 blockquote {
   border-left: 4px solid #c2c2c2;
   padding-left: 40px;
@@ -123,7 +128,7 @@ blockquote {
   line-height: 20px;
 }
 
-/* line 55, ../sass/screen.scss */
+/* line 59, ../sass/screen.scss */
 hr {
   width: 50%;
   height: 2px;
@@ -132,24 +137,24 @@ hr {
   margin-bottom: 14px;
 }
 
-/* line 63, ../sass/screen.scss */
+/* line 67, ../sass/screen.scss */
 ul, ol {
   margin-bottom: 14px;
 }
 
-/* line 66, ../sass/screen.scss */
+/* line 70, ../sass/screen.scss */
 ul {
   list-style-type: disc;
   margin-left: 15px;
 }
 
-/* line 71, ../sass/screen.scss */
+/* line 75, ../sass/screen.scss */
 ol {
   list-style-type: decimal;
   margin-left: 20px;
 }
 
-/* line 77, ../sass/screen.scss */
+/* line 81, ../sass/screen.scss */
 .header a.header-text {
   text-shadow: 3px 2px 0px #211f1c;
   letter-spacing: 3px;
@@ -159,12 +164,12 @@ ol {
   font-size: 4em;
   float: left;
 }
-/* line 87, ../sass/screen.scss */
+/* line 91, ../sass/screen.scss */
 .header .buttons {
   text-align: right;
   float: right;
 }
-/* line 90, ../sass/screen.scss */
+/* line 94, ../sass/screen.scss */
 .header .buttons a {
   display: inline-block;
   background-color: #DEDEDE;
@@ -173,33 +178,33 @@ ol {
   margin-right: 30px;
   font-size: 20px;
 }
-/* line 97, ../sass/screen.scss */
+/* line 101, ../sass/screen.scss */
 .header .buttons a:hover {
   text-decoration: none;
   background-color: #3395eb;
   color: white;
 }
-/* line 102, ../sass/screen.scss */
+/* line 106, ../sass/screen.scss */
 .header .buttons a img {
   float: left;
 }
-/* line 105, ../sass/screen.scss */
+/* line 109, ../sass/screen.scss */
 .header .buttons a span {
   padding-left: 9px;
   position: relative;
   top: -8px;
 }
-/* line 111, ../sass/screen.scss */
+/* line 115, ../sass/screen.scss */
 .header .buttons a:last-child {
   margin-right: 0px;
 }
 
-/* line 118, ../sass/screen.scss */
+/* line 122, ../sass/screen.scss */
 .content {
   margin-top: 50px;
 }
 
-/* line 122, ../sass/screen.scss */
+/* line 126, ../sass/screen.scss */
 .content > p:first-child:first-letter {
   float: left;
   margin: 10px 3px 0 0;
@@ -207,7 +212,7 @@ ol {
   line-height: 69%;
 }
 
-/* line 131, ../sass/screen.scss */
+/* line 135, ../sass/screen.scss */
 .posts .post-date {
   font-family: Georgia;
   background-color: #DEDEDE;
@@ -222,14 +227,15 @@ ol {
   margin-bottom: 9px;
 }
 
-/* line 146, ../sass/screen.scss */
+/* line 150, ../sass/screen.scss */
 code {
+  font-size: 14px;
   background-color: #dedede;
   padding: 0px 3px;
-  font-family: 'Kameron', serif;
+  font-family: 'Chivo', sans-serif;
 }
 
-/* line 152, ../sass/screen.scss */
+/* line 157, ../sass/screen.scss */
 .highlight {
   background: white;
   padding: 20px;
@@ -237,28 +243,28 @@ code {
   margin-top: 20px;
   margin-bottom: 20px;
 }
-/* line 159, ../sass/screen.scss */
+/* line 164, ../sass/screen.scss */
 .highlight code {
   background-color: white;
 }
 
-/* line 164, ../sass/screen.scss */
+/* line 169, ../sass/screen.scss */
 .left, .right {
   display: table-cell;
 }
 
-/* line 168, ../sass/screen.scss */
+/* line 173, ../sass/screen.scss */
 .main {
   padding-right: 15px;
 }
 
-/* line 173, ../sass/screen.scss */
+/* line 178, ../sass/screen.scss */
 .right {
   width: 25%;
   padding-left: 15px;
 }
 
-/* line 178, ../sass/screen.scss */
+/* line 183, ../sass/screen.scss */
 .bio {
   display: inline-block;
   width: 600px;
@@ -267,7 +273,7 @@ code {
   top: -20px;
 }
 
-/* line 186, ../sass/screen.scss */
+/* line 191, ../sass/screen.scss */
 .mugshot {
   display: inline-block;
   border-radius: 10px;
@@ -275,23 +281,23 @@ code {
   height: 279px;
 }
 
-/* line 193, ../sass/screen.scss */
+/* line 198, ../sass/screen.scss */
 .sidebar {
   clear: both;
 }
-/* line 195, ../sass/screen.scss */
+/* line 200, ../sass/screen.scss */
 .sidebar a {
   display: inline-block;
   padding: 2px 5px;
   font-family: Arvo;
 }
-/* line 199, ../sass/screen.scss */
+/* line 204, ../sass/screen.scss */
 .sidebar a:hover {
   text-decoration: none;
   background-color: #3395eb;
   color: white;
 }
-/* line 205, ../sass/screen.scss */
+/* line 210, ../sass/screen.scss */
 .sidebar .current {
   text-decoration: none;
   background-color: #3395eb;

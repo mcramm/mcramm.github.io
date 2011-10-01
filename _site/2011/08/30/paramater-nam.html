@@ -3,7 +3,7 @@
   <head>
     <title>Parameter 'Nam</title>
     <link href='http://fonts.googleapis.com/css?family=Arvo&v2' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=Kameron&v2' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Chivo' rel='stylesheet' type='text/css'>
     <link rel='stylesheet' href='/css/screen.css'></link>
     <link rel='stylesheet' href='/css/highlight.css'></link>
   </head>
@@ -25,35 +25,35 @@
     <h1>Parameter 'Nam </h1>
     <p>I recently finished a project to improve the design of the account statements our customers print off for patients. The new design was pretty heavy and I was going to need to draw a lot of variable-length text that could be aligned to the left, right or center.</p>
 
-<p>We use a library called <a href='http://framework.zend.com/manual/en/zend.pdf.html'>Zend</a> to generate all of our PDFs, and it has served us well so far. The problem is that all of the previous projects used it pretty lightly, and there weren&#8217;t any methods written that would help with such a dynamic design. This meant I was going to have to write a lot of the code myself, (which is fine, as I <strong>am</strong> a software developer), but would probably take the project past the deadline our clients were expecting. As the day approached, we started feeling more and more pressure to ship the feature, and of course, the code suffered.</p>
+<p>We use a library called <a href='http://framework.zend.com/manual/en/zend.pdf.html'>Zend</a> to generate all of our PDFs, and it has served us well so far. The problem is that all of the previous projects used it pretty lightly and there weren&#8217;t any methods written that would help with such a dynamic design. This meant I was going to have to write a lot of the code myself, (which is fine since I <strong>am</strong> a software developer), but would probably take the project past the deadline our clients were expecting. As the day approached, we began to feel more and more pressure to ship the feature and the code suffered because of it.</p>
 
 <p>The following is a small excerpt from the class responsible for drawing text to the page. Note that the original project was done in php. I&#8217;ve transposed it to ruby for the sake of simplicity and because I couldn&#8217;t get Pygments to syntax highlight php code nicely.</p>
 <div class='highlight'><pre><code class='ruby'><span class='k'>def</span> <span class='nf'>drawStaticText</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>x</span><span class='p'>,</span> <span class='n'>y</span><span class='p'>,</span> <span class='n'>page</span><span class='o'>=</span><span class='mi'>0</span><span class='p'>,</span> <span class='n'>html_color</span><span class='o'>=</span><span class='s2'>&quot;#000000&quot;</span><span class='p'>,</span> <span class='n'>fontSize</span><span class='o'>=</span><span class='mi'>0</span><span class='p'>)</span>
-  <span class='n'>fontSize</span> <span class='o'>=</span> <span class='p'>(</span><span class='n'>fontSize</span> <span class='o'>==</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>?</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>fontSize</span> <span class='p'>:</span> <span class='n'>fontSize</span>
-  <span class='n'>getPage</span><span class='p'>(</span><span class='n'>page</span><span class='p'>)</span>
+    <span class='n'>fontSize</span> <span class='o'>=</span> <span class='p'>(</span><span class='n'>fontSize</span> <span class='o'>==</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>?</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>fontSize</span> <span class='p'>:</span> <span class='n'>fontSize</span>
+    <span class='n'>getPage</span><span class='p'>(</span><span class='n'>page</span><span class='p'>)</span>
 
-  <span class='n'>setColor</span><span class='p'>(</span><span class='n'>html_color</span><span class='p'>)</span>
-  <span class='nb'>self</span><span class='o'>.</span><span class='n'>page</span><span class='o'>.</span><span class='n'>setFont</span><span class='p'>(</span><span class='n'>getFont</span><span class='p'>(),</span> <span class='n'>fontSize</span><span class='p'>)</span>
+    <span class='n'>setColor</span><span class='p'>(</span><span class='n'>html_color</span><span class='p'>)</span>
+    <span class='nb'>self</span><span class='o'>.</span><span class='n'>page</span><span class='o'>.</span><span class='n'>setFont</span><span class='p'>(</span><span class='n'>getFont</span><span class='p'>(),</span> <span class='n'>fontSize</span><span class='p'>)</span>
 
-  <span class='nb'>self</span><span class='o'>.</span><span class='n'>page</span><span class='o'>.</span><span class='n'>drawText</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>x</span><span class='p'>,</span> <span class='n'>y</span><span class='p'>,</span> <span class='s1'>&#39;UTF-8&#39;</span><span class='p'>)</span>
+    <span class='nb'>self</span><span class='o'>.</span><span class='n'>page</span><span class='o'>.</span><span class='n'>drawText</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>x</span><span class='p'>,</span> <span class='n'>y</span><span class='p'>,</span> <span class='s1'>&#39;UTF-8&#39;</span><span class='p'>)</span>
 <span class='k'>end</span>
 
 <span class='k'>def</span> <span class='nf'>drawCenteredText</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>x</span><span class='p'>,</span> <span class='n'>y</span><span class='p'>,</span> <span class='n'>page</span><span class='p'>,</span> <span class='n'>html_color</span><span class='o'>=</span><span class='s2'>&quot;#000000&quot;</span><span class='p'>,</span> <span class='n'>fontSize</span><span class='o'>=</span><span class='mi'>0</span><span class='p'>)</span>
-  <span class='n'>fontSize</span> <span class='o'>=</span> <span class='p'>(</span><span class='n'>fontSize</span> <span class='o'>==</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>?</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>fontSize</span> <span class='p'>:</span> <span class='n'>fontSize</span>
+    <span class='n'>fontSize</span> <span class='o'>=</span> <span class='p'>(</span><span class='n'>fontSize</span> <span class='o'>==</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>?</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>fontSize</span> <span class='p'>:</span> <span class='n'>fontSize</span>
 
-  <span class='n'>width</span> <span class='o'>=</span> <span class='n'>getTextWidth</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>getFont</span><span class='p'>(),</span> <span class='n'>fontSize</span><span class='p'>)</span>
-  <span class='n'>x</span> <span class='o'>=</span> <span class='n'>x</span> <span class='o'>-</span> <span class='n'>width</span> <span class='o'>/</span> <span class='mi'>2</span>
+    <span class='n'>width</span> <span class='o'>=</span> <span class='n'>getTextWidth</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>getFont</span><span class='p'>(),</span> <span class='n'>fontSize</span><span class='p'>)</span>
+    <span class='n'>x</span> <span class='o'>=</span> <span class='n'>x</span> <span class='o'>-</span> <span class='n'>width</span> <span class='o'>/</span> <span class='mi'>2</span>
 
-  <span class='n'>drawStaticText</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>x</span><span class='p'>,</span> <span class='n'>y</span><span class='p'>,</span> <span class='n'>page</span><span class='p'>,</span> <span class='n'>html_color</span><span class='p'>,</span> <span class='n'>fontSize</span><span class='p'>)</span>
+    <span class='n'>drawStaticText</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>x</span><span class='p'>,</span> <span class='n'>y</span><span class='p'>,</span> <span class='n'>page</span><span class='p'>,</span> <span class='n'>html_color</span><span class='p'>,</span> <span class='n'>fontSize</span><span class='p'>)</span>
 <span class='k'>end</span>
 
 <span class='k'>def</span> <span class='nf'>drawRightAlignedText</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>x</span><span class='p'>,</span> <span class='n'>y</span><span class='p'>,</span> <span class='n'>page</span><span class='p'>,</span> <span class='n'>html_color</span><span class='o'>=</span><span class='s2'>&quot;#000000&quot;</span><span class='p'>,</span> <span class='n'>fontSize</span><span class='o'>=</span><span class='mi'>0</span><span class='p'>)</span>
-  <span class='n'>fontSize</span> <span class='o'>=</span> <span class='p'>(</span><span class='n'>fontSize</span> <span class='o'>==</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>?</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>fontSize</span> <span class='p'>:</span> <span class='n'>fontSize</span>
+    <span class='n'>fontSize</span> <span class='o'>=</span> <span class='p'>(</span><span class='n'>fontSize</span> <span class='o'>==</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>?</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>fontSize</span> <span class='p'>:</span> <span class='n'>fontSize</span>
 
-  <span class='n'>width</span> <span class='o'>=</span> <span class='n'>getTextWidth</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>getFont</span><span class='p'>(),</span> <span class='n'>fontSize</span><span class='p'>)</span>
-  <span class='n'>x</span> <span class='o'>=</span> <span class='n'>x</span> <span class='o'>-</span> <span class='n'>width</span>
+    <span class='n'>width</span> <span class='o'>=</span> <span class='n'>getTextWidth</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>getFont</span><span class='p'>(),</span> <span class='n'>fontSize</span><span class='p'>)</span>
+    <span class='n'>x</span> <span class='o'>=</span> <span class='n'>x</span> <span class='o'>-</span> <span class='n'>width</span>
 
-  <span class='n'>drawStaticText</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>x</span><span class='p'>,</span> <span class='n'>y</span><span class='p'>,</span> <span class='n'>page</span><span class='p'>,</span> <span class='n'>html_color</span><span class='p'>,</span> <span class='n'>fontSize</span><span class='p'>)</span>
+    <span class='n'>drawStaticText</span><span class='p'>(</span><span class='n'>text</span><span class='p'>,</span> <span class='n'>x</span><span class='p'>,</span> <span class='n'>y</span><span class='p'>,</span> <span class='n'>page</span><span class='p'>,</span> <span class='n'>html_color</span><span class='p'>,</span> <span class='n'>fontSize</span><span class='p'>)</span>
 <span class='k'>end</span>
 </code></pre>
 </div>
@@ -65,80 +65,78 @@
 
 <h3 id='2_poorly_named_methods'>2. Poorly named methods</h3>
 
-<p>The names of these methods aren&#8217;t consistent, nor do I feel the correctly convey what they&#8217;re doing. The person implmenting this code might not have a problem understanding what <code>drawCenteredText</code>, does, but it would feel inconsistant next to <code>drawRightAlignedText</code>. And why the word &#8220;Static&#8221; in <code>drawStaticText</code>? What does that imply about the method?</p>
-
-<p>This might sound like nitpicking, but method names are important.</p>
+<p>The names of these methods aren&#8217;t consistent, nor do I feel the correctly convey what they&#8217;re doing. The person implementing this code might not have a problem understanding what <code>drawCenteredText</code>, does, but it would feel inconsistent next to <code>drawRightAlignedText</code>. And why the word &#8220;Static&#8221; in <code>drawStaticText</code>? What does that imply about the method?</p>
 
 <h3 id='3_parameter_hell'>3. Parameter Hell</h3>
 
-<p>There are <em>way</em> too many parameters being passed around here. Some people regard the passing of anything more than 2 parameteres to a method as a code smell, and I tend to agree. The more parameters you pass into a method makes it harder to test, looks messy, and generally create brittle code. Sometimes there is no way around it, but you should try to avoid it where possible.</p>
+<p>There are <em>way</em> too many parameters being passed around here. Some people regard the passing of anything more than 2 parameters to a method as a code smell, and I tend to agree. The more parameters you pass into a method makes it harder to test, looks messy, and generally create brittle code. Sometimes there is no way around it, but you should try to avoid it where possible.</p>
 
-<p>My focus for the remainder of this post will be in reducing the number of parameters being used. <code>self.page.drawText()</code> is off limits since thats the call to actual library. Everything else is fair game.</p>
+<p>My focus for the remainder of this post will be in reducing the number of parameters being used. <code>self.page.drawText()</code> is off-limits since that&#8217;s the call to actual library. Everything else is fair game.</p>
 
 <p>I recently got Martin Fowler&#8217;s &#8220;Refactoring: Improving the Design of Existing Code&#8221;, and it has been an amazing reference for refactorings like this. On page 295, it details the process of replacing a number of parameters sent to a method with a parameter <em>object</em> instead:</p>
 
 <blockquote>
-<p>Often you see a particular group of parameters that tend to be passed together. Several methods may use this group, either on one calss or in several classes. Such a group of classes is a data clump that can be replaced with an object that carries all of this data.</p>
+<p>Often you see a particular group of parameters that tend to be passed together. Several methods may use this group, either on one class or in several classes. Such a group of classes is a data clump that can be replaced with an object that carries all of this data.</p>
 </blockquote>
 
-<p>Moving these parameters into an object, and passing it in instead, feels like the right way to go. I should also be able to add the offset calculation required for centered/right aligned text onto the object, and remove that responsbility from the code higher up. I&#8217;m still going to have a problem with building the object itself, but I should be able to initialize it with a hash and reduce the chances of it being implemented incorrectly in the future.</p>
+<p>Moving these parameters into an object, and passing it in instead, feels like the right way to go. I should also be able to add the offset calculation required for centered/right aligned text onto the object, and remove that responsibility from the code higher up. I&#8217;m still going to have a problem with building the object itself, but I should be able to initialize it with a hash and reduce the chances of it being implemented incorrectly in the future.</p>
 <div class='highlight'><pre><code class='ruby'><span class='k'>class</span> <span class='nc'>TextObject</span>
-  <span class='no'>ATTRIBUTES</span> <span class='o'>=</span> <span class='o'>[</span>
-    <span class='ss'>:value</span><span class='p'>,</span> <span class='ss'>:x</span><span class='p'>,</span> <span class='ss'>:y</span><span class='p'>,</span> <span class='ss'>:alignment</span><span class='p'>,</span> <span class='ss'>:color</span><span class='p'>,</span> <span class='ss'>:font_size</span>
-  <span class='o'>].</span><span class='n'>freeze</span>
+    <span class='no'>ATTRIBUTES</span> <span class='o'>=</span> <span class='o'>[</span>
+        <span class='ss'>:value</span><span class='p'>,</span> <span class='ss'>:x</span><span class='p'>,</span> <span class='ss'>:y</span><span class='p'>,</span> <span class='ss'>:alignment</span><span class='p'>,</span> <span class='ss'>:color</span><span class='p'>,</span> <span class='ss'>:font_size</span>
+    <span class='o'>].</span><span class='n'>freeze</span>
 
-  <span class='no'>ATTRIBUTES</span><span class='o'>.</span><span class='n'>each</span> <span class='k'>do</span> <span class='o'>|</span><span class='kp'>attr</span><span class='o'>|</span>
-    <span class='kp'>attr_accessor</span> <span class='kp'>attr</span>
-  <span class='k'>end</span>
-
-  <span class='k'>def</span> <span class='nf'>initialize</span><span class='p'>(</span><span class='n'>args</span><span class='o'>=</span><span class='kp'>nil</span><span class='p'>)</span>
     <span class='no'>ATTRIBUTES</span><span class='o'>.</span><span class='n'>each</span> <span class='k'>do</span> <span class='o'>|</span><span class='kp'>attr</span><span class='o'>|</span>
-      <span class='k'>if</span><span class='p'>(</span> <span class='n'>args</span><span class='o'>.</span><span class='n'>key?</span><span class='p'>(</span><span class='kp'>attr</span><span class='p'>)</span> <span class='p'>)</span>
-        <span class='nb'>instance_variable_set</span><span class='p'>(</span><span class='s2'>&quot;@</span><span class='si'>#{</span><span class='kp'>attr</span><span class='si'>}</span><span class='s2'>&quot;</span><span class='p'>,</span> <span class='n'>args</span><span class='o'>[</span><span class='kp'>attr</span><span class='o'>]</span><span class='p'>)</span>
-      <span class='k'>end</span>
+        <span class='kp'>attr_accessor</span> <span class='kp'>attr</span>
     <span class='k'>end</span>
-  <span class='k'>end</span>
 
-  <span class='k'>def</span> <span class='nf'>x</span>
-    <span class='k'>return</span> <span class='n'>x</span> <span class='k'>unless</span> <span class='o'>[</span><span class='ss'>:right</span><span class='p'>,</span> <span class='ss'>:center</span><span class='o'>].</span><span class='n'>include?</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>alignment</span>
-    <span class='k'>return</span> <span class='p'>(</span><span class='nb'>self</span><span class='o'>.</span><span class='n'>alignment</span> <span class='o'>==</span> <span class='ss'>:right</span><span class='p'>)</span> <span class='p'>?</span> <span class='n'>calculateOffsetForRight</span> <span class='p'>:</span> <span class='n'>calculateOffsetForCenter</span>
-  <span class='k'>end</span>
+    <span class='k'>def</span> <span class='nf'>initialize</span><span class='p'>(</span><span class='n'>args</span><span class='o'>=</span><span class='kp'>nil</span><span class='p'>)</span>
+        <span class='no'>ATTRIBUTES</span><span class='o'>.</span><span class='n'>each</span> <span class='k'>do</span> <span class='o'>|</span><span class='kp'>attr</span><span class='o'>|</span>
+            <span class='k'>if</span><span class='p'>(</span> <span class='n'>args</span><span class='o'>.</span><span class='n'>key?</span><span class='p'>(</span><span class='kp'>attr</span><span class='p'>)</span> <span class='p'>)</span>
+                <span class='nb'>instance_variable_set</span><span class='p'>(</span><span class='s2'>&quot;@</span><span class='si'>#{</span><span class='kp'>attr</span><span class='si'>}</span><span class='s2'>&quot;</span><span class='p'>,</span> <span class='n'>args</span><span class='o'>[</span><span class='kp'>attr</span><span class='o'>]</span><span class='p'>)</span>
+            <span class='k'>end</span>
+        <span class='k'>end</span>
+    <span class='k'>end</span>
 
-  <span class='kp'>private</span>
+    <span class='k'>def</span> <span class='nf'>x</span>
+        <span class='k'>return</span> <span class='n'>x</span> <span class='k'>unless</span> <span class='o'>[</span><span class='ss'>:right</span><span class='p'>,</span> <span class='ss'>:center</span><span class='o'>].</span><span class='n'>include?</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>alignment</span>
+        <span class='k'>return</span> <span class='p'>(</span><span class='nb'>self</span><span class='o'>.</span><span class='n'>alignment</span> <span class='o'>==</span> <span class='ss'>:right</span><span class='p'>)</span> <span class='p'>?</span> <span class='n'>calculateOffsetForRight</span> <span class='p'>:</span> <span class='n'>calculateOffsetForCenter</span>
+    <span class='k'>end</span>
 
-  <span class='k'>def</span> <span class='nf'>calculateOffsetForRight</span>
-    <span class='k'>return</span> <span class='n'>x</span> <span class='o'>-</span> <span class='n'>getWidth</span><span class='p'>()</span>
-  <span class='k'>end</span>
+    <span class='kp'>private</span>
 
-  <span class='k'>def</span> <span class='nf'>calculateOffsetForCenter</span>
-    <span class='k'>return</span> <span class='n'>x</span> <span class='o'>-</span> <span class='p'>(</span><span class='n'>getWidth</span><span class='p'>()</span> <span class='o'>/</span> <span class='mi'>2</span><span class='p'>)</span>
-  <span class='k'>end</span>
+    <span class='k'>def</span> <span class='nf'>calculateOffsetForRight</span>
+        <span class='k'>return</span> <span class='n'>x</span> <span class='o'>-</span> <span class='n'>getWidth</span><span class='p'>()</span>
+    <span class='k'>end</span>
 
-  <span class='k'>def</span> <span class='nf'>getWidth</span>
-    <span class='k'>return</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>value</span><span class='o'>.</span><span class='n'>size</span>
-    <span class='c1'># In reality, this method returns pixel value for the string based on font size / family.</span>
-  <span class='k'>end</span>
+    <span class='k'>def</span> <span class='nf'>calculateOffsetForCenter</span>
+        <span class='k'>return</span> <span class='n'>x</span> <span class='o'>-</span> <span class='p'>(</span><span class='n'>getWidth</span><span class='p'>()</span> <span class='o'>/</span> <span class='mi'>2</span><span class='p'>)</span>
+    <span class='k'>end</span>
+
+    <span class='k'>def</span> <span class='nf'>getWidth</span>
+        <span class='k'>return</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>value</span><span class='o'>.</span><span class='n'>size</span>
+        <span class='c1'># In reality, this method returns pixel value for the string based on font size / family.</span>
+    <span class='k'>end</span>
 <span class='k'>end</span>
 </code></pre>
 </div>
 <p>You can see that this object is pretty small, and while the initialization looks a little complicated, it makes using it so much easier. I can now go ahead and remove replace all of the parameters with this new object. At the same time, I&#8217;ll rename <code>drawStaticText</code> to <code>drawText</code> to better reflect what it is doing.</p>
 <div class='highlight'><pre><code class='ruby'><span class='k'>def</span> <span class='nf'>drawText</span><span class='p'>(</span> <span class='n'>text_obj</span><span class='p'>,</span> <span class='n'>page</span><span class='o'>=</span><span class='mi'>1</span> <span class='p'>)</span>
-  <span class='n'>font_size</span> <span class='o'>=</span> <span class='p'>(</span><span class='n'>textObj</span><span class='o'>.</span><span class='n'>font_size</span> <span class='o'>==</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>?</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>font_size</span> <span class='p'>:</span> <span class='n'>text_obj</span><span class='o'>.</span><span class='n'>font_size</span>
-  <span class='n'>getPage</span><span class='p'>(</span><span class='n'>page</span><span class='p'>)</span>
-  <span class='n'>setColor</span><span class='p'>(</span><span class='n'>text_obj</span><span class='o'>.</span><span class='n'>color</span><span class='p'>)</span>
-  <span class='nb'>self</span><span class='o'>.</span><span class='n'>page</span><span class='o'>.</span><span class='n'>setFont</span><span class='p'>(</span><span class='n'>getFont</span><span class='p'>(),</span> <span class='n'>font_size</span><span class='p'>)</span>
-  <span class='nb'>self</span><span class='o'>.</span><span class='n'>page</span><span class='o'>.</span><span class='n'>drawText</span><span class='p'>(</span><span class='n'>text_obj</span><span class='o'>.</span><span class='n'>value</span><span class='p'>,</span> <span class='n'>text_obj</span><span class='o'>.</span><span class='n'>x</span><span class='p'>,</span> <span class='n'>text_obj</span><span class='o'>.</span><span class='n'>y</span><span class='p'>,</span> <span class='s1'>&#39;UTF-8&#39;</span><span class='p'>)</span>
+    <span class='n'>font_size</span> <span class='o'>=</span> <span class='p'>(</span><span class='n'>textObj</span><span class='o'>.</span><span class='n'>font_size</span> <span class='o'>==</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>?</span> <span class='nb'>self</span><span class='o'>.</span><span class='n'>font_size</span> <span class='p'>:</span> <span class='n'>text_obj</span><span class='o'>.</span><span class='n'>font_size</span>
+    <span class='n'>getPage</span><span class='p'>(</span><span class='n'>page</span><span class='p'>)</span>
+    <span class='n'>setColor</span><span class='p'>(</span><span class='n'>text_obj</span><span class='o'>.</span><span class='n'>color</span><span class='p'>)</span>
+    <span class='nb'>self</span><span class='o'>.</span><span class='n'>page</span><span class='o'>.</span><span class='n'>setFont</span><span class='p'>(</span><span class='n'>getFont</span><span class='p'>(),</span> <span class='n'>font_size</span><span class='p'>)</span>
+    <span class='nb'>self</span><span class='o'>.</span><span class='n'>page</span><span class='o'>.</span><span class='n'>drawText</span><span class='p'>(</span><span class='n'>text_obj</span><span class='o'>.</span><span class='n'>value</span><span class='p'>,</span> <span class='n'>text_obj</span><span class='o'>.</span><span class='n'>x</span><span class='p'>,</span> <span class='n'>text_obj</span><span class='o'>.</span><span class='n'>y</span><span class='p'>,</span> <span class='s1'>&#39;UTF-8&#39;</span><span class='p'>)</span>
 <span class='k'>end</span>
 </code></pre>
 </div>
 <p>Finally this code is starting to shape up. This is what it would look like to use that <code>TextObject</code>:</p>
 <div class='highlight'><pre><code class='ruby'><span class='n'>my_text_obj</span> <span class='o'>=</span> <span class='kp'>new</span> <span class='no'>TextObject</span><span class='p'>({</span>
-  <span class='ss'>:value</span> <span class='o'>=&gt;</span> <span class='s2'>&quot;Draw Me!&quot;</span><span class='p'>,</span>
-  <span class='ss'>:x</span> <span class='o'>=&gt;</span> <span class='mi'>12</span><span class='p'>,</span>
-  <span class='ss'>:y</span> <span class='o'>=&gt;</span> <span class='mi'>100</span><span class='p'>,</span>
-  <span class='ss'>:alignment</span> <span class='o'>=&gt;</span> <span class='ss'>:left</span><span class='p'>,</span>
-  <span class='ss'>:color</span> <span class='o'>=&gt;</span> <span class='s2'>&quot;#000000&quot;</span><span class='p'>,</span>
-  <span class='ss'>:font_size</span> <span class='o'>=&gt;</span> <span class='mi'>12</span>
+    <span class='ss'>:value</span> <span class='o'>=&gt;</span> <span class='s2'>&quot;Draw Me!&quot;</span><span class='p'>,</span>
+    <span class='ss'>:x</span> <span class='o'>=&gt;</span> <span class='mi'>12</span><span class='p'>,</span>
+    <span class='ss'>:y</span> <span class='o'>=&gt;</span> <span class='mi'>100</span><span class='p'>,</span>
+    <span class='ss'>:alignment</span> <span class='o'>=&gt;</span> <span class='ss'>:left</span><span class='p'>,</span>
+    <span class='ss'>:color</span> <span class='o'>=&gt;</span> <span class='s2'>&quot;#000000&quot;</span><span class='p'>,</span>
+    <span class='ss'>:font_size</span> <span class='o'>=&gt;</span> <span class='mi'>12</span>
 <span class='p'>})</span>
 
 <span class='n'>my_text_obj</span><span class='o'>.</span><span class='n'>x</span>   <span class='c1'># =&gt; 12</span>
@@ -152,7 +150,7 @@
 <span class='n'>drawText</span><span class='p'>(</span> <span class='n'>my_text_obj</span> <span class='p'>)</span>
 </code></pre>
 </div>
-<p>I&#8217;m sure that there are other ways to refactor this code even further, but this is fine for the puroposes of getting rid of all those crazy parameters. Testing the <code>drawText</code> method now should be much easier, and I can write tests for the <code>TextObject</code> as well.</p>
+<p>I&#8217;m sure that there are other ways to refactor this code even further, but this is fine for the purposes of getting rid of all those crazy parameters. Testing the <code>drawText</code> method now should be much easier, and I can write tests for the <code>TextObject</code> as well.</p>
 
 <p>There are still other areas of this project that could use some refactoring, but thats it for at least this section. At least I can browse through this file without having to enable text-wrapping in vim.</p>
 </div>

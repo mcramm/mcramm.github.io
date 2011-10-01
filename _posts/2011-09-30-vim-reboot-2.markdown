@@ -1,5 +1,6 @@
 ---
 layout: post
+published: false
 ---
 
 Over the past few years my VIM configuration has gotten out of hand. I
