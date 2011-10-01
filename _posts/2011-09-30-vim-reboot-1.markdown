@@ -8,20 +8,52 @@ was inspired by Avdi Grimm's recent [Emacs Reboot](
 http://avdi.org/devblog/category/emacs-reboot/ ) series and decided to
 do something similar with VIM.
 
-I work on a Mac, which means I prefer MacVim to the "command-line"
-(ugly) version. The latest snapshot for Snow Leopard can be found at
+I work on a Mac, which means I prefer to use MacVim where possible. The
+latest snapshot for Snow Leopard can be found at
 [http://code.google.com/p/macvim/](http://code.google.com/p/macvim/).
 Installing is as easy as you would expect. Simply download the
 snapshot, drag MacVim.app to Applications and move the mvim script to
-folder in your $PATH.
+folder in your path.
 
 {% highlight bash %}
-sudo cp mvim /usr/bin;
+sudo mv mvim /usr/bin
 {% endhighlight %}
-Then make it executeable.
+
+Using ````mvim```` from the command line at this point should launch
+MacVim as you would expect.
+
+At this point, you have two options. You can continue with this series
+of posts on customizing your environment by hand, or you can check out
+[Janus](https://github.com/carlhuda/janus) and get a very good default
+configuration.
+
+The first thing I wanted to do was fix the (ugly) default colorscheme
+and setup MacVim to work in fullscreen mode.
+
+Create a ````.gvimrc```` file:
 {% highlight bash %}
-sudo chmod +x /usr/bin/mvim
+touch ~/.gvimrc
 {% endhighlight %}
+
+And add the following options to it:
+
+{% highlight vim %}
+if has("gui_macvim")
+    " Make fullscreen mode take up the full screen
+    set fuoptions=maxhorz,maxvert
+
+    " Command-Return toggles full screen mode
+    macmenu Window.Toggle\ Full\ Screen\ Mode key=<D-CR>
+endif
+
+" Start with the toolbar hidden
+set guioptions-=T
+
+" Set the color scheme
+set background=dark
+color ir_black
+{% endhighlight %}
+
 
 The first thing I decided to do was decide which plugins I was using and
 which ones were just taking up space. This list may change, but I am
@@ -40,8 +72,7 @@ order):
 
 If you go through that list, you'll notice that [Tim Pope](https://github.com/tpope) is the author
 for a majority of them. The guy has created a ton of useful plugins and
-    I definitely recommend trolling through his projects for anything
-    useful.
+I definitely recommend trolling through his projects for anything useful.
 
 
 

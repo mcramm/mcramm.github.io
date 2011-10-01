@@ -26,12 +26,35 @@
     <p>Over the past few years my VIM configuration has gotten out of hand. I have tried to maintain it as best I can, but its time for a reboot! I was inspired by Avdi Grimm&#8217;s recent <a href='
 http://avdi.org/devblog/category/emacs-reboot/'>Emacs Reboot</a> series and decided to do something similar with VIM.</p>
 
-<p>I work on a Mac, which means I prefer MacVim to the &#8220;command-line&#8221; (ugly) version. The latest snapshot for Snow Leopard can be found at <a href='http://code.google.com/p/macvim/'>http://code.google.com/p/macvim/</a>. Installing is as easy as you would expect. Simply download the snapshot, drag MacVim.app to Applications and move the mvim script to folder in your $PATH.</p>
-<div class='highlight'><pre><code class='bash'>sudo cp mvim /usr/bin;
+<p>I work on a Mac, which means I prefer to use MacVim where possible. The latest snapshot for Snow Leopard can be found at <a href='http://code.google.com/p/macvim/'>http://code.google.com/p/macvim/</a>. Installing is as easy as you would expect. Simply download the snapshot, drag MacVim.app to Applications and move the mvim script to folder in your path.</p>
+<div class='highlight'><pre><code class='bash'>sudo mv mvim /usr/bin
 </code></pre>
 </div>
-<p>Then make it executeable.</p>
-<div class='highlight'><pre><code class='bash'>sudo chmod +x /usr/bin/mvim
+<p>Using <code>mvim</code> from the command line at this point should launch MacVim as you would expect.</p>
+
+<p>At this point, you have two options. You can continue with this series of posts on customizing your environment by hand, or you can check out <a href='https://github.com/carlhuda/janus'>Janus</a> and get a very good default configuration.</p>
+
+<p>The first thing I wanted to do was fix the (ugly) default colorscheme and setup MacVim to work in fullscreen mode.</p>
+
+<p>Create a <code>.gvimrc</code> file:</p>
+<div class='highlight'><pre><code class='bash'>touch ~/.gvimrc
+</code></pre>
+</div>
+<p>And add the following options to it:</p>
+<div class='highlight'><pre><code class='vim'><span class='k'>if</span> has<span class='p'>(</span><span class='s2'>&quot;gui_macvim&quot;</span><span class='p'>)</span>
+<span class='c'>    &quot; Make fullscreen mode take up the full screen</span>
+    <span class='k'>set</span> fuoptions<span class='p'>=</span>maxhorz<span class='p'>,</span>maxvert
+
+<span class='c'>    &quot; Command-Return toggles full screen mode</span>
+    macmenu Window.Toggle\ Full\ Screen\ Mode <span class='nb'>key</span><span class='p'>=&lt;</span>D<span class='p'>-</span>CR<span class='p'>&gt;</span>
+<span class='k'>endif</span>
+
+<span class='c'>&quot; Start with the toolbar hidden</span>
+<span class='k'>set</span> <span class='nb'>guioptions</span><span class='p'>-=</span>T
+
+<span class='c'>&quot; Set the color scheme</span>
+<span class='k'>set</span> <span class='nb'>background</span><span class='p'>=</span><span class='nb'>dark</span>
+<span class='k'>color</span> ir_black
 </code></pre>
 </div>
 <p>The first thing I decided to do was decide which plugins I was using and which ones were just taking up space. This list may change, but I am currently using the following plugins on a daily basis (in no particular order):</p>
