@@ -3,23 +3,67 @@ layout: post
 published: false
 ---
 
-Over the past few years my VIM configuration has gotten out of hand. I
+### Line Numbers
 
-The first thing I decided to do was decide which plugins I was using and
-which ones were just taking up space. This list may change, but I am
-currently using the following plugins on a daily basis (in no particular
-order):
+By default, vim doesn't show the numbers for individual lines of code. I
+prefer having this, as it can make finding the source of exceptions
+slightly easier, and you waste less time by telling the person you're
+pairing with to go to line 12 instead of pointing like an ape.
 
-1. [SnipMate](https://github.com/msanders/snipmate.vim)
-2. [Surround](https://github.com/tpope/vim-surround)
-3. [Unimpared](https://github.com/tpope/vim-unimpaired)
-4. [LustyJuggler](https://github.com/sjbach/lusty)
-5. [Command-T](http://www.vim.org/scripts/script.php?script_id=3025)
-6. [Fugitive](https://github.com/tpope/vim-fugitive)
-7. [NERD Tree](https://github.com/scrooloose/nerdtree)
-8. [NERD Commenter](https://github.com/scrooloose/nerdcommenter)
-9. [Endwise](https://github.com/tpope/vim-endwise)
+{% highlight bash %}
+    set number
+{% endhighlight %}
 
-If you go through that list, you'll notice that [Tim Pope](https://github.com/tpope) is the author
-for a majority of them. The guy has created a ton of useful plugins and
-I definitely recommend trolling through his projects for anything useful.
+### Whitespace
+
+{% highlight bash %}
+    set nowrap
+
+    set tabstop=2
+    set shiftwidth=2
+    set softtabstop=2
+    set expandtab
+    set autoindent
+    set smartindent
+
+    set list listchars=tab:\ \ ,trail:·
+{% endhighlight %}
+
+`nowrap` tells vim not to wrap long lines of code.
+
+`tabstop` tells vim how many columns a tab counts for. Most of the work
+I do is in ruby, and the standard there is 2 spaces.
+
+`shiftwidth` tells vim how many columns text is re-indented with when
+doing << and >>.
+
+`softabstop` controls how many columns vim uses when you hit the tab
+key.
+
+`expandtab` tells vim to use the appropriate number of spaces to insert
+when hitting tab.
+
+Find the last few settings a little confusing? [Check out this site](http://tedlogan.com/techblog3.html) for
+_little_ bit better explanation. At work, we use PHP, and our standard
+is 4 spaces of indentation instead of 2. You can override these
+settings on a per file type basis by creating a _filetype_.vim in
+`~/.vim/after/ftplugin`. For example, I have a `php.vim` file with the
+following:
+
+{% highlight bash %}
+    setlocal tabstop=4
+    setlocal shiftwidth=4
+    setlocal tabstop=4
+{% endhighlight %}
+
+`autoindent` simply copies the indentation of the previous line when
+starting a new one.
+
+`smartindent` automatically inserts one extra level of indentation in
+certain cases.
+
+`list listchars=tab:\ \ ,trail:·` tells vim to put a trailing character
+`·` in place of whitespace at the end of a line. Again, this is more of a
+personal preference, as I tend to be pretty obsessive about leaving my
+code looking pretty and whitespace-free.
+
