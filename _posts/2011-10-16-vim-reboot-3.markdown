@@ -5,16 +5,19 @@ published: false
 
 ### Line Numbers
 
-By default, vim doesn't show the numbers for individual lines of code. I
-prefer having this, as it can make finding the source of exceptions
+By default vim doesn't show the numbers for individual lines of code. I
+prefer having this as it can make finding the source of exceptions
 slightly easier, and you waste less time by telling the person you're
-pairing with to go to line 12 instead of pointing like an ape.
+pairing with to go to line 12 instead of pointing at their monitor like an ape.
 
 {% highlight bash %}
     set number
 {% endhighlight %}
 
 ### Whitespace
+
+This section is pretty self-explanatory; it tells vim how to deal with
+whitespace.
 
 {% highlight bash %}
     set nowrap

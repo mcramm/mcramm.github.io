@@ -20,7 +20,7 @@ The first thing I wanted to have was some syntax highlighting.
     syntax enable
 {% endhighlight %}
 
-`set t_Co=256` sets vim up to run in 256 color mode (I use [iTerm 2](http://www.iterm2.com/#/section/home))
+`set t_Co=256` sets vim up to run in 256 color mode (I use [iTerm 2](http://www.iterm2.com/#/section/home)).
 
 `colorscheme mike_wombat` sets the colors scheme to a slightly
 customized version of the wombat color scheme. Like the ir_black theme
