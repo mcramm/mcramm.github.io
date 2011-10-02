@@ -21,7 +21,7 @@ folder in your path:
 sudo mv mvim /usr/bin
 {% endhighlight %}
 
-Using ````mvim```` from the command line at this point should launch
+Using `mvim` from the command line at this point should launch
 MacVim as you would expect.
 
 At this point, you have two options. You can continue with this series
@@ -31,9 +31,9 @@ configuration. I used this initially and copied a bit of my
 configuration directly from it.
 
 The first thing I wanted to do was fix the (ugly) default color scheme
-and setup MacVim to work in fullscreen mode.
+and setup MacVim to work in full screen mode.
 
-Create a ````.gvimrc```` file:
+Create a `.gvimrc` file:
 {% highlight bash %}
 touch ~/.gvimrc
 {% endhighlight %}
@@ -69,11 +69,11 @@ for me.
 And ir_black can be found in a bunch of places, [the best of which is
 here](https://github.com/mcramm/dotfiles/blob/master/vim/colors/ir_black.vim). You can use this scheme by doing:
 {% highlight bash %}
-mkdir -p ~/.vim/colors
-mv ir_black.vim ~/.vim/colors/
+  mkdir -p ~/.vim/colors
+   mv ir_black.vim ~/.vim/colors/
 {% endhighlight %}
 
-Running ````mvim```` from the command line should present the following:
+Running `mvim` from the command line should present the following:
 
 ![Vim](https://lh6.googleusercontent.com/-ntdKpA-y-dI/ToZhZlaVFMI/AAAAAAAAAsE/8PJ663BY_1E/vim1.png)
 
