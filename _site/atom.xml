@@ -4,13 +4,75 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2011-10-01T23:10:25-06:00</updated>
+  <updated>2011-10-02T08:32:06-06:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2011/10/02/vim-reboot-1</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2011/10/02/vim-reboot-1.html"/>
+    <title>Vim Reboot 1</title>
+    <updated>2011-10-02T00:00:00-06:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;p&gt;Over the past few years my Vim configuration has gotten out of hand. I&amp;#8217;ve tried to maintain it as best I can, but its time for a reboot. I was inspired by Avdi Grimm&amp;#8217;s recent &lt;a href='
+http://avdi.org/devblog/category/emacs-reboot/'&gt;Emacs Reboot&lt;/a&gt; series and decided to do something similar for Vim.&lt;/p&gt;
+
+&lt;p&gt;I work on a Mac, which means I prefer to use MacVim where possible. The latest snapshot for Snow Leopard can be found at &lt;a href='http://code.google.com/p/macvim/'&gt;http://code.google.com/p/macvim/&lt;/a&gt; and installing is as easy as you would expect. Simply download the snapshot, drag MacVim.app to Applications and move the mvim script to folder in your path:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;sudo mv mvim /usr/bin
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Using &lt;code&gt;mvim&lt;/code&gt; from the command line at this point should launch MacVim as you would expect.&lt;/p&gt;
+
+&lt;p&gt;At this point, you have two options. You can continue with this series of posts on customizing your environment by hand, or you can check out &lt;a href='https://github.com/carlhuda/janus'&gt;Janus&lt;/a&gt; and get a very good default configuration. I used this initially and copied a bit of my configuration directly from it.&lt;/p&gt;
+
+&lt;p&gt;The first thing I wanted to do was fix the (ugly) default color scheme and setup MacVim to work in full screen mode.&lt;/p&gt;
+
+&lt;p&gt;Create a &lt;code&gt;.gvimrc&lt;/code&gt; file:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;touch ~/.gvimrc
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;And add the following to it:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;&lt;span class='k'&gt;if &lt;/span&gt;has&lt;span class='o'&gt;(&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;gui_macvim&amp;quot;&lt;/span&gt;&lt;span class='o'&gt;)&lt;/span&gt;
+    &lt;span class='s2'&gt;&amp;quot; Make fullscreen mode take up the full screen&lt;/span&gt;
+&lt;span class='s2'&gt;    set fuoptions=maxhorz,maxvert&lt;/span&gt;
+
+&lt;span class='s2'&gt;    &amp;quot;&lt;/span&gt;&lt;span class='nb'&gt;set &lt;/span&gt;the font
+    &lt;span class='nb'&gt;set &lt;/span&gt;&lt;span class='nv'&gt;guifont&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;Menlo:h10
+
+    &lt;span class='s2'&gt;&amp;quot; Command-Return toggles full screen mode&lt;/span&gt;
+&lt;span class='s2'&gt;    macmenu Window.Toggle\ Full\ Screen\ Mode key=&amp;lt;D-CR&amp;gt;&lt;/span&gt;
+&lt;span class='s2'&gt;endif&lt;/span&gt;
+
+&lt;span class='s2'&gt;&amp;quot;&lt;/span&gt; Start with the toolbar hidden
+&lt;span class='nb'&gt;set &lt;/span&gt;guioptions-&lt;span class='o'&gt;=&lt;/span&gt;T
+
+&lt;span class='err'&gt;&amp;quot;&lt;/span&gt; Set the color scheme
+&lt;span class='nb'&gt;set &lt;/span&gt;&lt;span class='nv'&gt;background&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;dark
+color ir_black
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Substitute the &amp;#8220;Menlo&amp;#8221; font and &amp;#8220;ir_black&amp;#8221; color scheme with the font/scheme of your preference.&lt;/p&gt;
+
+&lt;p&gt;Menlo should be available on your Mac if you have Snow Leopard. If you don&amp;#8217;t have it, then you should try out &lt;a href='http://ftp.gnome.org/pub/GNOME/sources/ttf-bitstream-vera/1.10/'&gt;Bitstream&lt;/a&gt;. Installation details can be found elsewhere on their website.&lt;/p&gt;
+
+&lt;p&gt;ir_black can be found in a bunch of places, &lt;a href='https://github.com/mcramm/dotfiles/blob/master/vim/colors/ir_black.vim'&gt;the best of which is here&lt;/a&gt;. You can use this scheme by doing:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;  mkdir -p ~/.vim/colors
+   mv ir_black.vim ~/.vim/colors/
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Running &lt;code&gt;mvim&lt;/code&gt; from the command line should present the following:&lt;/p&gt;
+
+&lt;p&gt;&lt;img alt='Vim' src='https://lh6.googleusercontent.com/-ntdKpA-y-dI/ToZhZlaVFMI/AAAAAAAAAsE/8PJ663BY_1E/vim1.png' /&gt;&lt;/p&gt;
+
+&lt;p&gt;Next I&amp;#8217;ll start setting up some standard vim options and a couple of custom mappings I use quite frequently.&lt;/p&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2011/09/30/paramater-nam</id>
