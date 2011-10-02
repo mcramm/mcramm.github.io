@@ -46,7 +46,7 @@ if has("gui_macvim")
     set fuoptions=maxhorz,maxvert
 
     "set the font
-    set guifont=Bitstream\ Vera\ Sans\ Mono:h10
+    set guifont=Menlo:h10
 
     " Command-Return toggles full screen mode
     macmenu Window.Toggle\ Full\ Screen\ Mode key=<D-CR>
@@ -60,14 +60,17 @@ set background=dark
 color ir_black
 {% endhighlight %}
 
-Substitute the "Bitstream" font and "ir_black" color scheme with the
-font/scheme of your preference. I've found that these two work the best
-for me.
+Substitute the "Menlo" font and "ir_black" color scheme with the
+font/scheme of your preference.
 
-[Bitstream can be found here](http://ftp.gnome.org/pub/GNOME/sources/ttf-bitstream-vera/1.10/). Installation details can be found elsewhere on the website.
+Menlo should be available on your Mac if you have Snow Leopard.
+If you don't have it, then you should try out
+[Bitstream](http://ftp.gnome.org/pub/GNOME/sources/ttf-bitstream-vera/1.10/).
+Installation details can be found elsewhere on their website.
 
-And ir_black can be found in a bunch of places, [the best of which is
+ir_black can be found in a bunch of places, [the best of which is
 here](https://github.com/mcramm/dotfiles/blob/master/vim/colors/ir_black.vim). You can use this scheme by doing:
+
 {% highlight bash %}
   mkdir -p ~/.vim/colors
    mv ir_black.vim ~/.vim/colors/
