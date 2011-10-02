@@ -237,11 +237,10 @@ ol {
 code {
   font-size: 14px;
   background-color: #dedede;
-  padding: 0px 3px;
   font-family: 'Chivo', sans-serif;
 }
 
-/* line 162, ../sass/screen.scss */
+/* line 161, ../sass/screen.scss */
 .highlight {
   background: white;
   padding: 20px;
@@ -249,28 +248,28 @@ code {
   margin-top: 20px;
   margin-bottom: 20px;
 }
-/* line 169, ../sass/screen.scss */
+/* line 168, ../sass/screen.scss */
 .highlight code {
   background-color: white;
 }
 
-/* line 174, ../sass/screen.scss */
+/* line 173, ../sass/screen.scss */
 .left, .right {
   display: table-cell;
 }
 
-/* line 178, ../sass/screen.scss */
+/* line 177, ../sass/screen.scss */
 .main {
   padding-right: 15px;
 }
 
-/* line 183, ../sass/screen.scss */
+/* line 182, ../sass/screen.scss */
 .right {
   width: 25%;
   padding-left: 15px;
 }
 
-/* line 188, ../sass/screen.scss */
+/* line 187, ../sass/screen.scss */
 .bio {
   display: inline-block;
   width: 600px;
@@ -279,7 +278,7 @@ code {
   top: -20px;
 }
 
-/* line 196, ../sass/screen.scss */
+/* line 195, ../sass/screen.scss */
 .mugshot {
   display: inline-block;
   border-radius: 10px;
@@ -287,23 +286,23 @@ code {
   height: 279px;
 }
 
-/* line 203, ../sass/screen.scss */
+/* line 202, ../sass/screen.scss */
 .sidebar {
   clear: both;
 }
-/* line 205, ../sass/screen.scss */
+/* line 204, ../sass/screen.scss */
 .sidebar a {
   display: inline-block;
   padding: 2px 5px;
   font-family: Arvo;
 }
-/* line 209, ../sass/screen.scss */
+/* line 208, ../sass/screen.scss */
 .sidebar a:hover {
   text-decoration: none;
   background-color: #3395eb;
   color: white;
 }
-/* line 215, ../sass/screen.scss */
+/* line 214, ../sass/screen.scss */
 .sidebar .current {
   text-decoration: none;
   background-color: #3395eb;

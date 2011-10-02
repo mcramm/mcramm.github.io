@@ -1,0 +1,52 @@
+---
+layout: post
+title: Vim Reboot 2
+published: false
+---
+
+In my [last post](/2011/10/02/vim-reboot-1.html) I installed
+MacVim and setup some very basic options specifically for it. For the
+next few posts, I'll be focusing on features that can be applied to the
+more common, server-side version.
+
+### Syntax Highlighting
+
+The first thing I wanted to have was some syntax highlighting.
+
+{% highlight bash %}
+    set t_Co=256
+    colorscheme mike_wombat
+
+    syntax enable
+{% endhighlight %}
+
+`set t_Co=256` sets vim up to run in 256 color mode (I use [iTerm 2](http://www.iterm2.com/#/section/home))
+
+`colorscheme mike_wombat` sets the colors scheme to a slightly
+customized version of the wombat color scheme. Like the ir_black theme
+from my previous post, this can be found [here](https://github.com/mcramm/dotfiles/blob/master/vim/colors/mike_wombat.vim). Just move it into `~/.vim/colors` to use it.
+
+`syntax enable` enables syntax highlighting.
+
+### Backup Directory
+
+Vim keeps a backup of any files you open in the form of _filename_.swp.
+If your vim session crashes, or the connection to your server times out,
+then you can use this file to recover any edits you've made.
+
+The problem is that these files can sometimes get in the way. The most
+common complaint I hear is with these files getting included as part of
+a commit to a repository.
+
+Some people choose to turn this feature off completely and not have
+these backups created at all. I think that these backups can be valuable
+and prefer to simply have them written to a different directory.
+
+{% highlight bash %}
+    set backupdir=~/.vim/backup
+    set directory=~/.vim/backup
+{% endhighlight %}
+
+Any backup files will now be created in `~/.vim/backup`. You may need to
+make the directory manually before the feature will work (though you
+should get prompted with an error when launching vim).

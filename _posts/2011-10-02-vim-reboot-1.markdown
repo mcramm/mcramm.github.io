@@ -40,7 +40,7 @@ touch ~/.gvimrc
 
 And add the following to it:
 
-{% highlight vim %}
+{% highlight bash %}
 if has("gui_macvim")
     " Make fullscreen mode take up the full screen
     set fuoptions=maxhorz,maxvert
