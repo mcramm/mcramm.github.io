@@ -4,7 +4,7 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2011-10-02T11:23:02-06:00</updated>
+  <updated>2011-10-07T11:58:42-06:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
@@ -64,7 +64,7 @@ color ir_black
 
 &lt;p&gt;ir_black can be found in a bunch of places, &lt;a href='https://github.com/mcramm/dotfiles/blob/master/vim/colors/ir_black.vim'&gt;the best of which is here&lt;/a&gt;. You can use this scheme by doing:&lt;/p&gt;
 &lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;  mkdir -p ~/.vim/colors
-   mv ir_black.vim ~/.vim/colors/
+  mv ir_black.vim ~/.vim/colors/
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;p&gt;Running &lt;code&gt;mvim&lt;/code&gt; from the command line should present the following:&lt;/p&gt;

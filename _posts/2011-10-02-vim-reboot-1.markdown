@@ -72,7 +72,7 @@ here](https://github.com/mcramm/dotfiles/blob/master/vim/colors/ir_black.vim). Y
 
 {% highlight bash %}
   mkdir -p ~/.vim/colors
-   mv ir_black.vim ~/.vim/colors/
+  mv ir_black.vim ~/.vim/colors/
 {% endhighlight %}
 
 Running `mvim` from the command line should present the following:
