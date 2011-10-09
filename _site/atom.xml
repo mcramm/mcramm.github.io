@@ -4,13 +4,53 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2011-10-07T11:58:42-06:00</updated>
+  <updated>2011-10-09T15:01:45-06:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2011/10/09/vim-reboot-2</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2011/10/09/vim-reboot-2.html"/>
+    <title>Vim Reboot 2</title>
+    <updated>2011-10-09T00:00:00-06:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;p&gt;In my &lt;a href='/2011/10/02/vim-reboot-1.html'&gt;last post&lt;/a&gt; I installed MacVim and setup some very basic options specifically for it. For the next few posts, I&amp;#8217;ll be focusing on features that can be applied to the more common, server-side version.&lt;/p&gt;
+
+&lt;h3 id='syntax_highlighting'&gt;Syntax Highlighting&lt;/h3&gt;
+
+&lt;p&gt;The first thing I wanted to have was some syntax highlighting.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;    &lt;span class='nb'&gt;set &lt;/span&gt;&lt;span class='nv'&gt;t_Co&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;256
+    colorscheme mike_wombat
+
+    syntax &lt;span class='nb'&gt;enable&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;set t_Co=256&lt;/code&gt; sets vim up to run in 256 color mode (I use &lt;a href='http://www.iterm2.com/#/section/home'&gt;iTerm 2&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;colorscheme mike_wombat&lt;/code&gt; sets the colors scheme to a slightly customized version of the wombat color scheme. Like the ir_black theme from my previous post, this can be found &lt;a href='https://github.com/mcramm/dotfiles/blob/master/vim/colors/mike_wombat.vim'&gt;here&lt;/a&gt;. Just move it into &lt;code&gt;~/.vim/colors&lt;/code&gt; to use it.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;syntax enable&lt;/code&gt; enables syntax highlighting.&lt;/p&gt;
+
+&lt;h3 id='backup_directory'&gt;Backup Directory&lt;/h3&gt;
+
+&lt;p&gt;Vim keeps a backup of any files you open in the form of &lt;em&gt;filename&lt;/em&gt;.swp. If your vim session crashes, or the connection to your server times out, then you can use this file to recover any edits you&amp;#8217;ve made.&lt;/p&gt;
+
+&lt;p&gt;The problem is that these files can sometimes get in the way. The most common complaint I hear is with these files getting included as part of a commit to a repository.&lt;/p&gt;
+
+&lt;p&gt;Some people choose to turn this feature off completely and not have these backups created at all. I think that these backups can be valuable and prefer to simply have them written to a different directory.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;    &lt;span class='nb'&gt;set &lt;/span&gt;&lt;span class='nv'&gt;backupdir&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;~/.vim/backup
+    &lt;span class='nb'&gt;set &lt;/span&gt;&lt;span class='nv'&gt;directory&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;~/.vim/backup
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Any backup files will now be created in &lt;code&gt;~/.vim/backup&lt;/code&gt;. You may need to make the directory manually before the feature will work (though you should get prompted with an error when launching vim).&lt;/p&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2011/10/02/vim-reboot-1</id>

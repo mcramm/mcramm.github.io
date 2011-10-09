@@ -1,7 +1,6 @@
 ---
 layout: post
 title: Vim Reboot 2
-published: false
 ---
 
 In my [last post](/2011/10/02/vim-reboot-1.html) I installed
