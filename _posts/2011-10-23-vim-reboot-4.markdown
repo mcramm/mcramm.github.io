@@ -3,23 +3,69 @@ layout: post
 published: false
 ---
 
-Over the past few years my VIM configuration has gotten out of hand. I
+### An Addendum
 
-The first thing I decided to do was decide which plugins I was using and
-which ones were just taking up space. This list may change, but I am
-currently using the following plugins on a daily basis (in no particular
-order):
+In a previous post, I described how to get syntax highlighting working,
+but I forgot to add a setting to enable plugins and indentation based
+on filetype:
 
-1. [SnipMate](https://github.com/msanders/snipmate.vim)
-2. [Surround](https://github.com/tpope/vim-surround)
-3. [Unimpared](https://github.com/tpope/vim-unimpaired)
-4. [LustyJuggler](https://github.com/sjbach/lusty)
-5. [Command-T](http://www.vim.org/scripts/script.php?script_id=3025)
-6. [Fugitive](https://github.com/tpope/vim-fugitive)
-7. [NERD Tree](https://github.com/scrooloose/nerdtree)
-8. [NERD Commenter](https://github.com/scrooloose/nerdcommenter)
-9. [Endwise](https://github.com/tpope/vim-endwise)
+{% highlight bash %}
+    filetype plugin indent on
+{% endhighlight %}
 
-If you go through that list, you'll notice that [Tim Pope](https://github.com/tpope) is the author
-for a majority of them. The guy has created a ton of useful plugins and
-I definitely recommend trolling through his projects for anything useful.
+### Searching
+
+Every vim user should know how to search for text within a file. In
+normal mode, simply hit `/` and type in a search string. Hit `Enter`
+and your cursor will jump to the first occurance of that string. The
+following options make searching a little bit nicer:
+
+{% highlight bash %}
+    set hlsearch
+    set incsearch
+    set ignorecase
+    set smartcase
+{% endhighlight %}
+
+`hlsearch` highlights every occurance of your search in the file after
+you press the `Enter` key.
+
+`incsearch` moves the cursor and begins highlighting the search term as
+you are typing it.
+
+`ignorecase` will make your searching case insensitve. Searching for
+"foobar" will match "foobar", "FOOBAR", and everything inbetween.
+
+`smartcase` is used in conjunction with `ignorecase`. If your search
+term contains an uppercase letter, then the search will be case
+sensitive. Searching for "foobar" will work as before, but "fooBar",
+will only match other occurances of "fooBar".
+
+
+### Status Line
+
+At the bottom of the vim window there is a status line that (by default)
+simply displays the name of currently open file. There are ways, of
+course, to customize this, and I'll be doing a lot more with it in a
+later post. For now, all I want to do is insert the cursor's current
+line/column number, and make sure that it is *always* visible.
+
+{% highlight bash %}
+    set ruler
+    set laststatus=2
+{% endhighlight %}
+
+`ruler` puts in the cursor's current line/column number.
+
+`laststatus` tells vim when to show it's status line. It can have 3
+possible values:
+
+* `0` Tells it to never appear.
+* `1` Tells it to only appear when there are more than 2 windows open.
+* `2` Forces it to always be visible.
+
+As I said, there are even more ways to customize this line, but for the
+customization I want to do, I'll need to install a plugin.
+
+This is the end of the most basic setup options. Next time I'll start
+enabling the plugins that I use most frequently.
