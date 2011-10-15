@@ -4,13 +4,72 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2011-10-09T15:01:45-06:00</updated>
+  <updated>2011-10-15T10:32:07-06:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2011/10/16/vim-reboot-3</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2011/10/16/vim-reboot-3.html"/>
+    <title>Vim Reboot 3</title>
+    <updated>2011-10-16T00:00:00-06:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;h3 id='line_numbers'&gt;Line Numbers&lt;/h3&gt;
+
+&lt;p&gt;By default vim doesn&amp;#8217;t show line numbers. I prefer having this as it can make finding the source of exceptions slightly easier, and you waste less time by telling the person you&amp;#8217;re pairing with to go to line 12 instead of pointing at their monitor like an ape.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;    &lt;span class='nb'&gt;set &lt;/span&gt;number
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;h3 id='whitespace'&gt;Whitespace&lt;/h3&gt;
+
+&lt;p&gt;This section is pretty self-explanatory; it tells vim how to deal with whitespace.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;    &lt;span class='nb'&gt;set &lt;/span&gt;nowrap
+
+    &lt;span class='nb'&gt;set &lt;/span&gt;&lt;span class='nv'&gt;tabstop&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;2
+    &lt;span class='nb'&gt;set &lt;/span&gt;&lt;span class='nv'&gt;shiftwidth&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;2
+    &lt;span class='nb'&gt;set &lt;/span&gt;&lt;span class='nv'&gt;softtabstop&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;2
+    &lt;span class='nb'&gt;set &lt;/span&gt;expandtab
+    &lt;span class='nb'&gt;set &lt;/span&gt;autoindent
+    &lt;span class='nb'&gt;set &lt;/span&gt;smartindent
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;nowrap&lt;/code&gt; tells vim not to wrap long lines of code.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;tabstop&lt;/code&gt; tells vim how many columns a tab counts for. Most of the work I do is in ruby, and the standard there is 2 spaces.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;shiftwidth&lt;/code&gt; tells vim how many columns text is re-indented with when doing &amp;#171;&amp;#160;and&amp;#160;&amp;#187;.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;softabstop&lt;/code&gt; controls how many columns vim uses when you hit the tab key.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;expandtab&lt;/code&gt; tells vim to use the appropriate number of spaces to insert when hitting tab.&lt;/p&gt;
+
+&lt;p&gt;Find the last few settings a little confusing? &lt;a href='http://tedlogan.com/techblog3.html'&gt;Check out this site&lt;/a&gt; for &lt;em&gt;little&lt;/em&gt; bit better explanation. At work, we use PHP, and our standard is 4 spaces of indentation instead of 2. You can override these settings on a per file type basis by creating a &lt;em&gt;filetype&lt;/em&gt;.vim in &lt;code&gt;~/.vim/after/ftplugin&lt;/code&gt;. For example, I have a &lt;code&gt;php.vim&lt;/code&gt; file with the following:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;    setlocal &lt;span class='nv'&gt;tabstop&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;4
+    setlocal &lt;span class='nv'&gt;shiftwidth&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;4
+    setlocal &lt;span class='nv'&gt;tabstop&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;4
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;autoindent&lt;/code&gt; simply copies the indentation of the previous line when starting a new one.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;smartindent&lt;/code&gt; automatically inserts one extra level of indentation in certain cases.&lt;/p&gt;
+
+&lt;p&gt;There is one last thing I like to do that picked up from the &lt;a href='https://github.com/carlhuda/janus'&gt;Janus&lt;/a&gt; vim configuration: &lt;div class='highlight'&gt;
+&lt;pre&gt;
+&lt;code class='bash'&gt;
+    &lt;span class='nb'&gt;set &lt;/span&gt;list &lt;span class='nv'&gt;listchars&lt;/span&gt;=tab:&lt;span class='se'&gt;\ \ &lt;/span&gt;,trail:&amp;middot;
+&lt;/code&gt;
+&lt;/pre&gt;
+&lt;/div&gt;&lt;/p&gt;
+
+&lt;p&gt;This tells vim to put a trailing character, &lt;code&gt;&amp;middot;&lt;/code&gt; in place of any trailing whitespace. Again, this is more of a personal preference. I tend to be pretty obsseive about leaving my code and commits looking pretty.&lt;/p&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2011/10/09/vim-reboot-2</id>

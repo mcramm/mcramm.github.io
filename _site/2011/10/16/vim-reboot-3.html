@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vim Reboot 3</title>
+    <link href='http://fonts.googleapis.com/css?family=Arvo&v2' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Chivo' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet' href='/css/screen.css'></link>
+    <link rel='stylesheet' href='/css/highlight.css'></link>
+  </head>
+  <body>
+    <div class='header'>
+        <a class='header-text' href='/'>mcramm.com</a>
+            <div class='buttons'>
+                <a href='https://github.com/mcramm'><img src='https://lh4.googleusercontent.com/-5_8rnYH_YbA/ToZRB70imlI/AAAAAAAAAr4/0X5KbQ1gWlA/s288/Octocat.png' width='40px'/></a>
+                <a href='http://twitter.com/cramm'><img src='https://lh6.googleusercontent.com/-F-Qtu1RTa5s/ToZRCLErIbI/AAAAAAAAAr8/IboN5dcHCJo/s288/twitter_newbird_blue.png' width='40px'/></a>
+            </div>
+    </div>
+    <div class ='sidebar'>
+    <div class='navigation'>
+        <a href='/'>About</a>
+        <a class='current' href='/posts.html'>Posts</a>
+        <a target='_blank' href='/atom.xml'>RSS</a>
+    </div>
+</div>
+<div class='content'>
+    <h1>Vim Reboot 3 </h1>
+    <h3 id='line_numbers'>Line Numbers</h3>
+
+<p>By default vim doesn&#8217;t show line numbers. I prefer having this as it can make finding the source of exceptions slightly easier, and you waste less time by telling the person you&#8217;re pairing with to go to line 12 instead of pointing at their monitor like an ape.</p>
+<div class='highlight'><pre><code class='bash'>    <span class='nb'>set </span>number
+</code></pre>
+</div>
+<h3 id='whitespace'>Whitespace</h3>
+
+<p>This section is pretty self-explanatory; it tells vim how to deal with whitespace.</p>
+<div class='highlight'><pre><code class='bash'>    <span class='nb'>set </span>nowrap
+
+    <span class='nb'>set </span><span class='nv'>tabstop</span><span class='o'>=</span>2
+    <span class='nb'>set </span><span class='nv'>shiftwidth</span><span class='o'>=</span>2
+    <span class='nb'>set </span><span class='nv'>softtabstop</span><span class='o'>=</span>2
+    <span class='nb'>set </span>expandtab
+    <span class='nb'>set </span>autoindent
+    <span class='nb'>set </span>smartindent
+</code></pre>
+</div>
+<p><code>nowrap</code> tells vim not to wrap long lines of code.</p>
+
+<p><code>tabstop</code> tells vim how many columns a tab counts for. Most of the work I do is in ruby, and the standard there is 2 spaces.</p>
+
+<p><code>shiftwidth</code> tells vim how many columns text is re-indented with when doing &#171;&#160;and&#160;&#187;.</p>
+
+<p><code>softabstop</code> controls how many columns vim uses when you hit the tab key.</p>
+
+<p><code>expandtab</code> tells vim to use the appropriate number of spaces to insert when hitting tab.</p>
+
+<p>Find the last few settings a little confusing? <a href='http://tedlogan.com/techblog3.html'>Check out this site</a> for <em>little</em> bit better explanation. At work, we use PHP, and our standard is 4 spaces of indentation instead of 2. You can override these settings on a per file type basis by creating a <em>filetype</em>.vim in <code>~/.vim/after/ftplugin</code>. For example, I have a <code>php.vim</code> file with the following:</p>
+<div class='highlight'><pre><code class='bash'>    setlocal <span class='nv'>tabstop</span><span class='o'>=</span>4
+    setlocal <span class='nv'>shiftwidth</span><span class='o'>=</span>4
+    setlocal <span class='nv'>tabstop</span><span class='o'>=</span>4
+</code></pre>
+</div>
+<p><code>autoindent</code> simply copies the indentation of the previous line when starting a new one.</p>
+
+<p><code>smartindent</code> automatically inserts one extra level of indentation in certain cases.</p>
+
+<p>There is one last thing I like to do that picked up from the <a href='https://github.com/carlhuda/janus'>Janus</a> vim configuration: <div class='highlight'>
+<pre>
+<code class='bash'>
+    <span class='nb'>set </span>list <span class='nv'>listchars</span>=tab:<span class='se'>\ \ </span>,trail:&middot;
+</code>
+</pre>
+</div></p>
+
+<p>This tells vim to put a trailing character, <code>&middot;</code> in place of any trailing whitespace. Again, this is more of a personal preference. I tend to be pretty obsseive about leaving my code and commits looking pretty.</p>
+</div>
+
+</body>
+</html>

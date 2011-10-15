@@ -1,11 +1,10 @@
 ---
 layout: post
-published: false
 ---
 
 ### Line Numbers
 
-By default vim doesn't show the numbers for individual lines of code. I
+By default vim doesn't show line numbers. I
 prefer having this as it can make finding the source of exceptions
 slightly easier, and you waste less time by telling the person you're
 pairing with to go to line 12 instead of pointing at their monitor like an ape.
@@ -28,8 +27,6 @@ whitespace.
     set expandtab
     set autoindent
     set smartindent
-
-    set list listchars=tab:\ \ ,trail:·
 {% endhighlight %}
 
 `nowrap` tells vim not to wrap long lines of code.
@@ -65,8 +62,17 @@ starting a new one.
 `smartindent` automatically inserts one extra level of indentation in
 certain cases.
 
-`list listchars=tab:\ \ ,trail:·` tells vim to put a trailing character
-`·` in place of whitespace at the end of a line. Again, this is more of a
-personal preference, as I tend to be pretty obsessive about leaving my
-code looking pretty and whitespace-free.
+There is one last thing I like to do that picked up from the [Janus](https://github.com/carlhuda/janus) vim
+configuration:
+<div class='highlight'>
+<pre>
+<code class='bash'>
+    <span class='nb'>set </span>list <span class='nv'>listchars</span>=tab:<span class='se'>\ \ </span>,trail:&middot;
+</code>
+</pre>
+</div>
 
+This tells vim to put a trailing character, <code>&middot;</code> in
+place of any trailing whitespace. Again, this is more of a personal
+preference. I tend to be pretty obsseive about leaving my code and
+commits looking pretty.
