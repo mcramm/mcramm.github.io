@@ -1,11 +1,10 @@
 ---
 layout: post
-published: false
 ---
 
 ### An Addendum
 
-In a previous post, I described how to get syntax highlighting working,
+In a previous post I described how to get syntax highlighting working,
 but I forgot to add a setting to enable plugins and indentation based
 on filetype:
 
@@ -16,7 +15,7 @@ on filetype:
 ### Searching
 
 Every vim user should know how to search for text within a file. In
-normal mode, simply hit `/` and type in a search string. Hit `Enter`
+normal mode, hit `/` and type in a search string. Press `Enter`
 and your cursor will jump to the first occurance of that string. The
 following options make searching a little bit nicer:
 
@@ -31,7 +30,7 @@ following options make searching a little bit nicer:
 you press the `Enter` key.
 
 `incsearch` moves the cursor and begins highlighting the search term as
-you are typing it.
+you type it.
 
 `ignorecase` will make your searching case insensitve. Searching for
 "foobar" will match "foobar", "FOOBAR", and everything inbetween.
@@ -55,7 +54,7 @@ line/column number, and make sure that it is *always* visible.
     set laststatus=2
 {% endhighlight %}
 
-`ruler` puts in the cursor's current line/column number.
+`ruler` displays the cursor's current line and column number.
 
 `laststatus` tells vim when to show it's status line. It can have 3
 possible values:

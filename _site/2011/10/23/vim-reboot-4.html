@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vim Reboot 4</title>
+    <link href='http://fonts.googleapis.com/css?family=Arvo&v2' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Chivo' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet' href='/css/screen.css'></link>
+    <link rel='stylesheet' href='/css/highlight.css'></link>
+    <link rel='icon' type='image/png' href='https://lh4.googleusercontent.com/-mDxSUIZcgrI/TpnO60oHq7I/AAAAAAAAAtQ/NkYt_vfqQ4g/s73/icon.png'></link>
+  </head>
+  <body>
+    <div class='header'>
+        <a class='header-text' href='/'>mcramm.com</a>
+            <div class='buttons'>
+                <a href='https://github.com/mcramm'><img src='https://lh4.googleusercontent.com/-5_8rnYH_YbA/ToZRB70imlI/AAAAAAAAAr4/0X5KbQ1gWlA/s288/Octocat.png' width='40px'/></a>
+                <a href='http://twitter.com/cramm'><img src='https://lh6.googleusercontent.com/-F-Qtu1RTa5s/ToZRCLErIbI/AAAAAAAAAr8/IboN5dcHCJo/s288/twitter_newbird_blue.png' width='40px'/></a>
+            </div>
+    </div>
+    <div class ='sidebar'>
+    <div class='navigation'>
+        <a href='/'>About</a>
+        <a class='current' href='/posts.html'>Posts</a>
+        <a target='_blank' href='/atom.xml'>RSS</a>
+    </div>
+</div>
+<div class='content'>
+    <h1>Vim Reboot 4 </h1>
+    <h3 id='an_addendum'>An Addendum</h3>
+
+<p>In a previous post I described how to get syntax highlighting working, but I forgot to add a setting to enable plugins and indentation based on filetype:</p>
+<div class='highlight'><pre><code class='bash'>    filetype plugin indent on
+</code></pre>
+</div>
+<h3 id='searching'>Searching</h3>
+
+<p>Every vim user should know how to search for text within a file. In normal mode, hit <code>/</code> and type in a search string. Press <code>Enter</code> and your cursor will jump to the first occurance of that string. The following options make searching a little bit nicer:</p>
+<div class='highlight'><pre><code class='bash'>    <span class='nb'>set </span>hlsearch
+    <span class='nb'>set </span>incsearch
+    <span class='nb'>set </span>ignorecase
+    <span class='nb'>set </span>smartcase
+</code></pre>
+</div>
+<p><code>hlsearch</code> highlights every occurance of your search in the file after you press the <code>Enter</code> key.</p>
+
+<p><code>incsearch</code> moves the cursor and begins highlighting the search term as you type it.</p>
+
+<p><code>ignorecase</code> will make your searching case insensitve. Searching for &#8220;foobar&#8221; will match &#8220;foobar&#8221;, &#8220;FOOBAR&#8221;, and everything inbetween.</p>
+
+<p><code>smartcase</code> is used in conjunction with <code>ignorecase</code>. If your search term contains an uppercase letter, then the search will be case sensitive. Searching for &#8220;foobar&#8221; will work as before, but &#8220;fooBar&#8221;, will only match other occurances of &#8220;fooBar&#8221;.</p>
+
+<h3 id='status_line'>Status Line</h3>
+
+<p>At the bottom of the vim window there is a status line that (by default) simply displays the name of currently open file. There are ways, of course, to customize this, and I&#8217;ll be doing a lot more with it in a later post. For now, all I want to do is insert the cursor&#8217;s current line/column number, and make sure that it is <em>always</em> visible.</p>
+<div class='highlight'><pre><code class='bash'>    <span class='nb'>set </span>ruler
+    <span class='nb'>set </span><span class='nv'>laststatus</span><span class='o'>=</span>2
+</code></pre>
+</div>
+<p><code>ruler</code> displays the cursor&#8217;s current line and column number.</p>
+
+<p><code>laststatus</code> tells vim when to show it&#8217;s status line. It can have 3 possible values:</p>
+
+<ul>
+<li><code>0</code> Tells it to never appear.</li>
+
+<li><code>1</code> Tells it to only appear when there are more than 2 windows open.</li>
+
+<li><code>2</code> Forces it to always be visible.</li>
+</ul>
+
+<p>As I said, there are even more ways to customize this line, but for the customization I want to do, I&#8217;ll need to install a plugin.</p>
+
+<p>This is the end of the most basic setup options. Next time I&#8217;ll start enabling the plugins that I use most frequently.</p>
+</div>
+
+</body>
+</html>

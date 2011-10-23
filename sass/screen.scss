@@ -156,6 +156,7 @@ code {
   font-size: 14px;
   background-color: $command_bg;
   font-family: 'andale mono', 'Chivo', sans-serif;
+  padding: 1px 3px;
 }
 
 .highlight {
@@ -167,6 +168,7 @@ code {
 
   code {
     background-color: $codeblock_bg;
+    padding: 0px;
   }
 }
 

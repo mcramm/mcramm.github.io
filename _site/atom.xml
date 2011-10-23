@@ -4,13 +4,69 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2011-10-16T09:21:40-06:00</updated>
+  <updated>2011-10-23T10:31:45-06:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2011/10/23/vim-reboot-4</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2011/10/23/vim-reboot-4.html"/>
+    <title>Vim Reboot 4</title>
+    <updated>2011-10-23T00:00:00-06:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;h3 id='an_addendum'&gt;An Addendum&lt;/h3&gt;
+
+&lt;p&gt;In a previous post I described how to get syntax highlighting working, but I forgot to add a setting to enable plugins and indentation based on filetype:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;    filetype plugin indent on
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;h3 id='searching'&gt;Searching&lt;/h3&gt;
+
+&lt;p&gt;Every vim user should know how to search for text within a file. In normal mode, hit &lt;code&gt;/&lt;/code&gt; and type in a search string. Press &lt;code&gt;Enter&lt;/code&gt; and your cursor will jump to the first occurance of that string. The following options make searching a little bit nicer:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;    &lt;span class='nb'&gt;set &lt;/span&gt;hlsearch
+    &lt;span class='nb'&gt;set &lt;/span&gt;incsearch
+    &lt;span class='nb'&gt;set &lt;/span&gt;ignorecase
+    &lt;span class='nb'&gt;set &lt;/span&gt;smartcase
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;hlsearch&lt;/code&gt; highlights every occurance of your search in the file after you press the &lt;code&gt;Enter&lt;/code&gt; key.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;incsearch&lt;/code&gt; moves the cursor and begins highlighting the search term as you type it.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;ignorecase&lt;/code&gt; will make your searching case insensitve. Searching for &amp;#8220;foobar&amp;#8221; will match &amp;#8220;foobar&amp;#8221;, &amp;#8220;FOOBAR&amp;#8221;, and everything inbetween.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;smartcase&lt;/code&gt; is used in conjunction with &lt;code&gt;ignorecase&lt;/code&gt;. If your search term contains an uppercase letter, then the search will be case sensitive. Searching for &amp;#8220;foobar&amp;#8221; will work as before, but &amp;#8220;fooBar&amp;#8221;, will only match other occurances of &amp;#8220;fooBar&amp;#8221;.&lt;/p&gt;
+
+&lt;h3 id='status_line'&gt;Status Line&lt;/h3&gt;
+
+&lt;p&gt;At the bottom of the vim window there is a status line that (by default) simply displays the name of currently open file. There are ways, of course, to customize this, and I&amp;#8217;ll be doing a lot more with it in a later post. For now, all I want to do is insert the cursor&amp;#8217;s current line/column number, and make sure that it is &lt;em&gt;always&lt;/em&gt; visible.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;    &lt;span class='nb'&gt;set &lt;/span&gt;ruler
+    &lt;span class='nb'&gt;set &lt;/span&gt;&lt;span class='nv'&gt;laststatus&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;ruler&lt;/code&gt; displays the cursor&amp;#8217;s current line and column number.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;laststatus&lt;/code&gt; tells vim when to show it&amp;#8217;s status line. It can have 3 possible values:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;0&lt;/code&gt; Tells it to never appear.&lt;/li&gt;
+
+&lt;li&gt;&lt;code&gt;1&lt;/code&gt; Tells it to only appear when there are more than 2 windows open.&lt;/li&gt;
+
+&lt;li&gt;&lt;code&gt;2&lt;/code&gt; Forces it to always be visible.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;As I said, there are even more ways to customize this line, but for the customization I want to do, I&amp;#8217;ll need to install a plugin.&lt;/p&gt;
+
+&lt;p&gt;This is the end of the most basic setup options. Next time I&amp;#8217;ll start enabling the plugins that I use most frequently.&lt;/p&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2011/10/16/vim-reboot-3</id>
