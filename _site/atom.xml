@@ -4,13 +4,67 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2011-10-23T10:31:45-06:00</updated>
+  <updated>2011-10-29T09:28:10-06:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2011/10/29/rubys-load-path</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2011/10/29/rubys-load-path.html"/>
+    <title>Ruby's Load Path</title>
+    <updated>2011-10-29T00:00:00-06:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;p&gt;One thing that always tripped me up when I first started writing my own gems was how to properly require other files when the files were relative to the current file&amp;#8217;s path. Let&amp;#8217;s say you have your classes laid out like this:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;    app.rb
+    lib/
+        myclass.rb
+        anotherclass.rb
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;How would you require those two files in &lt;code&gt;lib&lt;/code&gt;? I quickly became used to doing something like this:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;    &lt;span class='nb'&gt;require&lt;/span&gt; &lt;span class='no'&gt;File&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;join&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt; &lt;span class='no'&gt;File&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;dirname&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='bp'&gt;__FILE__&lt;/span&gt;&lt;span class='p'&gt;),&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;lib&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;myclass&amp;#39;&lt;/span&gt; &lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='nb'&gt;require&lt;/span&gt; &lt;span class='no'&gt;File&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;join&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt; &lt;span class='no'&gt;File&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;dirname&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='bp'&gt;__FILE__&lt;/span&gt;&lt;span class='p'&gt;),&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;lib&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;anotherclass&amp;#39;&lt;/span&gt; &lt;span class='p'&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Which works, but has a lot of duplication. All I really care about is the name of the file I&amp;#8217;m requiring, and that&amp;#8217;s all the way at the end of the line.&lt;/p&gt;
+
+&lt;p&gt;In quicker, smaller projects, it was okay since I only ever needed to require one file at a time. On larger projects though, I began to do the following:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;    &lt;span class='n'&gt;path_to_lib&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt;  &lt;span class='no'&gt;File&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;join&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt; &lt;span class='no'&gt;File&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;dirname&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='bp'&gt;__FILE__&lt;/span&gt;&lt;span class='p'&gt;),&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;lib&amp;#39;&lt;/span&gt; &lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='nb'&gt;require&lt;/span&gt; &lt;span class='no'&gt;File&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;join&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt; &lt;span class='n'&gt;path_to_lib&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;myclass&amp;#39;&lt;/span&gt; &lt;span class='p'&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;This was better but it still felt like I was doing something unnecessary. Finally one day I was frustrated enough to look into what &lt;code&gt;require&lt;/code&gt; actually did. How does Ruby know where to look when requiring a gem? If I want to use the &lt;a href='http://rubydoc.info/gems/typhoeus/0.3.2/frames'&gt;Typhoeus&lt;/a&gt; library, I can just say &lt;code&gt;require &amp;#39;typhoeus&amp;#39;&lt;/code&gt;; I don&amp;#8217;t need to specify the full path to its location.&lt;/p&gt;
+
+&lt;p&gt;Sounds like its time to check out Ruby&amp;#8217;s &lt;a href='http://www.ruby-doc.org/core-1.9.2/Kernel.html#method-i-require'&gt;Kernel&lt;/a&gt; module.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Ruby tries to load the library named &lt;em&gt;string&lt;/em&gt;, returning &lt;em&gt;true&lt;/em&gt; if successful. If the filename does not resolve to an absolute path, it will be searched for in the directories listed in &lt;code&gt;$:&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Makes sense. All I should need to do is add the subdirectory I want to require to load to the path that Ruby scans through. Kernel&amp;#8217;s rdoc says that the path(s) are stored in &lt;code&gt;$:&lt;/code&gt;. Let&amp;#8217;s see whats in there:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;    &lt;span class='nb'&gt;p&lt;/span&gt; &lt;span class='vg'&gt;$:&lt;/span&gt;  &lt;span class='c1'&gt;# =&amp;gt; [&amp;quot;/Library/Ruby/Site/1.8&amp;quot;, ... ]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Looks like its just an array of paths. I should be able to simply add a path to the end of the array and Ruby &lt;em&gt;should&lt;/em&gt; scan that directory when I call &lt;code&gt;require&lt;/code&gt;:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;    &lt;span class='vg'&gt;$:&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;unshift&lt;/span&gt; &lt;span class='no'&gt;File&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;join&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='no'&gt;File&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;dirname&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='bp'&gt;__FILE__&lt;/span&gt;&lt;span class='p'&gt;),&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;..&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;lib&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Again, this works, but &lt;code&gt;$:&lt;/code&gt; dosen&amp;#8217;t feel intuitive. Some quick googling shows that &lt;code&gt;$LOAD_PATH&lt;/code&gt; is an alias for &lt;code&gt;$:&lt;/code&gt;:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;    &lt;span class='vg'&gt;$LOAD_PATH&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;unshift&lt;/span&gt; &lt;span class='no'&gt;File&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;join&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='no'&gt;File&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;dirname&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='bp'&gt;__FILE__&lt;/span&gt;&lt;span class='p'&gt;),&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;..&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;lib&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+    &lt;span class='nb'&gt;require&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;myclass&amp;#39;&lt;/span&gt;
+    &lt;span class='nb'&gt;require&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;anotherclass&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Now you can see immediately which file is being required. Plus, if you&amp;#8217;re writing a gem, you only need to do this &lt;em&gt;once&lt;/em&gt; in the base class and the same load path will be used in any file beneath it.&lt;/p&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2011/10/23/vim-reboot-4</id>
