@@ -10,7 +10,7 @@ layout: default
 </div>
 <div class='content'>
     <div class='posts'>
-    {% for post in site.posts limit: 5 %}
+    {% for post in site.posts %}
     <div class='post-link'>
       <span class='post-date'>{{ post.date | date_to_string }}</span>
       <a href="{{ post.url }}">{{ post.title }}</a>
