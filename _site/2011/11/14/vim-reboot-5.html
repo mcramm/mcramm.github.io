@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vim Reboot 5</title>
+    <link href='http://fonts.googleapis.com/css?family=Arvo&v2' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Chivo' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet' href='/css/screen.css'></link>
+    <link rel='stylesheet' href='/css/highlight.css'></link>
+    <link rel='icon' type='image/png' href='https://lh4.googleusercontent.com/-mDxSUIZcgrI/TpnO60oHq7I/AAAAAAAAAtQ/NkYt_vfqQ4g/s73/icon.png'></link>
+  </head>
+  <body>
+    <div class='header'>
+        <a class='header-text' href='/'>mcramm.com</a>
+            <div class='buttons'>
+                <a href='https://github.com/mcramm'><img src='https://lh4.googleusercontent.com/-5_8rnYH_YbA/ToZRB70imlI/AAAAAAAAAr4/0X5KbQ1gWlA/s288/Octocat.png' width='40px'/></a>
+                <a href='http://twitter.com/cramm'><img src='https://lh6.googleusercontent.com/-F-Qtu1RTa5s/ToZRCLErIbI/AAAAAAAAAr8/IboN5dcHCJo/s288/twitter_newbird_blue.png' width='40px'/></a>
+            </div>
+    </div>
+    <div class ='sidebar'>
+    <div class='navigation'>
+        <a href='/'>About</a>
+        <a class='current' href='/posts.html'>Posts</a>
+        <a target='_blank' href='/atom.xml'>RSS</a>
+    </div>
+</div>
+<div class='content'>
+    <h1>Vim Reboot 5 </h1>
+    <h3 id='plugins_in_vim'>Plugins in VIM</h3>
+
+<p>Vim plugins can be enabled in a variety of ways. Sometimes all you need to do is copy the <em>plugin</em>.vim to <code>~/.vim/plugin</code>. Other times the plugin comes packaged as a <code>.vba</code> file that you need to open in vim and source by executing <code>:so %</code>. In any case, you should always read the plugin&#8217;s README <em>first</em>.</p>
+
+<p>Some people have gone out of there way to write vim plugins that make installing <em>other</em> plugins even easier. I have come across two such plugins in my research.</p>
+
+<p><a href='https://github.com/tpope/vim-pathogen'>Pathogen</a> was created by <a href='http://tbaggery.com/'>Tim Pope</a> and has been around for a while. A couple colleagues of mine use it and seem to really like it.</p>
+
+<p><a href='https://github.com/gmarik/vundle'>Vundle</a> was inspired by <a href='http://gembundler.com/'>Bundler&#8217;s</a> method of keeping track of rubygems for projects.</p>
+
+<p>For the sake of these posts, I&#8217;m going to stick with the &#8220;vanilla&#8221; method of installing plugins. If you&#8217;re curious though, I would recommend trying out both of those plugin management solutions as they can make organizing your plugins much easier.</p>
+
+<h3 id='tab_completion'>Tab Completion</h3>
+
+<p>I got to admit, all of the setup done in the previous posts was incredibly frustrating without tab completion. <a href='http://www.vim.org/scripts/script.php?script_id=1643'>SuperTab</a> is the best solution I&#8217;ve found. The plugin comes as a <code>.vba</code> file, which means installing it requires you to open the file up and type <code>:so %</code>.</p>
+
+<p>Now when you are in your editor and hit <code>tab</code>, a handy dandy list of all possible matches will appear:</p>
+<img src='https://lh6.googleusercontent.com/-A-lO289m2tA/TqdWJZrED8I/AAAAAAAAAt4/aONsAKE-uk0/s173/Screen%2Bshot%2B2011-10-25%2Bat%2B6.35.35%2BPM.png' width='200' />
+<h3 id='nerd_commenter'>Nerd Commenter</h3>
+
+<p>Commenting lines in and out can get pretty arduous if you do it a lot. With <a href='http://www.vim.org/scripts/script.php?script_id=1218'>Nerd Commenter</a>, you can comment a line in or out by doing <code>&lt;Leader&gt;ci</code>. Make sure that you have <code>filetype plugin indent on</code> in your <code>~/.vimrc</code>, as the plugin will use the appropriate comments for the language you&#8217;re in. There are a couple of other commenting formats available with the plugin, so you should look through the vimscripts page and try a few commands out.</p>
+
+<p>To install, simply download the <code>.zip</code> file to <code>~/.vim/</code>, and unpack it.</p>
+</div>
+
+</body>
+</html>

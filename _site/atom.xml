@@ -4,13 +4,47 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2011-10-29T09:28:10-06:00</updated>
+  <updated>2011-11-14T17:07:21-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2011/11/14/vim-reboot-5</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2011/11/14/vim-reboot-5.html"/>
+    <title>Vim Reboot 5</title>
+    <updated>2011-11-14T00:00:00-07:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;h3 id='plugins_in_vim'&gt;Plugins in VIM&lt;/h3&gt;
+
+&lt;p&gt;Vim plugins can be enabled in a variety of ways. Sometimes all you need to do is copy the &lt;em&gt;plugin&lt;/em&gt;.vim to &lt;code&gt;~/.vim/plugin&lt;/code&gt;. Other times the plugin comes packaged as a &lt;code&gt;.vba&lt;/code&gt; file that you need to open in vim and source by executing &lt;code&gt;:so %&lt;/code&gt;. In any case, you should always read the plugin&amp;#8217;s README &lt;em&gt;first&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Some people have gone out of there way to write vim plugins that make installing &lt;em&gt;other&lt;/em&gt; plugins even easier. I have come across two such plugins in my research.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://github.com/tpope/vim-pathogen'&gt;Pathogen&lt;/a&gt; was created by &lt;a href='http://tbaggery.com/'&gt;Tim Pope&lt;/a&gt; and has been around for a while. A couple colleagues of mine use it and seem to really like it.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://github.com/gmarik/vundle'&gt;Vundle&lt;/a&gt; was inspired by &lt;a href='http://gembundler.com/'&gt;Bundler&amp;#8217;s&lt;/a&gt; method of keeping track of rubygems for projects.&lt;/p&gt;
+
+&lt;p&gt;For the sake of these posts, I&amp;#8217;m going to stick with the &amp;#8220;vanilla&amp;#8221; method of installing plugins. If you&amp;#8217;re curious though, I would recommend trying out both of those plugin management solutions as they can make organizing your plugins much easier.&lt;/p&gt;
+
+&lt;h3 id='tab_completion'&gt;Tab Completion&lt;/h3&gt;
+
+&lt;p&gt;I got to admit, all of the setup done in the previous posts was incredibly frustrating without tab completion. &lt;a href='http://www.vim.org/scripts/script.php?script_id=1643'&gt;SuperTab&lt;/a&gt; is the best solution I&amp;#8217;ve found. The plugin comes as a &lt;code&gt;.vba&lt;/code&gt; file, which means installing it requires you to open the file up and type &lt;code&gt;:so %&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now when you are in your editor and hit &lt;code&gt;tab&lt;/code&gt;, a handy dandy list of all possible matches will appear:&lt;/p&gt;
+&lt;img src='https://lh6.googleusercontent.com/-A-lO289m2tA/TqdWJZrED8I/AAAAAAAAAt4/aONsAKE-uk0/s173/Screen%2Bshot%2B2011-10-25%2Bat%2B6.35.35%2BPM.png' width='200' /&gt;
+&lt;h3 id='nerd_commenter'&gt;Nerd Commenter&lt;/h3&gt;
+
+&lt;p&gt;Commenting lines in and out can get pretty arduous if you do it a lot. With &lt;a href='http://www.vim.org/scripts/script.php?script_id=1218'&gt;Nerd Commenter&lt;/a&gt;, you can comment a line in or out by doing &lt;code&gt;&amp;lt;Leader&amp;gt;ci&lt;/code&gt;. Make sure that you have &lt;code&gt;filetype plugin indent on&lt;/code&gt; in your &lt;code&gt;~/.vimrc&lt;/code&gt;, as the plugin will use the appropriate comments for the language you&amp;#8217;re in. There are a couple of other commenting formats available with the plugin, so you should look through the vimscripts page and try a few commands out.&lt;/p&gt;
+
+&lt;p&gt;To install, simply download the &lt;code&gt;.zip&lt;/code&gt; file to &lt;code&gt;~/.vim/&lt;/code&gt;, and unpack it.&lt;/p&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2011/10/29/rubys-load-path</id>

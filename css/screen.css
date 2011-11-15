@@ -208,9 +208,15 @@ ol {
 /* line 127, ../sass/screen.scss */
 .content {
   margin-top: 50px;
+  margin-bottom: 50px;
+}
+/* line 130, ../sass/screen.scss */
+.content img {
+  display: block;
+  margin: 0px auto;
 }
 
-/* line 131, ../sass/screen.scss */
+/* line 136, ../sass/screen.scss */
 .content > p:first-child:first-letter {
   float: left;
   margin: 10px 3px 0 0;
@@ -218,7 +224,7 @@ ol {
   line-height: 69%;
 }
 
-/* line 140, ../sass/screen.scss */
+/* line 145, ../sass/screen.scss */
 .posts .post-date {
   font-family: Georgia;
   background-color: #DEDEDE;
@@ -233,7 +239,7 @@ ol {
   margin-bottom: 9px;
 }
 
-/* line 155, ../sass/screen.scss */
+/* line 160, ../sass/screen.scss */
 code {
   font-size: 14px;
   background-color: #dedede;
@@ -241,7 +247,7 @@ code {
   padding: 1px 3px;
 }
 
-/* line 162, ../sass/screen.scss */
+/* line 167, ../sass/screen.scss */
 .highlight {
   background: white;
   padding: 20px;
@@ -249,29 +255,29 @@ code {
   margin-top: 20px;
   margin-bottom: 20px;
 }
-/* line 169, ../sass/screen.scss */
+/* line 174, ../sass/screen.scss */
 .highlight code {
   background-color: white;
   padding: 0px;
 }
 
-/* line 175, ../sass/screen.scss */
+/* line 180, ../sass/screen.scss */
 .left, .right {
   display: table-cell;
 }
 
-/* line 179, ../sass/screen.scss */
+/* line 184, ../sass/screen.scss */
 .main {
   padding-right: 15px;
 }
 
-/* line 184, ../sass/screen.scss */
+/* line 189, ../sass/screen.scss */
 .right {
   width: 25%;
   padding-left: 15px;
 }
 
-/* line 189, ../sass/screen.scss */
+/* line 194, ../sass/screen.scss */
 .bio {
   display: inline-block;
   width: 600px;
@@ -280,7 +286,7 @@ code {
   top: -20px;
 }
 
-/* line 197, ../sass/screen.scss */
+/* line 202, ../sass/screen.scss */
 .mugshot {
   display: inline-block;
   border-radius: 10px;
@@ -288,23 +294,23 @@ code {
   height: 279px;
 }
 
-/* line 204, ../sass/screen.scss */
+/* line 209, ../sass/screen.scss */
 .sidebar {
   clear: both;
 }
-/* line 206, ../sass/screen.scss */
+/* line 211, ../sass/screen.scss */
 .sidebar a {
   display: inline-block;
   padding: 2px 5px;
   font-family: Arvo;
 }
-/* line 210, ../sass/screen.scss */
+/* line 215, ../sass/screen.scss */
 .sidebar a:hover {
   text-decoration: none;
   background-color: #3395eb;
   color: white;
 }
-/* line 216, ../sass/screen.scss */
+/* line 221, ../sass/screen.scss */
 .sidebar .current {
   text-decoration: none;
   background-color: #3395eb;

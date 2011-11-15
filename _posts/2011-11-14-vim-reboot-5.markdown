@@ -1,0 +1,53 @@
+---
+layout: post
+---
+
+### Plugins in VIM
+
+Vim plugins can be enabled in a variety of ways. Sometimes all you
+need to do is copy the *plugin*.vim to `~/.vim/plugin`. Other times
+the plugin comes packaged as a `.vba` file that you need to open in vim
+and source by executing `:so %`. In any case, you should always read the
+plugin's README *first*.
+
+Some people have gone out of there way to write vim plugins that make
+installing *other* plugins even easier. I have come across two such plugins
+in my research.
+
+[Pathogen](https://github.com/tpope/vim-pathogen) was created by [Tim
+Pope](http://tbaggery.com/) and has been around for a while. A couple
+colleagues of mine use it and seem to really like it.
+
+[Vundle](https://github.com/gmarik/vundle) was inspired by
+[Bundler's](http://gembundler.com/) method of keeping track of rubygems
+for projects.
+
+For the sake of these posts, I'm going to stick with the "vanilla"
+method of installing plugins. If you're curious though, I would
+recommend trying out both of those plugin management solutions as they
+can make organizing your plugins much easier.
+
+### Tab Completion
+
+I got to admit, all of the setup done in the previous posts was
+incredibly frustrating without tab completion. [SuperTab](http://www.vim.org/scripts/script.php?script_id=1643)
+is the best solution I've found. The plugin comes as a `.vba`
+file, which means installing it requires you to open the file
+up and type `:so %`.
+
+Now when you are in your editor and hit `tab`, a handy dandy list of all
+possible matches will appear:
+
+<img width='200' src='https://lh6.googleusercontent.com/-A-lO289m2tA/TqdWJZrED8I/AAAAAAAAAt4/aONsAKE-uk0/s173/Screen%2Bshot%2B2011-10-25%2Bat%2B6.35.35%2BPM.png'></img>
+
+### Nerd Commenter
+
+Commenting lines in and out can get pretty arduous if you do it a lot.
+With [Nerd Commenter](http://www.vim.org/scripts/script.php?script_id=1218), you can
+comment a line in or out by doing `<Leader>ci`. Make sure that you have
+`filetype plugin indent on` in your `~/.vimrc`, as the plugin will use
+the appropriate comments for the language you're in. There are a couple
+of other commenting formats available with the plugin, so you should
+look through the vimscripts page and try a few commands out.
+
+To install, simply download the `.zip` file to `~/.vim/`, and unpack it.

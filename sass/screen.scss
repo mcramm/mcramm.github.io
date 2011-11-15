@@ -126,6 +126,11 @@ ol {
 
 .content {
   margin-top: 50px;
+  margin-bottom: 50px;
+  img {
+    display: block;
+    margin: 0px auto;
+  }
 }
 .content > p:first-child {
   &:first-letter {

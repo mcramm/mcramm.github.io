@@ -19,7 +19,7 @@ order):
 7. [NERD Tree](https://github.com/scrooloose/nerdtree)
 8. [NERD Commenter](https://github.com/scrooloose/nerdcommenter)
 9. [Endwise](https://github.com/tpope/vim-endwise)
-10. [SuperTab](http://www.vim.org/scripts/script.php?script_id=182)
+10. [SuperTab](https://github.com/ervandew/supertab)
 
 If you go through that list, you'll notice that [Tim Pope](https://github.com/tpope) is the author
 for a majority of them. The guy has created a ton of useful plugins and
