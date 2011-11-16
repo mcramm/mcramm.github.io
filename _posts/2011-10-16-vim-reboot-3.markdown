@@ -53,7 +53,6 @@ following:
 {% highlight bash %}
     setlocal tabstop=4
     setlocal shiftwidth=4
-    setlocal tabstop=4
 {% endhighlight %}
 
 `autoindent` simply copies the indentation of the previous line when
