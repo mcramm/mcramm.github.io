@@ -4,13 +4,85 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2011-11-27T12:34:36-07:00</updated>
+  <updated>2011-11-27T20:18:38-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2011/11/27/vim-reboot-6</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2011/11/27/vim-reboot-6.html"/>
+    <title>Vim Reboot 6</title>
+    <updated>2011-11-27T00:00:00-07:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;h3 id='commandt'&gt;Command-T&lt;/h3&gt;
+
+&lt;p&gt;I used &lt;a href='http://macromates.com/'&gt;Textmate&lt;/a&gt; when I first started learning Ruby/Rails and after I switched to Vim, I missed the ability to use the &lt;code&gt;&amp;lt;Cmd&amp;gt;-t&lt;/code&gt; hotkey to quickly open up new files. What was so great about it was that you could hit the hotkey and start typing the name of your file to filter the resulting list. Once you had filtered the list enough to have your file appear at the top, you just hit &lt;code&gt;&amp;lt;Enter&amp;gt;&lt;/code&gt; and the file would open as the active pane in Textmate.&lt;/p&gt;
+
+&lt;p&gt;After a bit of research, I came across &lt;a href='http://www.vim.org/scripts/script.php?script_id=3025'&gt;Command-T&lt;/a&gt;. This plugin works in the exact same and can even be improved with some minor configuration.&lt;/p&gt;
+
+&lt;p&gt;Installing this plugin is slightly more involved than others. First, download the &lt;code&gt;.vba&lt;/code&gt;, open it in vim and source it with &lt;code&gt;:so %&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You then need to install the C extension:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='bash'&gt;&lt;span class='nb'&gt;cd&lt;/span&gt; ~/.vim/ruby/command-t
+ruby extconf.rb
+make
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;And the plugin will be installed! I would recommend doing the following configuration as well:&lt;/p&gt;
+
+&lt;p&gt;From my &lt;code&gt;~/.vimrc&lt;/code&gt;:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;&lt;span class='c'&gt;&amp;quot; Command-T configuration&lt;/span&gt;
+&lt;span class='c'&gt;&amp;quot; Set the max height to 20 lines&lt;/span&gt;
+&lt;span class='p'&gt;:&lt;/span&gt;&lt;span class='k'&gt;let&lt;/span&gt; g:CommandTMaxHeight&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;20&lt;/span&gt;
+&lt;span class='c'&gt;&amp;quot; Show dotfiles like .gitignore, .rvmrc&lt;/span&gt;
+&lt;span class='p'&gt;:&lt;/span&gt;&lt;span class='k'&gt;let&lt;/span&gt; g:CommandTAlwaysShowDotFiles&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;1&lt;/span&gt;
+&lt;span class='c'&gt;&amp;quot; The maximum number of files to search through&lt;/span&gt;
+&lt;span class='p'&gt;:&lt;/span&gt;&lt;span class='k'&gt;let&lt;/span&gt; g:CommandTMaxFiles&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;20000&lt;/span&gt;
+&lt;span class='c'&gt;&amp;quot; Map ctrl-t to command-T since the meta key isn&amp;#39;t available when using&lt;/span&gt;
+&lt;span class='c'&gt;&amp;quot; vim on the server&lt;/span&gt;
+&lt;span class='p'&gt;:&lt;/span&gt;map &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;C&lt;span class='p'&gt;-&lt;/span&gt;T&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; :CommandT&lt;span class='p'&gt;&amp;lt;&lt;/span&gt;CR&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;And from my &lt;code&gt;~/.gvimrc&lt;/code&gt;:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;&lt;span class='c'&gt;&amp;quot; Set the mac meta key&lt;/span&gt;
+macmenu &amp;amp;File.New\ Tab &lt;span class='nb'&gt;key&lt;/span&gt;&lt;span class='p'&gt;=&amp;lt;&lt;/span&gt;D&lt;span class='p'&gt;-&lt;/span&gt;T&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+map &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;D&lt;span class='p'&gt;-&lt;/span&gt;&lt;span class='k'&gt;t&lt;/span&gt;&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; :CommandT&lt;span class='p'&gt;&amp;lt;&lt;/span&gt;CR&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+imap &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;D&lt;span class='p'&gt;-&lt;/span&gt;&lt;span class='k'&gt;t&lt;/span&gt;&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;Esc&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;:CommandT&lt;span class='p'&gt;&amp;lt;&lt;/span&gt;CR&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;When you&amp;#8217;re in a project, you can now hit &lt;code&gt;&amp;lt;Cmd&amp;gt;-t&lt;/code&gt; and start typing the name of the file you wish to edit. You can scroll up and down the list by using &lt;code&gt;&amp;lt;Ctrl&amp;gt;-j&lt;/code&gt; and &lt;code&gt;&amp;lt;Ctrl&amp;gt;-k&lt;/code&gt; respectively. To open a file, just hit &lt;code&gt;&amp;lt;Enter&amp;gt;&lt;/code&gt;. You can also open a file in a new vertical split by doing &lt;code&gt;&amp;lt;Ctrl&amp;gt;-v&lt;/code&gt;, or in a new tab by doing &lt;code&gt;&amp;lt;Ctrl&amp;gt;-t&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id='setting_the_default_leader_key'&gt;Setting the default leader key&lt;/h3&gt;
+
+&lt;p&gt;It might be a good idea at this point to update the default leader key used to prepend any custom mappings you create. I always set mine to &lt;code&gt;,&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;In &lt;code&gt;~/.vimrc&lt;/code&gt;:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;&lt;span class='c'&gt;&amp;quot; Set the leader&lt;/span&gt;
+&lt;span class='k'&gt;let&lt;/span&gt; mapleader &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='c'&gt;&amp;quot;,&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Now you can do something like this:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;&lt;span class='c'&gt;&amp;quot; toggle line numbering on and off&lt;/span&gt;
+map &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;Leader&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;&lt;span class='k'&gt;n&lt;/span&gt; :&lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='k'&gt;number&lt;/span&gt;&lt;span class='p'&gt;!&amp;lt;&lt;/span&gt;CR&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;When you hit &lt;code&gt;,n&lt;/code&gt; in vim, line numbers will be toggle on and off.&lt;/p&gt;
+
+&lt;h3 id='commandts_buffer_list'&gt;Command-T&amp;#8217;s buffer list&lt;/h3&gt;
+
+&lt;p&gt;Now that we have the default leader setup, we can take advantage of Command-T&amp;#8217;s built-in buffer manager. If you don&amp;#8217;t know what buffers are in vim then you should take a look at &lt;a href='http://vim.wikia.com/wiki/Vim_buffer_FAQ'&gt;this page&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;After you&amp;#8217;ve opened/closed a few files, you hit &lt;code&gt;,b&lt;/code&gt; to see a list of any buffers open in the current session. In some cases, this can actually be quicker than using the standard Command-T interface.&lt;/p&gt;
+
+&lt;p&gt;There is an alternative to Command-T&amp;#8217;s buffer window called &lt;a href='https://github.com/sjbach/lusty'&gt;LustyJuggler&lt;/a&gt;. I would recommend giving it a try if you&amp;#8217;re not fond of how Command-T manages buffers.&lt;/p&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2011/11/14/vim-reboot-5</id>

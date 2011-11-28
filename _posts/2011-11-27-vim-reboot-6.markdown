@@ -1,12 +1,11 @@
 ---
 layout: post
-published: false
 ---
 
 ### Command-T
 
 I used [Textmate](http://macromates.com/) when I first started learning Ruby/Rails and
-after I swtiched to Vim, I missed th ability to use the `<Cmd>-t` hotkey to quickly
+after I switched to Vim, I missed the ability to use the `<Cmd>-t` hotkey to quickly
 open up new files.  What was so great about it was that you could hit the hotkey and
 start typing the name of your file to filter the resulting list. Once you had filtered
 the list enough to have your file appear at the top, you just hit `<Enter>` and the file
@@ -14,10 +13,11 @@ would open as the active pane in Textmate.
 
 After a bit of research, I came across
 [Command-T](http://www.vim.org/scripts/script.php?script_id=3025). This plugin works
-in the exact same and can even be improved with some minor configuration
+in the exact same and can even be improved with some minor
+configuration.
 
 Installing this plugin is slightly more involved than others. First, download the
-`.vba`, open it in vim and source it with `:so %`
+`.vba`, open it in vim and source it with `:so %`.
 
 You then need to install the C extension:
 {% highlight bash %}
@@ -55,7 +55,7 @@ imap <D-t> <Esc>:CommandT<CR>
 
 When you're in a project, you can now hit `<Cmd>-t` and start typing the name of the file
 you wish to edit. You can scroll up and down the list by using `<Ctrl>-j` and `<Ctrl>-k`
-respectivly. To open a file, just hit `<Enter>`. You can also open a file in a new vertical split
+respectively. To open a file, just hit `<Enter>`. You can also open a file in a new vertical split
 by doing `<Ctrl>-v`, or in a new tab by doing `<Ctrl>-t`.
 
 ### Setting the default leader key
@@ -82,10 +82,10 @@ When you hit `,n` in vim, line numbers will be toggle on and off.
 ### Command-T's buffer list
 
 Now that we have the default leader setup, we can take advantage of Command-T's built-in buffer
-manager. If you don't know what bufferes are in vim then you should take a look at [this page](http://vim.wikia.com/wiki/Vim_buffer_FAQ).
+manager. If you don't know what buffers are in vim then you should take a look at [this page](http://vim.wikia.com/wiki/Vim_buffer_FAQ).
 
 After you've opened/closed a few files, you hit `,b` to see a list of any buffers
-open in the current session. It some cases, this can actually be quicker than
+open in the current session. In some cases, this can actually be quicker than
 using the standard Command-T interface.
 
 There is an alternative to Command-T's buffer window called [LustyJuggler](https://github.com/sjbach/lusty).
