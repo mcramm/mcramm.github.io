@@ -1,0 +1,18 @@
+---
+layout: post
+published: false
+---
+
+### Some other useful plugins
+
+There are some other plugins remaining that I find incredibly useful,
+but don't do a whole lot of configuration for:
+
+1. [SnipMate](https://github.com/msanders/snipmate.vim) - For quickly creating your own custom snippets
+2. [Surround](https://github.com/tpope/vim-surround) - For working with surrounding brackets. Need to change your `"`'s to `'`'s ? or `()` to `[]`? use `surround.vim`.
+3. [Unimpared](https://github.com/tpope/vim-unimpaired) - Mappings for common operations.
+4. [NERD Tree](https://github.com/scrooloose/nerdtree) - Sidebar that contains the structure of the current project. Useful for common file operations.
+5. [Endwise](https://github.com/tpope/vim-endwise) - Adds the 'end' keyword to certain structures automatically in Ruby.
+
+Each of these plugins can be installed by simply downloading the
+zip and unpacking it in your `~/.vim` directory.
