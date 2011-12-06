@@ -1,6 +1,5 @@
 ---
 layout: post
-published: false
 ---
 
 ### Some other useful plugins

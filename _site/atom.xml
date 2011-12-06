@@ -4,13 +4,41 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2011-12-06T13:20:32-07:00</updated>
+  <updated>2011-12-06T13:22:31-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2011/12/06/vim-reboot-7</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2011/12/06/vim-reboot-7.html"/>
+    <title>Vim Reboot 7</title>
+    <updated>2011-12-06T00:00:00-07:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;h3 id='some_other_useful_plugins'&gt;Some other useful plugins&lt;/h3&gt;
+
+&lt;p&gt;There are some other plugins remaining that I find quite useful, but don&amp;#8217;t need to do much configuration for:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href='https://github.com/msanders/snipmate.vim'&gt;SnipMate&lt;/a&gt; - For quickly creating your own custom snippets.&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/tpope/vim-surround'&gt;Surround&lt;/a&gt; - For working with surrounding brackets. Need to change your &lt;code&gt;&amp;quot;&lt;/code&gt;&amp;#8217;s to &lt;code&gt;&amp;#39;&lt;/code&gt;&amp;#8217;s ? or &lt;code&gt;()&lt;/code&gt; to &lt;code&gt;[]&lt;/code&gt;? Use Surround.vim.&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/tpope/vim-unimpaired'&gt;Unimpared&lt;/a&gt; - Mappings for common operations.&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/scrooloose/nerdtree'&gt;NERD Tree&lt;/a&gt; - Sidebar that contains the structure of the current project. Useful for common file operations.&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/tpope/vim-endwise'&gt;Endwise&lt;/a&gt; - Adds the &amp;#8216;end&amp;#8217; keyword to certain structures automatically in Ruby.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Each of these plugins can be installed by simply downloading the zip and unpacking it in your &lt;code&gt;~/.vim&lt;/code&gt; directory.&lt;/p&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2011/11/27/vim-reboot-6</id>
