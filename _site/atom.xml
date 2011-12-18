@@ -4,13 +4,76 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2011-12-06T13:22:31-07:00</updated>
+  <updated>2011-12-18T16:45:49-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2011/12/18/tdd-in-node</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2011/12/18/tdd-in-node.html"/>
+    <title>Tdd In Node</title>
+    <updated>2011-12-18T00:00:00-07:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;p&gt;TDD is discipline that I&amp;#8217;ve been trying to master for a while now, and I&amp;#8217;ve been absorbing every blog post, talk, or book I can get my hands on. One thing thats key for me is to have some way to run my tests very quickly. Even better, the tests should run automatically whenever code in application files or tests changes.&lt;/p&gt;
+
+&lt;p&gt;In Ruby, I have Guard. It works beautifully and does exactly what I need it to do. I spent the last week struggling to find something similar in NodeJs but didn&amp;#8217;t come up with anything I liked. I found it frustrating, because watching for events on files or directories is something that Node should be good at. In the end I settled on writing a simple Cakefile:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;    &lt;span class='no'&gt;CoffeeScript&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='nb'&gt;require&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;coffee-script&amp;#39;&lt;/span&gt;
+
+    &lt;span class='p'&gt;{&lt;/span&gt;&lt;span class='nb'&gt;print&lt;/span&gt;&lt;span class='p'&gt;}&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='nb'&gt;require&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;util&amp;#39;&lt;/span&gt;
+    &lt;span class='nb'&gt;exec&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='nb'&gt;require&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;child_process&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;exec&lt;/span&gt;
+    &lt;span class='n'&gt;fs&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='nb'&gt;require&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;fs&amp;#39;&lt;/span&gt;
+
+    &lt;span class='c1'&gt;# ANSI Terminal Colors&lt;/span&gt;
+    &lt;span class='n'&gt;green&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;\033[0;32m&amp;#39;&lt;/span&gt;
+    &lt;span class='n'&gt;reset&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;\033[0m&amp;#39;&lt;/span&gt;
+    &lt;span class='n'&gt;red&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;\033[0;31m&amp;#39;&lt;/span&gt;
+
+    &lt;span class='n'&gt;log&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;message&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;color&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;explanation&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='o'&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span class='n'&gt;console&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;log&lt;/span&gt; &lt;span class='n'&gt;color&lt;/span&gt; &lt;span class='o'&gt;+&lt;/span&gt; &lt;span class='n'&gt;message&lt;/span&gt; &lt;span class='o'&gt;+&lt;/span&gt; &lt;span class='n'&gt;reset&lt;/span&gt; &lt;span class='o'&gt;+&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39; &amp;#39;&lt;/span&gt; &lt;span class='o'&gt;+&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;explanation&lt;/span&gt; &lt;span class='ow'&gt;or&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+    &lt;span class='n'&gt;compile&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;callback&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='o'&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span class='nb'&gt;exec&lt;/span&gt; &lt;span class='s2'&gt;&amp;quot;coffee -o js -c lib&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;error&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;stdout&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;stderr&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='o'&gt;-&amp;gt;&lt;/span&gt;
+            &lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='n'&gt;error&lt;/span&gt; &lt;span class='n'&gt;is&lt;/span&gt; &lt;span class='n'&gt;null&lt;/span&gt;
+                &lt;span class='n'&gt;log&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;compiled!&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;green&lt;/span&gt;
+                &lt;span class='n'&gt;callback?&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt;
+            &lt;span class='k'&gt;else&lt;/span&gt;
+                &lt;span class='n'&gt;log&lt;/span&gt; &lt;span class='n'&gt;error&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;red&lt;/span&gt;
+
+    &lt;span class='nb'&gt;test&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='o'&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span class='n'&gt;command&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;jasmine-node --coffee spec&amp;#39;&lt;/span&gt;
+
+        &lt;span class='nb'&gt;exec&lt;/span&gt; &lt;span class='n'&gt;command&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;error&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;stdout&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;stderr&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='o'&gt;-&amp;gt;&lt;/span&gt;
+            &lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='n'&gt;error&lt;/span&gt; &lt;span class='n'&gt;is&lt;/span&gt; &lt;span class='n'&gt;null&lt;/span&gt;
+                &lt;span class='n'&gt;log&lt;/span&gt; &lt;span class='n'&gt;stdout&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;green&lt;/span&gt;
+            &lt;span class='k'&gt;else&lt;/span&gt;
+                &lt;span class='n'&gt;log&lt;/span&gt; &lt;span class='n'&gt;stdout&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;red&lt;/span&gt;
+
+    &lt;span class='n'&gt;task&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;build&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;Compile the coffeescript into javascript&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='o'&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span class='n'&gt;compile&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt;
+
+    &lt;span class='n'&gt;task&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;test&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;Run the tests&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='o'&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span class='nb'&gt;test&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt;
+
+    &lt;span class='n'&gt;task&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;watch&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;Watch for file changes and compile into javascript&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='o'&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span class='n'&gt;fs&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;watch&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;spec&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;event&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;filename&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='o'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='nb'&gt;test&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt;
+        &lt;span class='n'&gt;fs&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;watch&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;lib&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;event&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;filename&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='o'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;compile&lt;/span&gt; &lt;span class='nb'&gt;test&lt;/span&gt;
+
+        &lt;span class='n'&gt;compile&lt;/span&gt; &lt;span class='nb'&gt;test&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;This file is pretty simple and contains three tasks: build, test and watch. Node has an easy way to watch for file system events on directories through &lt;code&gt;fs.watch &amp;lt;directory&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;I tried a couple of testing libraries, but settled on &lt;a href='https://github.com/mhevery/jasmine-node'&gt;jasmine-node&lt;/a&gt; since I&amp;#8217;ve used it before.&lt;/p&gt;
+
+&lt;p&gt;Now I can just run &lt;code&gt;cake watch&lt;/code&gt; and start writing code. Occasionally I&amp;#8217;ll stop and take a look at the other monitor to make sure everything is green. I used this process and ran through the classic &lt;a href='http://butunclebob.com/ArticleS.UncleBob.TheBowlingGameKata'&gt;Bowling Game Kata&lt;/a&gt;. I also posted &lt;a href='https://github.com/mcramm/node_bowling'&gt;the source&lt;/a&gt; on GitHub.&lt;/p&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2011/12/06/vim-reboot-7</id>
