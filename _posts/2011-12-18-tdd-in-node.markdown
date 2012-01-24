@@ -71,4 +71,4 @@ Now I can just run `cake watch` and start writing code. Occasionally I'll
 stop and take a look at the other monitor to make sure everything is
 green. I used this process and ran through the classic [Bowling Game
 Kata](http://butunclebob.com/ArticleS.UncleBob.TheBowlingGameKata).
-I also posted [the source](https://github.com/mcramm/node_bowling) on GitHub.
+I also posted [the source](https://github.com/mcramm/node_katas) on GitHub.

@@ -38,7 +38,7 @@ up and type `:so %`.
 Now when you are in your editor and hit `tab`, a handy dandy list of all
 possible matches will appear:
 
-<img width='200' src='https://lh6.googleusercontent.com/-A-lO289m2tA/TqdWJZrED8I/AAAAAAAAAt4/aONsAKE-uk0/s173/Screen%2Bshot%2B2011-10-25%2Bat%2B6.35.35%2BPM.png'></img>
+<img width='200' src='https://lh6.googleusercontent.com/-A-lO289m2tA/TqdWJZrED8I/AAAAAAAAAt4/aONsAKE-uk0/s173/Screen%2Bshot%2B2011-10-25%2Bat%2B6.35.35%2BPM.png'>
 
 ### Nerd Commenter
 
