@@ -27,7 +27,7 @@ away under my bed and plan to peek sometime mid-August. The list was
 good though, and it has definitely given me some stuff to think about.
 More importantly I was able to pull out a couple of resolutions from it
 that I think are realistic, obtainable goals that will require a bit of
-dilligent to keep up:
+diligent to keep up:
 
 ## Stop and Think
 
@@ -55,7 +55,7 @@ thinking through problems and coming up with a solution when you know
 you're ready.
 
 Obviously there are times at our jobs when we don't have
-the luxery of taking even a day to think about a specific problem, but
+the luxury of taking even a day to think about a specific problem, but
 that's not my point. My point is that I shouldn't be diving into a
 problem that I don't understand. If its time-sensitive, then I should be
 grabbing someone else and running ideas by them before start writing
@@ -82,8 +82,13 @@ By now you're probably wondering why I titled this post "Watch
 Yourself". To be honest, I set out to write a post that was more of an
 extension of a recent post by Uncle Martin titled [The Letter](http://blog.8thlight.com/uncle-bob/2012/01/12/The-Letter.html).
 It felt exceptionally preachy and I decided that there wasn't any
-reason for me to reiterate something that had already been stated so
-eloquently.
+reason for me to reiterate something that had already been written so
+eloquently. I chose to write more about myself and the overarching goal
+I've set about being more concious of my decisions and practices as a
+software developer. I know that I if I can spend the next year being
+diligent about hitting these resolutions, that I'll improved wholly
+as a professional.
+ 
 
 
 
@@ -91,7 +96,7 @@ eloquently.
 
 
 Over the last couple of weeks, I've seen a common trend emerge from a
-couple of different sources about the self regulation of onseself as a
+couple of different sources about the self regulation of oneself as a
 software developer. 
 
 Specifically, Uncle (Bob) Martin wrote two posts in
