@@ -1,6 +1,5 @@
 ---
 layout: post
-published: false
 ---
 
 Every week since the new year started I've been getting asked what my

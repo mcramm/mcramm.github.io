@@ -4,13 +4,55 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2011-12-18T16:45:49-07:00</updated>
+  <updated>2012-01-27T15:15:55-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2012/01/27/watch-yourself</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2012/01/27/watch-yourself.html"/>
+    <title>Watch Yourself</title>
+    <updated>2012-01-27T00:00:00-07:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;p&gt;Every week since the new year started I&amp;#8217;ve been getting asked what my New Years resolutions were for 2012. My answer the first few times was the truth: &amp;#8220;I haven&amp;#8217;t decided yet.&amp;#8221; Almost magically, the focus will shift to the other person and they&amp;#8217;ll explain to me that this year they plan on being more active, do more travelling, etc. At this point my attention will wane my eyes will gloss over and the words &amp;#8220;Oh, nice!&amp;#8221; fall out.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#8217;ve noticed that most people don&amp;#8217;t hit these kinds of goals and I can&amp;#8217;t tell if its because they&amp;#8217;re to vague, unrealistic, that the person is lazy, or some combination of the three. With me I know that I&amp;#8217;ll only hit my goals if they&amp;#8217;re A) specific and B) obtainable. &amp;#8220;I want to be more active&amp;#8221; is a nice goal, and one that every sunlight bereft developer should strive for, but isn&amp;#8217;t specific enough. &amp;#8220;I want to learn how to perform a frontside-180&amp;#8221; is pretty specific and completely obtainable for even for someone who has just started snowboarding.&lt;/p&gt;
+
+&lt;p&gt;When I sat down to pick a resolution for this year, I wanted to pick something about myself professionally that could use some improvement. I made a list. A &lt;strong&gt;long, very scary&lt;/strong&gt; list that I&amp;#8217;ve since hidden under my bed and don&amp;#8217;t plan on looking at again until sometime mid-August. The list was good though, and it has definitely given me some stuff to think about. More importantly I was able to pull out a couple of resolutions from it that I are realistic enough, but will still require some diligence on my part in order to obtain.&lt;/p&gt;
+
+&lt;h2 id='stop_and_think'&gt;Stop and Think&lt;/h2&gt;
+
+&lt;p&gt;If I had to classify the first part of my career, I think I would label myself an &amp;#8220;Idealistic Hacker.&amp;#8221; When given a new problem, I would launch into an answer without thinking through the ramifications that came with it. I would typically look back at my newly minted solution and realise that it didn&amp;#8217;t &lt;em&gt;quite&lt;/em&gt; fit with the issue I was trying to solve. I would then spend more time hacking my hack until the requirements were met.&lt;/p&gt;
+
+&lt;p&gt;Obviously this was a problem. It worked for a while until I realized that I was wasting a ton of time not only with getting the feature shipped, but trying to re-understand my solution on a return trip to the module 6 months later.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#8217;m the kind of guy who appreciates well designed code and loathes the ugly. I take pride in designing my code well because I know that it saves time for the next person who has to read it. I&amp;#8217;ve found through practice and experience that I can achieve my highest level of satisfaction when I&amp;#8217;ve taken the time to truly think about a problem before I sit down to solve it.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;This is in essence what Rich Hicky talks about in a presentation he gave called &lt;a href='http://blip.tv/clojure/hammock-driven-development-4475586'&gt;Hammock Driven Development&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Undoubtedly there are times in our jobs where we aren&amp;#8217;t afforded the luxury of taking even a day to think through a problem, but we should be able to at least spare a few minutes to make sure we &lt;strong&gt;understand&lt;/strong&gt; the problem. I&amp;#8217;ve come up with two really obvious tactics to force myself to come up with good solutions. The first is to throw an idea at a colleague and see what they think. Small, two minute discussions about a problem has saved me boatloads of time when designing a solution. The second is to make sure I write my tests first.&lt;/p&gt;
+
+&lt;h2 id='practice_tdd_everywhere'&gt;Practice TDD EVERYWHERE&lt;/h2&gt;
+
+&lt;p&gt;TDD is something I&amp;#8217;ve been practicing on my own for a while now, but I haven&amp;#8217;t yet made the leap to using it full time at work. I don&amp;#8217;t really have an excuse for this. Most of my colleagues believe in the practice, and everyone is in favor of writing tests. I just tend to get to so bogged down with problems from all different angles that I spend more time writing my tests after I&amp;#8217;ve finished rather than before.&lt;/p&gt;
+
+&lt;p&gt;I decided this needed to stop when I began working on a module that had no tests associated with it. My problem was trivial: a date value wasn&amp;#8217;t appearing on a client facing widget. The solution seemed simple enough. There was a &lt;code&gt;default_display_value&lt;/code&gt; attribute on the widget that wasn&amp;#8217;t being set during its creation so all I needed to do was add the correct date to the parameters being passed in. Alas, this appeared to do nothing and I spent the next hour following a maze of logic that only served to confirm that the code I was looking at had been hacked together.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#8217;ve vowed since then to always write tests for any code I touch &lt;strong&gt;first&lt;/strong&gt;. I&amp;#8217;ll do this not only because I know it will result in better code, but that the next developer will be able to expand upon it without worrying about breaking whats there.&lt;/p&gt;
+
+&lt;p&gt;By now you&amp;#8217;re probably wondering why I titled this post &amp;#8220;Watch Yourself&amp;#8221; and not &amp;#8220;Stop What You&amp;#8217;re Doing and Write Tests!&amp;#8221; To be honest, I originally set out to write something along those lines, but it felt overly preachy and has been done to death. I changed it to be more about myself and what I&amp;#8217;ve experienced. I know what works for me because I&amp;#8217;ve taken the time to look back at what I&amp;#8217;ve done, determine where I&amp;#8217;ve succeed, where I&amp;#8217;ve failed and try to improve myself professionally.&lt;/p&gt;
+
+&lt;p&gt;You should too.&lt;/p&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2011/12/18/tdd-in-node</id>
@@ -72,7 +114,7 @@
 
 &lt;p&gt;I tried a couple of testing libraries, but settled on &lt;a href='https://github.com/mhevery/jasmine-node'&gt;jasmine-node&lt;/a&gt; since I&amp;#8217;ve used it before.&lt;/p&gt;
 
-&lt;p&gt;Now I can just run &lt;code&gt;cake watch&lt;/code&gt; and start writing code. Occasionally I&amp;#8217;ll stop and take a look at the other monitor to make sure everything is green. I used this process and ran through the classic &lt;a href='http://butunclebob.com/ArticleS.UncleBob.TheBowlingGameKata'&gt;Bowling Game Kata&lt;/a&gt;. I also posted &lt;a href='https://github.com/mcramm/node_bowling'&gt;the source&lt;/a&gt; on GitHub.&lt;/p&gt;</content>
+&lt;p&gt;Now I can just run &lt;code&gt;cake watch&lt;/code&gt; and start writing code. Occasionally I&amp;#8217;ll stop and take a look at the other monitor to make sure everything is green. I used this process and ran through the classic &lt;a href='http://butunclebob.com/ArticleS.UncleBob.TheBowlingGameKata'&gt;Bowling Game Kata&lt;/a&gt;. I also posted &lt;a href='https://github.com/mcramm/node_katas'&gt;the source&lt;/a&gt; on GitHub.&lt;/p&gt;</content>
   </entry>
   
   <entry>
