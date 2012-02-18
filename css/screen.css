@@ -72,7 +72,7 @@ body {
   font-family: "Minion Pro","Palatino","Hoefler Text","Times New Roman",serif;
   font-size: 1em;
   color: #211f1c;
-  background: #f5f5f5;
+  background: #f8f8f8;
   width: 900px;
   margin: 0px auto;
   line-height: 27px;
@@ -126,7 +126,7 @@ strong {
 
 /* line 56, ../sass/screen.scss */
 blockquote {
-  border-left: 4px solid #c2c2c2;
+  border-left: 4px solid #c5c5c5;
   padding-left: 40px;
   margin-left: 0px;
   font-size: 0.9em;
@@ -137,7 +137,7 @@ blockquote {
 hr {
   width: 50%;
   height: 2px;
-  background-color: #c2c2c2;
+  background-color: #c5c5c5;
   border: none;
   margin-bottom: 14px;
 }
@@ -279,7 +279,7 @@ code {
 /* line 194, ../sass/screen.scss */
 .bio {
   display: inline-block;
-  width: 600px;
+  width: 705px;
   padding-left: 15px;
   position: relative;
   top: -20px;
@@ -288,30 +288,48 @@ code {
 /* line 202, ../sass/screen.scss */
 .mugshot {
   display: inline-block;
-  border-radius: 10px;
+  float: left;
   overflow: hidden;
-  height: 279px;
+  height: 201px;
+  margin-top: 46px;
+  border: 1px solid black;
 }
 
-/* line 209, ../sass/screen.scss */
+/* line 211, ../sass/screen.scss */
 .sidebar {
   clear: both;
 }
-/* line 211, ../sass/screen.scss */
+/* line 213, ../sass/screen.scss */
 .sidebar a {
   display: inline-block;
   padding: 2px 5px;
   font-family: Arvo;
 }
-/* line 215, ../sass/screen.scss */
+/* line 217, ../sass/screen.scss */
 .sidebar a:hover {
   text-decoration: none;
   background-color: #3395eb;
   color: white;
 }
-/* line 221, ../sass/screen.scss */
+/* line 223, ../sass/screen.scss */
 .sidebar .current {
   text-decoration: none;
   background-color: #3395eb;
   color: white;
+}
+
+/* line 230, ../sass/screen.scss */
+.footer-wrap {
+  width: inherit;
+}
+/* line 232, ../sass/screen.scss */
+.footer-wrap .footer {
+  padding-top: 5px;
+  border-top: 1px dotted #AAA;
+}
+/* line 235, ../sass/screen.scss */
+.footer-wrap .footer .copyright {
+  text-align: right;
+  color: #888;
+  font-size: 11px;
 }

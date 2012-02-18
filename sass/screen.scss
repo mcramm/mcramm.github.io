@@ -193,7 +193,7 @@ code {
 
 .bio {
   display: inline-block;
-  width: 600px;
+  width: 705px;
   padding-left: 15px;
   position: relative;
   top: -20px;
@@ -201,9 +201,11 @@ code {
 
 .mugshot {
   display: inline-block;
-  border-radius: 10px;
+  float: left;
   overflow: hidden;
-  height: 279px;
+  height: 201px;
+  margin-top: 46px;
+  border: 1px solid black;
 }
 
 .sidebar {
@@ -222,5 +224,18 @@ code {
       text-decoration: none;
       background-color: $link-hover;
       color: white;
+  }
+}
+
+.footer-wrap{
+  width: inherit;
+  .footer {
+    padding-top: 5px;
+    border-top: 1px dotted #AAA;
+    .copyright {
+      text-align: right;
+      color: #888;
+      font-size: 11px;
+    }
   }
 }
