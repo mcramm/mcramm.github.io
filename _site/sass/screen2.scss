@@ -1,0 +1,227 @@
+/* Welcome to Compass.
+ * In this file you should write your main styles. (or centralize your imports)
+ * Import this file using the following HTML or equivalent:
+ * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
+
+@import "base";
+
+body {
+  font-family: "Minion Pro","Palatino","Hoefler Text","Times New Roman",serif;
+  font-size: 1em;
+  color: $color;
+  background: $background_color;
+  width: 900px;
+  margin: 0px auto;
+  line-height: 27px;
+  padding-top: 40px;
+}
+
+a {
+  color: $link_color;
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+    color: $link_hover;
+  }
+}
+
+h1 {
+  font-size: 2em;
+  padding: 18px 0px 15px;
+}
+
+h2 {
+  font-size: 1.5em;
+  padding: 10px 0 3px;
+}
+
+h3 {
+  font-size: 1.3em;
+  padding: 10px 0 3px;
+}
+
+p {
+  margin-bottom: $paragraph_break;
+}
+
+em {
+  font-style: italic;
+  font-weight: bold;
+}
+
+strong {
+  font-weight: bold;
+}
+
+blockquote {
+  border-left: 4px solid $line_color;
+  padding-left: 40px;
+  margin-left: 0px;
+  font-size: 0.9em;
+  line-height: 20px;
+}
+
+hr {
+  width: 50%;
+  height: 2px;
+  background-color: $line_color;
+  border: none;
+  margin-bottom: $paragraph_break;
+}
+
+ul, ol {
+  margin-bottom: $paragraph_break;
+}
+ul {
+  list-style-type: disc;
+  margin-left: 15px;
+}
+
+ol {
+  list-style-type: decimal;
+  margin-left: 20px;
+}
+
+.header {
+  a.header-text {
+    text-shadow: 3px 2px 0px $color;
+    letter-spacing: 3px;
+    color: $header_color;
+    font-family: 'Arvo', serif;
+
+    text-decoration: none;
+    font-size: 4em;
+    float: left;
+  }
+  .buttons {
+    text-align: right;
+    float: right;
+    a {
+      display: inline-block;
+      background-color: #DEDEDE;
+      padding: 5px 15px 5px 15px;
+      color: $color;
+      margin-right: 30px;
+      font-size: 20px;
+      &:hover {
+        text-decoration: none;
+        background-color: $link-hover;
+        color: white;
+      }
+      img {
+        float: left;
+      }
+      span {
+        padding-left: 9px;
+        position: relative;
+        top: -8px;
+      }
+
+      &:last-child {
+        margin-right: 0px;
+      }
+    }
+  }
+}
+
+.content {
+  margin-top: 50px;
+  margin-bottom: 50px;
+  img {
+    display: block;
+    margin: 0px auto;
+  }
+}
+.content > p:first-child {
+  &:first-letter {
+    float: left;
+    margin: 10px 3px 0 0;
+    font-size: 57px;
+    line-height: 69%;
+  }
+}
+
+.posts {
+  .post-date {
+    font-family: Georgia;
+    background-color: #DEDEDE;
+    color: #333;
+    font-size: 13px;
+    margin-right: 15px;
+    width: 95px;
+    position: relative;
+    bottom: 1px;
+    display: inline-block;
+    text-align: center;
+    margin-bottom: 9px;
+  }
+}
+
+code {
+  font-size: 14px;
+  background-color: $command_bg;
+  font-family: 'andale mono', 'Chivo', sans-serif;
+  padding: 1px 3px;
+}
+
+.highlight {
+  background: $codeblock_bg;
+  padding: 20px;
+  line-height: 18px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+
+  code {
+    background-color: $codeblock_bg;
+    padding: 0px;
+  }
+}
+
+.left, .right {
+  display: table-cell;
+}
+
+.main {
+  padding-right: 15px;
+}
+
+
+.right {
+  width: 25%;
+  padding-left: 15px;
+}
+
+.bio {
+  display: inline-block;
+  width: 600px;
+  padding-left: 15px;
+  position: relative;
+  top: -20px;
+}
+
+.mugshot {
+  display: inline-block;
+  float: left;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 212px;
+}
+
+.sidebar {
+  clear: both;
+  a {
+    display: inline-block;
+    padding: 2px 5px;
+    font-family: Arvo;
+    &:hover {
+      text-decoration: none;
+      background-color: $link-hover;
+      color: white;
+    }
+  }
+  .current {
+      text-decoration: none;
+      background-color: $link-hover;
+      color: white;
+  }
+}
