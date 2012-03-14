@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <media charset='utf-8'>
+        <meta name='viewport' content='width=device-width, initial-scale:1.0'>
+        <meta name='description' content>
+        <meta name='author' content>
+
+        <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <link rel='stylesheet' href='bootstrap/css/bootstrap.css'></link>
+        <link rel='stylesheet' href='bootstrap/css/google-prettify.css'></link>
+    </head>
+    <body>
+        <div class='navbar navbar-fixed-top'>
+            <div class='navbar-inner'>
+                <div class='container'>
+                    <a class='brand' href='#'>FitChart</a>
+
+                    <ul class='nav'>
+                        <li class='active'><a href='#'>My Charts</a></li>
+                        <li><a href='#'>Goals</a></li>
+                    </ul>
+                    <ul class='nav pull-right'>
+                        <li><img src='http://www.gravatar.com/avatar/87aca8c72a55340bc0065de981ab1701.png' style='width: 35px;'></img></li>
+                        <li> <a href='#'>mcramm</a></li>
+                         <li class="divider-vertical"></li>
+                        <li><a href='#'>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class='container' style='margin-top:10%'>
+            <div id='chartarea' class='span12 offset1'>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+        <script src='https://raw.github.com/DmitryBaranovskiy/raphael/master/raphael-min.js'></script>
+        <script src='https://raw.github.com/DmitryBaranovskiy/g.raphael/master/min/g.raphael-min.js'></script>
+        <!-- <script src='https://raw.github.com/DmitryBaranovskiy/g.raphael/master/min/g.bar-min.js'></script> -->
+        <script src='https://raw.github.com/DmitryBaranovskiy/g.raphael/master/min/g.line-min.js'></script>
+        <script src='bootstrap/js/bootstrap.min.js'></script>
+        <!-- <script src="http://documentcloud.github.com/underscore/underscore-min.js"></script> -->
+        <!-- <script src="http://documentcloud.github.com/backbone/backbone-min.js"></script> -->
+        <script>
+            $(function() {
+                var r = Raphael('chartarea');
+                var x = [];
+                var y = [];
+                for (var i = 0; i < 20; i++) {
+                    x[i] = i;
+                    y[i] = (y[i - 1] || 0) + Math.floor((Math.random() * 7) - 3);
+                }
+
+                r.linechart(10,10, 650,220, x, y, {nostroke:false, axis:"0 0 1 1", symbol:'circle'}).hoverColumn(function() {
+                    this.tags = r.set();
+                    for(var i=0, ii = this.y.length; i < ii; i++){
+                        this.tags.push(
+                            r.tag(this.x, this.y[i], this.values[i], 160, 10).insertBefore(this).attr([{ fill:'#77F570'}, { fill: this.symbols[i].attr("fill")}])
+                        );
+                    }
+                }, function() {
+                    this.tags && this.tags.remove();
+                });
+            });
+        </script>
+    </body>
+</html>
