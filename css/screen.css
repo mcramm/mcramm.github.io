@@ -279,55 +279,44 @@ code {
 /* line 194, ../sass/screen.scss */
 .bio {
   display: inline-block;
-  width: 705px;
   padding-left: 15px;
   position: relative;
   top: -20px;
 }
 
-/* line 202, ../sass/screen.scss */
-.mugshot {
-  display: inline-block;
-  float: left;
-  overflow: hidden;
-  height: 201px;
-  margin-top: 46px;
-  border: 1px solid black;
-}
-
-/* line 211, ../sass/screen.scss */
+/* line 201, ../sass/screen.scss */
 .sidebar {
   clear: both;
 }
-/* line 213, ../sass/screen.scss */
+/* line 203, ../sass/screen.scss */
 .sidebar a {
   display: inline-block;
   padding: 2px 5px;
   font-family: Arvo;
 }
-/* line 217, ../sass/screen.scss */
+/* line 207, ../sass/screen.scss */
 .sidebar a:hover {
   text-decoration: none;
   background-color: #3395eb;
   color: white;
 }
-/* line 223, ../sass/screen.scss */
+/* line 213, ../sass/screen.scss */
 .sidebar .current {
   text-decoration: none;
   background-color: #3395eb;
   color: white;
 }
 
-/* line 230, ../sass/screen.scss */
+/* line 220, ../sass/screen.scss */
 .footer-wrap {
   width: inherit;
 }
-/* line 232, ../sass/screen.scss */
+/* line 222, ../sass/screen.scss */
 .footer-wrap .footer {
   padding-top: 5px;
   border-top: 1px dotted #AAA;
 }
-/* line 235, ../sass/screen.scss */
+/* line 225, ../sass/screen.scss */
 .footer-wrap .footer .copyright {
   text-align: right;
   color: #888;
