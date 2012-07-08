@@ -5,7 +5,6 @@ function refreshTime() {
     resetClock();
     resetPercentage();
     hideClock();
-    setSpecial();
     return;
   }
   var sec = mil/1000;
@@ -39,11 +38,11 @@ function refreshTime() {
 }
 
 function adjustOverlay(per) {
-  var height = 40;
+  var height = 500;
 
   var diff = per * height;
 
-  var new_offset = (40 - diff);
+  var new_offset = (diff - 500);
 
   $('.overlay').css('top', new_offset);
 }
@@ -66,17 +65,6 @@ function resetPercentage(){
   $('#percentage').html(100);
 }
 
-function setSpecial() {
-  $.ajax({
-    url: "/lyrics.html",
-    success: function(data) {
-      $('div#holder').html(data);
-      $('div#info').html("<a href='http://grooveshark.com/#/s/Digital+Love/2B6uN3' target='_blank'>Daft Punk - \"Digital Love\"</a>");
-      showSpecial();
-    }
-  });
-}
-
 function hideClock(){
   $('div#clock-wrap').animate({
     height: 'toggle'
@@ -96,8 +84,8 @@ function showSpecial(){
 
 
 $(document).ready( function() {
-  window.then = new Date(2011,08,02,20,44,00);
-  window.startDate = new Date(2011,07,26,20,44,00);
+  window.then = new Date(2012,06,20,21,20,00);
+  window.startDate = new Date(2012,06,01,00,00,00);
 
   refreshTime();
 });
