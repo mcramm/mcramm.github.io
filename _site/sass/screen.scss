@@ -85,17 +85,19 @@ ol {
 .header {
   height: 50px;
   a.header-text {
-    color: $header_color;
+    color: $color;
     font-family: 'Arvo', serif;
 
     text-decoration: none;
     font-size: 2em;
     float: left;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
 .content {
-  margin-bottom: 50px;
   font-size: 18px;
   clear: both;
   img {
@@ -148,15 +150,11 @@ code {
     display: inline-block;
     padding: 2px 5px;
     font-family: Arvo;
-    &:hover {
-      text-decoration: none;
-      background-color: $link-hover;
-      color: white;
-    }
   }
 }
 
 .footer-wrap{
+  margin-top: 50px;
   width: inherit;
   .footer {
     padding-top: 5px;

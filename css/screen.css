@@ -165,30 +165,33 @@ ol {
 }
 /* line 87, ../sass/screen.scss */
 .header a.header-text {
-  color: #1495eb;
+  color: #211f1c;
   font-family: 'Arvo', serif;
   text-decoration: none;
   font-size: 2em;
   float: left;
 }
+/* line 94, ../sass/screen.scss */
+.header a.header-text:hover {
+  text-decoration: underline;
+}
 
-/* line 97, ../sass/screen.scss */
+/* line 100, ../sass/screen.scss */
 .content {
-  margin-bottom: 50px;
   font-size: 18px;
   clear: both;
 }
-/* line 101, ../sass/screen.scss */
+/* line 103, ../sass/screen.scss */
 .content img {
   display: block;
   margin: 0px auto;
 }
 
-/* line 107, ../sass/screen.scss */
+/* line 109, ../sass/screen.scss */
 .posts {
   margin-top: 30px;
 }
-/* line 109, ../sass/screen.scss */
+/* line 111, ../sass/screen.scss */
 .posts .post-date {
   font-family: Georgia;
   background-color: #DEDEDE;
@@ -203,7 +206,7 @@ ol {
   margin-bottom: 9px;
 }
 
-/* line 124, ../sass/screen.scss */
+/* line 126, ../sass/screen.scss */
 code {
   font-size: 14px;
   background-color: #dedede;
@@ -211,7 +214,7 @@ code {
   padding: 1px 3px;
 }
 
-/* line 131, ../sass/screen.scss */
+/* line 133, ../sass/screen.scss */
 .highlight {
   background: #fafafa;
   border: 1px solid #D5D5D5;
@@ -220,39 +223,34 @@ code {
   margin-top: 20px;
   margin-bottom: 20px;
 }
-/* line 139, ../sass/screen.scss */
+/* line 141, ../sass/screen.scss */
 .highlight code {
   background-color: #fafafa;
   padding: 0px;
 }
 
-/* line 145, ../sass/screen.scss */
+/* line 147, ../sass/screen.scss */
 .navigation {
   float: right;
 }
-/* line 147, ../sass/screen.scss */
+/* line 149, ../sass/screen.scss */
 .navigation a {
   display: inline-block;
   padding: 2px 5px;
   font-family: Arvo;
 }
-/* line 151, ../sass/screen.scss */
-.navigation a:hover {
-  text-decoration: none;
-  background-color: #3395eb;
-  color: white;
-}
 
-/* line 159, ../sass/screen.scss */
+/* line 156, ../sass/screen.scss */
 .footer-wrap {
+  margin-top: 50px;
   width: inherit;
 }
-/* line 161, ../sass/screen.scss */
+/* line 159, ../sass/screen.scss */
 .footer-wrap .footer {
   padding-top: 5px;
   border-top: 1px dotted #AAA;
 }
-/* line 164, ../sass/screen.scss */
+/* line 162, ../sass/screen.scss */
 .footer-wrap .footer .copyright {
   text-align: right;
   color: #888;
