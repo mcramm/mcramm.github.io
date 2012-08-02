@@ -1,7 +1,8 @@
 @import "compass/reset";
 
-$background_color: #F8F8F8;
+$background_color: #FEFEFE;
 $color: #211F1C;
+$shadow-color: #B2ACA4;
 
 $header_color: #1495EB;
 
@@ -12,7 +13,6 @@ $link_hover: $link_color + #333;
 $line_color: $background_color - #333;
 
 $command_bg: #DEDEDE;
-$codeblock_bg: $background_color + #222;
-
+$codeblock_bg: #FAFAFA;
 
 $paragraph_break: 14px;

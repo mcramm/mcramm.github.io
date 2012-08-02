@@ -10,10 +10,10 @@ body {
   font-size: 1em;
   color: $color;
   background: $background_color;
-  width: 900px;
+  width: 620px;
   margin: 0px auto;
   line-height: 27px;
-  padding-top: 40px;
+  padding-top: 10px;
 }
 
 a {
@@ -26,18 +26,18 @@ a {
 }
 
 h1 {
-  font-size: 2em;
-  padding: 18px 0px 15px;
+  font-size: 3em;
+  line-height: 2em;
 }
 
 h2 {
-  font-size: 1.5em;
-  padding: 10px 0 3px;
+  font-size: 2em;
+  line-height: 2em;
 }
 
 h3 {
   font-size: 1.3em;
-  padding: 10px 0 3px;
+  line-height: 2em;
 }
 
 p {
@@ -83,65 +83,29 @@ ol {
 }
 
 .header {
+  height: 50px;
   a.header-text {
-    text-shadow: 3px 2px 0px $color;
-    letter-spacing: 3px;
     color: $header_color;
     font-family: 'Arvo', serif;
 
     text-decoration: none;
-    font-size: 4em;
+    font-size: 2em;
     float: left;
-  }
-  .buttons {
-    text-align: right;
-    float: right;
-    a {
-      display: inline-block;
-      background-color: #DEDEDE;
-      padding: 5px 15px 5px 15px;
-      color: $color;
-      margin-right: 30px;
-      font-size: 20px;
-      &:hover {
-        text-decoration: none;
-        background-color: $link-hover;
-        color: white;
-      }
-      img {
-        float: left;
-      }
-      span {
-        padding-left: 9px;
-        position: relative;
-        top: -8px;
-      }
-
-      &:last-child {
-        margin-right: 0px;
-      }
-    }
   }
 }
 
 .content {
-  margin-top: 50px;
   margin-bottom: 50px;
+  font-size: 18px;
+  clear: both;
   img {
     display: block;
     margin: 0px auto;
   }
 }
-.content > p:first-child {
-  &:first-letter {
-    float: left;
-    margin: 10px 3px 0 0;
-    font-size: 57px;
-    line-height: 69%;
-  }
-}
 
 .posts {
+  margin-top: 30px;
   .post-date {
     font-family: Georgia;
     background-color: #DEDEDE;
@@ -166,7 +130,8 @@ code {
 
 .highlight {
   background: $codeblock_bg;
-  padding: 20px;
+  border: 1px solid #D5D5D5;
+  padding: 5px 0px;
   line-height: 18px;
   margin-top: 20px;
   margin-bottom: 20px;
@@ -177,29 +142,8 @@ code {
   }
 }
 
-.left, .right {
-  display: table-cell;
-}
-
-.main {
-  padding-right: 15px;
-}
-
-
-.right {
-  width: 25%;
-  padding-left: 15px;
-}
-
-.bio {
-  display: inline-block;
-  padding-left: 15px;
-  position: relative;
-  top: -20px;
-}
-
-.sidebar {
-  clear: both;
+.navigation {
+  float: right;
   a {
     display: inline-block;
     padding: 2px 5px;
@@ -209,11 +153,6 @@ code {
       background-color: $link-hover;
       color: white;
     }
-  }
-  .current {
-      text-decoration: none;
-      background-color: $link-hover;
-      color: white;
   }
 }
 

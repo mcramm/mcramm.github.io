@@ -72,11 +72,11 @@ body {
   font-family: "Minion Pro","Palatino","Hoefler Text","Times New Roman",serif;
   font-size: 1em;
   color: #211f1c;
-  background: #f8f8f8;
-  width: 900px;
+  background: #fefefe;
+  width: 620px;
   margin: 0px auto;
   line-height: 27px;
-  padding-top: 40px;
+  padding-top: 10px;
 }
 
 /* line 19, ../sass/screen.scss */
@@ -92,20 +92,20 @@ a:hover {
 
 /* line 28, ../sass/screen.scss */
 h1 {
-  font-size: 2em;
-  padding: 18px 0px 15px;
+  font-size: 3em;
+  line-height: 2em;
 }
 
 /* line 33, ../sass/screen.scss */
 h2 {
-  font-size: 1.5em;
-  padding: 10px 0 3px;
+  font-size: 2em;
+  line-height: 2em;
 }
 
 /* line 38, ../sass/screen.scss */
 h3 {
   font-size: 1.3em;
-  padding: 10px 0 3px;
+  line-height: 2em;
 }
 
 /* line 43, ../sass/screen.scss */
@@ -126,7 +126,7 @@ strong {
 
 /* line 56, ../sass/screen.scss */
 blockquote {
-  border-left: 4px solid #c5c5c5;
+  border-left: 4px solid #cbcbcb;
   padding-left: 40px;
   margin-left: 0px;
   font-size: 0.9em;
@@ -137,7 +137,7 @@ blockquote {
 hr {
   width: 50%;
   height: 2px;
-  background-color: #c5c5c5;
+  background-color: #cbcbcb;
   border: none;
   margin-bottom: 14px;
 }
@@ -159,71 +159,36 @@ ol {
   margin-left: 20px;
 }
 
-/* line 86, ../sass/screen.scss */
+/* line 85, ../sass/screen.scss */
+.header {
+  height: 50px;
+}
+/* line 87, ../sass/screen.scss */
 .header a.header-text {
-  text-shadow: 3px 2px 0px #211f1c;
-  letter-spacing: 3px;
   color: #1495eb;
   font-family: 'Arvo', serif;
   text-decoration: none;
-  font-size: 4em;
+  font-size: 2em;
   float: left;
-}
-/* line 96, ../sass/screen.scss */
-.header .buttons {
-  text-align: right;
-  float: right;
-}
-/* line 99, ../sass/screen.scss */
-.header .buttons a {
-  display: inline-block;
-  background-color: #DEDEDE;
-  padding: 5px 15px 5px 15px;
-  color: #211f1c;
-  margin-right: 30px;
-  font-size: 20px;
-}
-/* line 106, ../sass/screen.scss */
-.header .buttons a:hover {
-  text-decoration: none;
-  background-color: #3395eb;
-  color: white;
-}
-/* line 111, ../sass/screen.scss */
-.header .buttons a img {
-  float: left;
-}
-/* line 114, ../sass/screen.scss */
-.header .buttons a span {
-  padding-left: 9px;
-  position: relative;
-  top: -8px;
-}
-/* line 120, ../sass/screen.scss */
-.header .buttons a:last-child {
-  margin-right: 0px;
 }
 
-/* line 127, ../sass/screen.scss */
+/* line 97, ../sass/screen.scss */
 .content {
-  margin-top: 50px;
   margin-bottom: 50px;
+  font-size: 18px;
+  clear: both;
 }
-/* line 130, ../sass/screen.scss */
+/* line 101, ../sass/screen.scss */
 .content img {
   display: block;
   margin: 0px auto;
 }
 
-/* line 136, ../sass/screen.scss */
-.content > p:first-child:first-letter {
-  float: left;
-  margin: 10px 3px 0 0;
-  font-size: 57px;
-  line-height: 69%;
+/* line 107, ../sass/screen.scss */
+.posts {
+  margin-top: 30px;
 }
-
-/* line 145, ../sass/screen.scss */
+/* line 109, ../sass/screen.scss */
 .posts .post-date {
   font-family: Georgia;
   background-color: #DEDEDE;
@@ -238,7 +203,7 @@ ol {
   margin-bottom: 9px;
 }
 
-/* line 160, ../sass/screen.scss */
+/* line 124, ../sass/screen.scss */
 code {
   font-size: 14px;
   background-color: #dedede;
@@ -246,77 +211,48 @@ code {
   padding: 1px 3px;
 }
 
-/* line 167, ../sass/screen.scss */
+/* line 131, ../sass/screen.scss */
 .highlight {
-  background: white;
-  padding: 20px;
+  background: #fafafa;
+  border: 1px solid #D5D5D5;
+  padding: 5px 0px;
   line-height: 18px;
   margin-top: 20px;
   margin-bottom: 20px;
 }
-/* line 174, ../sass/screen.scss */
+/* line 139, ../sass/screen.scss */
 .highlight code {
-  background-color: white;
+  background-color: #fafafa;
   padding: 0px;
 }
 
-/* line 180, ../sass/screen.scss */
-.left, .right {
-  display: table-cell;
+/* line 145, ../sass/screen.scss */
+.navigation {
+  float: right;
 }
-
-/* line 184, ../sass/screen.scss */
-.main {
-  padding-right: 15px;
-}
-
-/* line 189, ../sass/screen.scss */
-.right {
-  width: 25%;
-  padding-left: 15px;
-}
-
-/* line 194, ../sass/screen.scss */
-.bio {
-  display: inline-block;
-  padding-left: 15px;
-  position: relative;
-  top: -20px;
-}
-
-/* line 201, ../sass/screen.scss */
-.sidebar {
-  clear: both;
-}
-/* line 203, ../sass/screen.scss */
-.sidebar a {
+/* line 147, ../sass/screen.scss */
+.navigation a {
   display: inline-block;
   padding: 2px 5px;
   font-family: Arvo;
 }
-/* line 207, ../sass/screen.scss */
-.sidebar a:hover {
-  text-decoration: none;
-  background-color: #3395eb;
-  color: white;
-}
-/* line 213, ../sass/screen.scss */
-.sidebar .current {
+/* line 151, ../sass/screen.scss */
+.navigation a:hover {
   text-decoration: none;
   background-color: #3395eb;
   color: white;
 }
 
-/* line 220, ../sass/screen.scss */
+/* line 159, ../sass/screen.scss */
 .footer-wrap {
   width: inherit;
 }
-/* line 222, ../sass/screen.scss */
+/* line 161, ../sass/screen.scss */
 .footer-wrap .footer {
   padding-top: 5px;
   border-top: 1px dotted #AAA;
 }
-/* line 225, ../sass/screen.scss */
+/* line 164, ../sass/screen.scss */
 .footer-wrap .footer .copyright {
   text-align: right;
   color: #888;

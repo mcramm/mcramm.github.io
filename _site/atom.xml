@@ -4,7 +4,7 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2012-07-22T18:35:20-06:00</updated>
+  <updated>2012-08-01T18:45:58-06:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
@@ -173,11 +173,11 @@ make
 &lt;p&gt;From my &lt;code&gt;~/.vimrc&lt;/code&gt;:&lt;/p&gt;
 &lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;&lt;span class='c'&gt;&amp;quot; Command-T configuration&lt;/span&gt;
 &lt;span class='c'&gt;&amp;quot; Set the max height to 20 lines&lt;/span&gt;
-&lt;span class='p'&gt;:&lt;/span&gt;&lt;span class='k'&gt;let&lt;/span&gt; g:CommandTMaxHeight&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;20&lt;/span&gt;
+&lt;span class='p'&gt;:&lt;/span&gt;&lt;span class='k'&gt;let&lt;/span&gt; &lt;span class='k'&gt;g&lt;/span&gt;:CommandTMaxHeight&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;20&lt;/span&gt;
 &lt;span class='c'&gt;&amp;quot; Show dotfiles like .gitignore, .rvmrc&lt;/span&gt;
-&lt;span class='p'&gt;:&lt;/span&gt;&lt;span class='k'&gt;let&lt;/span&gt; g:CommandTAlwaysShowDotFiles&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;1&lt;/span&gt;
+&lt;span class='p'&gt;:&lt;/span&gt;&lt;span class='k'&gt;let&lt;/span&gt; &lt;span class='k'&gt;g&lt;/span&gt;:CommandTAlwaysShowDotFiles&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;1&lt;/span&gt;
 &lt;span class='c'&gt;&amp;quot; The maximum number of files to search through&lt;/span&gt;
-&lt;span class='p'&gt;:&lt;/span&gt;&lt;span class='k'&gt;let&lt;/span&gt; g:CommandTMaxFiles&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;20000&lt;/span&gt;
+&lt;span class='p'&gt;:&lt;/span&gt;&lt;span class='k'&gt;let&lt;/span&gt; &lt;span class='k'&gt;g&lt;/span&gt;:CommandTMaxFiles&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;20000&lt;/span&gt;
 &lt;span class='c'&gt;&amp;quot; Map ctrl-t to command-T since the meta key isn&amp;#39;t available when using&lt;/span&gt;
 &lt;span class='c'&gt;&amp;quot; vim on the server&lt;/span&gt;
 &lt;span class='p'&gt;:&lt;/span&gt;map &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;C&lt;span class='p'&gt;-&lt;/span&gt;T&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; :CommandT&lt;span class='p'&gt;&amp;lt;&lt;/span&gt;CR&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
@@ -198,7 +198,7 @@ imap &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;D&lt;span class='p'&gt;-&lt;/spa
 
 &lt;p&gt;In &lt;code&gt;~/.vimrc&lt;/code&gt;:&lt;/p&gt;
 &lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;&lt;span class='c'&gt;&amp;quot; Set the leader&lt;/span&gt;
-&lt;span class='k'&gt;let&lt;/span&gt; mapleader &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='c'&gt;&amp;quot;,&amp;quot;&lt;/span&gt;
+&lt;span class='k'&gt;let&lt;/span&gt; mapleader &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='s2'&gt;&amp;quot;,&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;p&gt;Now you can do something like this:&lt;/p&gt;
