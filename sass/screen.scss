@@ -137,6 +137,7 @@ code {
   line-height: 18px;
   margin-top: 20px;
   margin-bottom: 20px;
+  overflow-x: scroll;
 
   code {
     background-color: $codeblock_bg;

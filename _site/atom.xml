@@ -4,13 +4,274 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2012-08-01T18:45:58-06:00</updated>
+  <updated>2012-08-07T19:42:43-06:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2012/08/05/final-vim</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2012/08/05/final-vim.html"/>
+    <title>Final Vim</title>
+    <updated>2012-08-05T00:00:00-06:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;p&gt;I&amp;#8217;ve written about &lt;a href='http://mcramm.com/2011/12/06/vim-reboot-7.html'&gt;my Vim setup before&lt;/a&gt;, but the entire thing has gone through quite a change since my last post. I&amp;#8217;ve recently gone with a more minimalistic setup, removing all of the extra plugins and vimrc setup that I was never using.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#8217;m sure I could remove even more then what I have here.&lt;/p&gt;
+
+&lt;p&gt;There are already a ton of blog posts out there that go over recommendations for Vim, so I thought throw yet another one onto the pile. Hopefully this will help at least one person out there.&lt;/p&gt;
+
+&lt;h2 id='my_background_with_vim'&gt;My background with Vim&lt;/h2&gt;
+
+&lt;p&gt;I&amp;#8217;ve been using Vim heavily for the better part of 3 years now and I have no plans on switching to anything else. I&amp;#8217;m so comfortable with movement keys and standard bindings that when I try to use something like &lt;a href='http://macromates.com/'&gt;Textmate&lt;/a&gt; or &lt;a href='http://www.sublimetext.com/'&gt;Sublime&lt;/a&gt; I spend more time actually typing then I do thinking.&lt;/p&gt;
+
+&lt;p&gt;Vim also runs EVERYWHERE. I have never logged into a server and not had it available. It&amp;#8217;s been around for so long now that almost every linux distribution includes it by default. It also has an extensive library of plugins that add some pretty powerful functionality to the editor.&lt;/p&gt;
+
+&lt;p&gt;I haven&amp;#8217;t written any (useful) plugins myself, but I have managed to try out a fair number of them while collecting a fair number of useful settings that don&amp;#8217;t come in the standard setup.&lt;/p&gt;
+
+&lt;p&gt;While I haven&amp;#8217;t written any (useful) plugins myself, I have had the opportunity to experiment with a large number of them over the years. I&amp;#8217;ve also collected a health amount of settings that don&amp;#8217;t come in the standard setup.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#8217;m pretty diligent about keeping my &lt;a href='https://github.com/mcramm/dotfiles'&gt;dotfiles&lt;/a&gt; for Vim updated on Github, so unless you&amp;#8217;re reading this post on the same day it was released, then chances are I&amp;#8217;ve already made some changes.&lt;/p&gt;
+
+&lt;p&gt;Also noteworthy is where I&amp;#8217;ve gotten a lot of my configuration from. I&amp;#8217;ve gleaned much of it off of my coworkers and randomly finding snippets while surfing, but some of it I&amp;#8217;ve actually pulled out of Gary Bernhardt&amp;#8217;s (of &lt;a href='https://www.destroyallsoftware.com/screencasts'&gt;Destroy All Software&lt;/a&gt;) &lt;a href='https://github.com/garybernhardt/dotfiles'&gt;Dotfiles&lt;/a&gt;. A majority of the plugins I use have also come from the invaluable &lt;a href='http://tpo.pe/'&gt;Tim Pope&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id='learning_the_language'&gt;Learning The Language&lt;/h2&gt;
+
+&lt;p&gt;The first thing that most people will get thrown off by is the two central modes in Vim: &amp;#8220;normal&amp;#8221; and &amp;#8220;insert&amp;#8221; mode. Normal mode is where you do all your traversal and manipulation of text, while insert mode is when you actually input text. Normal mode is where the action is at, and where most other text editors fall short for me.&lt;/p&gt;
+
+&lt;p&gt;Once you get acquainted with the editor and start dipping your toes in further, you&amp;#8217;ll find that normal mode actual operates with its own mini language. This language is designed around the idea of &lt;em&gt;verbs&lt;/em&gt; and &lt;em&gt;nouns&lt;/em&gt;. I don&amp;#8217;t want to get too in depth here, as I will likely fall down a rabbit hole in my attempt. I think a quick example will suffice.&lt;/p&gt;
+
+&lt;p&gt;The command to delete something in Vim is the &lt;code&gt;d&lt;/code&gt; key. This would be a &lt;em&gt;verb&lt;/em&gt;. A word in Vim is represented with the &lt;code&gt;w&lt;/code&gt; key. Combine them, and you have the ability to delete words with &lt;code&gt;dw&lt;/code&gt;. What is so powerful about this is that when you learn a new verb like change &lt;code&gt;c&lt;/code&gt;, you can combine with what you know already. Suddenly you have the ability to change words with &lt;code&gt;cw&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;This really only scratches the surface with what&amp;#8217;s possible, and if you&amp;#8217;re new to Vim, then I highly recommend getting &lt;a href='http://pragprog.com/book/dnvim/practical-vim'&gt;Practical Vim&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id='configuration'&gt;Configuration&lt;/h2&gt;
+
+&lt;p&gt;One of the downsides to having such a powerful editor is that it takes a fair amount of configuration to get to a decent point for actual development. The following is a list of things I&amp;#8217;ve done to make using Vim a much more comfortable experience then what comes by default.&lt;/p&gt;
+
+&lt;p&gt;Printing out every line from my ~/.vimrc would be ridiculous, especially since I&amp;#8217;ve already linked to my dotfiles on Github. What follows is an abridged list of what I consider to be the important lines:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;    &lt;span class='k'&gt;call&lt;/span&gt; pathogen#infect&lt;span class='p'&gt;()&lt;/span&gt;
+    &lt;span class='nb'&gt;syntax&lt;/span&gt; enable
+    &lt;span class='k'&gt;filetype&lt;/span&gt; plugin indent &lt;span class='k'&gt;on&lt;/span&gt;
+
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;nocompatible&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;The &lt;code&gt;pathogen&lt;/code&gt; line is for initializing Pathogen. This is a Vim plugin that is used to manage other Vim plugins. I&amp;#8217;ll touch on this and some of my other plugins a little later, but if you&amp;#8217;re curious then you should &lt;a href='https://github.com/tpope/vim-pathogen'&gt;read the docs&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;syntax enable&lt;/code&gt; tells Vim to load any syntax.vim files in your path.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;filetype&lt;/code&gt; line simply tells Vim to detect the currently open file type and to load any configuration set by plugins and any &amp;#8220;indent.vim&amp;#8221; files in the run time path.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;set nocompatible&lt;/code&gt; eliminates any backwards compatibility issues with Vi.&lt;/p&gt;
+
+&lt;p&gt;You should also remap your caps-lock key for the entire system. &lt;em&gt;You don&amp;#8217;t need it.&lt;/em&gt; Trust me, all it will do is get in your way.&lt;/p&gt;
+
+&lt;h3 id='whitespace'&gt;Whitespace&lt;/h3&gt;
+
+&lt;p&gt;Here are the lines I use to deal with whitespace:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;nowrap&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;tabstop&lt;/span&gt;&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;2&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;shiftwidth&lt;/span&gt;&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;2&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;softtabstop&lt;/span&gt;&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;2&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;expandtab&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;autoindent&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;smartindent&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;nowrap&lt;/code&gt; tells Vim not automatically wrap lines when they get to a certain length.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;tabstop&lt;/code&gt;, &lt;code&gt;shiftwidth&lt;/code&gt; and &lt;code&gt;softtabstop&lt;/code&gt; are all dealing with indentation. I use 2 spaces for most code that I write, but need to use 4 at work since that&amp;#8217;s the standard the team decided on. I can overwrite these settings by adding a file in &lt;code&gt;~/.vim/after/ftplugin/php.vim&lt;/code&gt; with the following:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;    &lt;span class='k'&gt;setlocal&lt;/span&gt; &lt;span class='nb'&gt;tabstop&lt;/span&gt;&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;4&lt;/span&gt;
+    &lt;span class='k'&gt;setlocal&lt;/span&gt; &lt;span class='nb'&gt;shiftwidth&lt;/span&gt;&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;4&lt;/span&gt;
+    &lt;span class='k'&gt;setlocal&lt;/span&gt; &lt;span class='nb'&gt;softtabstop&lt;/span&gt;&lt;span class='p'&gt;=&lt;/span&gt;&lt;span class='m'&gt;4&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;expandtab&lt;/code&gt; tells Vim to use the appropriate number of spaces when hitting tab.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;autoindent&lt;/code&gt; simply copies the indentation of the previous line when creating a new one.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;smartindent&lt;/code&gt; will automatically insert one extra level of indentation in certain cases.&lt;/p&gt;
+
+&lt;p&gt;I also have this line that unobtrusively displays extra whitespace at the end of my lines:&lt;/p&gt;
+&lt;div class='highlight'&gt;
+&lt;pre&gt;
+&lt;code class='bash'&gt;
+    &lt;span class='nb'&gt;set &lt;/span&gt;list &lt;span class='nv'&gt;listchars&lt;/span&gt;=tab:&lt;span class='se'&gt;\ \ &lt;/span&gt;,trail:&amp;middot;
+&lt;/code&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;h3 id='searching'&gt;Searching&lt;/h3&gt;
+
+&lt;p&gt;I do a lot of searching for common words in Vim, and these are a great help:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;hlsearch&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;incsearch&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;ignorecase&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;smartcase&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;hlsearch&lt;/code&gt; highlights words as I&amp;#8217;m searching.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;incsearch&lt;/code&gt; immediately moves the cursor to first match as you start typing.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;ignorecase&lt;/code&gt; ignores the case of your search string.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;smartcase&lt;/code&gt; is used in conjunction with &lt;code&gt;ignorecase&lt;/code&gt;. If you search string contains an uppercase, then the search becomes case-sensitive&lt;/p&gt;
+
+&lt;h3 id='miscellaneous_settings'&gt;Miscellaneous Settings&lt;/h3&gt;
+
+&lt;p&gt;These are some settings that are still important, but I had a hard time grouping them logically with anything else:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;    &lt;span class='k'&gt;let&lt;/span&gt; mapleader &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='s2'&gt;&amp;quot;,&amp;quot;&lt;/span&gt;
+
+&lt;span class='c'&gt;    &amp;quot; allow backspacing over everything in insert mode&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;backspace&lt;/span&gt;&lt;span class='p'&gt;=&lt;/span&gt;indent&lt;span class='p'&gt;,&lt;/span&gt;&lt;span class='nb'&gt;eol&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;&lt;span class='k'&gt;start&lt;/span&gt;
+
+&lt;span class='c'&gt;    &amp;quot; Directories for swp files&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;backupdir&lt;/span&gt;&lt;span class='p'&gt;=~&lt;/span&gt;&lt;span class='sr'&gt;/.vim/&lt;/span&gt;&lt;span class='nb'&gt;backup&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;directory&lt;/span&gt;&lt;span class='p'&gt;=~&lt;/span&gt;&lt;span class='sr'&gt;/.vim/&lt;/span&gt;&lt;span class='nb'&gt;backup&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;mapleader&lt;/code&gt; sets the leader key to &amp;#8221;,&amp;#8221;. This is a common leader key that I use with my custom key bindings, which I&amp;#8217;ll get into shortly.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;set backspace&lt;/code&gt; lets you backspace over everything when in insert mode.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;set backupdir&lt;/code&gt; and &lt;code&gt;set directory&lt;/code&gt; sets the directories where Vim creates it&amp;#8217;s &lt;code&gt;.swp&lt;/code&gt; files. Useful, since I tend to add these files into version control by accident.&lt;/p&gt;
+
+&lt;h2 id='missing_behaviour'&gt;Missing Behaviour&lt;/h2&gt;
+
+&lt;p&gt;There are a couple of things that Vim doesn&amp;#8217;t do that might be a little surprising. The following lines of configuration adds this missing behaviour in.&lt;/p&gt;
+
+&lt;h3 id='last_cursor_position'&gt;Last cursor position&lt;/h3&gt;
+
+&lt;p&gt;For starters, Vim doesn&amp;#8217;t remember where your cursor was the last time you opened a particular file. Thankfully there is a solution, and it can be found in the Vim &lt;a href='http://vimdoc.sourceforge.net/htmldoc/eval.html#last-position-jump'&gt;help pages&lt;/a&gt; no less!&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;    &lt;span class='k'&gt;if&lt;/span&gt; has&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;autocmd&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+      &lt;span class='k'&gt;au&lt;/span&gt; &lt;span class='nb'&gt;BufReadPost&lt;/span&gt; * &lt;span class='k'&gt;if&lt;/span&gt; line&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;&amp;#39;\&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;&amp;gt;&lt;/span&gt; &lt;span class='m'&gt;0&lt;/span&gt; &amp;amp;&amp;amp; line&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;&amp;#39;\&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;=&lt;/span&gt; line&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;$&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+        \&lt;span class='p'&gt;|&lt;/span&gt; exe &lt;span class='s2'&gt;&amp;quot;normal g&amp;#39;\&amp;quot;&amp;quot;&lt;/span&gt; &lt;span class='p'&gt;|&lt;/span&gt; &lt;span class='k'&gt;endif&lt;/span&gt;
+    &lt;span class='k'&gt;endif&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;h3 id='tab_completion'&gt;Tab completion&lt;/h3&gt;
+
+&lt;p&gt;You don&amp;#8217;t need a plugin to do tab completion. Vim can do it out of the box:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;wildmenu&lt;/span&gt;
+    &lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;wildmode&lt;/span&gt;&lt;span class='p'&gt;=&lt;/span&gt;longest&lt;span class='p'&gt;,&lt;/span&gt;&lt;span class='nb'&gt;list&lt;/span&gt;
+
+&lt;span class='c'&gt;    &amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class='c'&gt;    &amp;quot; Multipurpose tab key&lt;/span&gt;
+&lt;span class='c'&gt;    &amp;quot; Indent if we&amp;#39;re at beginning of line, else, do completion&lt;/span&gt;
+&lt;span class='c'&gt;    &amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class='k'&gt;function&lt;/span&gt;&lt;span class='p'&gt;!&lt;/span&gt; InsertTabWrapper&lt;span class='p'&gt;()&lt;/span&gt;
+      &lt;span class='k'&gt;let&lt;/span&gt; &lt;span class='k'&gt;col&lt;/span&gt; &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='k'&gt;col&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;.&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='m'&gt;-1&lt;/span&gt;
+      &lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='p'&gt;!&lt;/span&gt;&lt;span class='k'&gt;col&lt;/span&gt; &lt;span class='p'&gt;||&lt;/span&gt; getline&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;.&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;[&lt;span class='k'&gt;col&lt;/span&gt; &lt;span class='p'&gt;-&lt;/span&gt; &lt;span class='m'&gt;1&lt;/span&gt;] &lt;span class='p'&gt;!~&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;\k&amp;#39;&lt;/span&gt;
+        &lt;span class='k'&gt;return&lt;/span&gt; &lt;span class='s2'&gt;&amp;quot;\&amp;lt;tab&amp;gt;&amp;quot;&lt;/span&gt;
+      &lt;span class='k'&gt;else&lt;/span&gt;
+        &lt;span class='k'&gt;return&lt;/span&gt; &lt;span class='s2'&gt;&amp;quot;\&amp;lt;c-p&amp;gt;&amp;quot;&lt;/span&gt;
+      &lt;span class='k'&gt;endif&lt;/span&gt;
+    &lt;span class='k'&gt;endfunction&lt;/span&gt;
+    &lt;span class='nb'&gt;inoremap&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;&lt;span class='k'&gt;tab&lt;/span&gt;&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;&lt;span class='k'&gt;c&lt;/span&gt;&lt;span class='p'&gt;-&lt;/span&gt;&lt;span class='k'&gt;r&lt;/span&gt;&lt;span class='p'&gt;&amp;gt;=&lt;/span&gt;InsertTabWrapper&lt;span class='p'&gt;()&amp;lt;&lt;/span&gt;&lt;span class='k'&gt;cr&lt;/span&gt;&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class='nb'&gt;inoremap&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;&lt;span class='k'&gt;s&lt;/span&gt;&lt;span class='p'&gt;-&lt;/span&gt;&lt;span class='k'&gt;tab&lt;/span&gt;&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;&lt;span class='k'&gt;c&lt;/span&gt;&lt;span class='p'&gt;-&lt;/span&gt;&lt;span class='k'&gt;n&lt;/span&gt;&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;h3 id='renaming_the_current_file'&gt;Renaming the current file&lt;/h3&gt;
+
+&lt;p&gt;There isn&amp;#8217;t a really easy way to change the name of the currently open file, then open the new file. A lot of people will write the file to a new location, open up the new file, then delete the old one.&lt;/p&gt;
+
+&lt;p&gt;But wait, We&amp;#8217;re programmers! There must be an easier way:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;&lt;span class='c'&gt;    &amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class='c'&gt;    &amp;quot; Rename current file&lt;/span&gt;
+&lt;span class='c'&gt;    &amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class='k'&gt;function&lt;/span&gt;&lt;span class='p'&gt;!&lt;/span&gt; RenameFile&lt;span class='p'&gt;()&lt;/span&gt;
+      &lt;span class='k'&gt;let&lt;/span&gt; old_name &lt;span class='p'&gt;=&lt;/span&gt; expand&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;%&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+      &lt;span class='k'&gt;let&lt;/span&gt; new_name &lt;span class='p'&gt;=&lt;/span&gt; input&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;New file name: &amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; expand&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;%&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;))&lt;/span&gt;
+      &lt;span class='k'&gt;if&lt;/span&gt; new_name &lt;span class='p'&gt;!=&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;&amp;#39;&lt;/span&gt; &amp;amp;&amp;amp; new_name &lt;span class='p'&gt;!=&lt;/span&gt; old_name
+        exec &lt;span class='s1'&gt;&amp;#39;:saveas &amp;#39;&lt;/span&gt; . new_name
+        exec &lt;span class='s1'&gt;&amp;#39;:silent !rm &amp;#39;&lt;/span&gt; .old_name
+        &lt;span class='k'&gt;redraw&lt;/span&gt;&lt;span class='p'&gt;!&lt;/span&gt;
+      &lt;span class='k'&gt;endif&lt;/span&gt;
+    &lt;span class='k'&gt;endfunction&lt;/span&gt;
+    map &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;leader&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;&lt;span class='k'&gt;n&lt;/span&gt; :&lt;span class='k'&gt;call&lt;/span&gt; RenameFile&lt;span class='p'&gt;()&amp;lt;&lt;/span&gt;&lt;span class='k'&gt;cr&lt;/span&gt;&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Hitting &lt;code&gt;,n&lt;/code&gt; brings up a prompt for a new file name. It even works when moving it into directories!&lt;/p&gt;
+
+&lt;h2 id='key_mappings'&gt;Key Mappings&lt;/h2&gt;
+
+&lt;p&gt;I promise, we&amp;#8217;re almost done with the straight ~/.vimrc options. What follows are some common key mappings that you might find useful:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='vim'&gt;    nmap K &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;nop&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+    :map &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;F2&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; :&lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;nowrap&lt;/span&gt;&lt;span class='p'&gt;!&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;CR&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+    :map &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;F3&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; :&lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='k'&gt;number&lt;/span&gt;&lt;span class='p'&gt;!&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;CR&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+    :map &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;F4&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; :&lt;span class='k'&gt;set&lt;/span&gt; &lt;span class='nb'&gt;paste&lt;/span&gt;&lt;span class='p'&gt;!&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;CR&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+    nmap gV &amp;#39;[&lt;span class='k'&gt;v&lt;/span&gt;`]
+    &lt;span class='nb'&gt;nnoremap&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;Leader&lt;span class='p'&gt;&amp;gt;&amp;lt;&lt;/span&gt;leader&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;&lt;span class='k'&gt;c&lt;/span&gt;&lt;span class='p'&gt;-&lt;/span&gt;^&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+
+    map &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;C&lt;span class='p'&gt;-&lt;/span&gt;&lt;span class='k'&gt;j&lt;/span&gt;&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; &lt;span class='m'&gt;10&lt;/span&gt;j
+    map &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;C&lt;span class='p'&gt;-&lt;/span&gt;&lt;span class='k'&gt;k&lt;/span&gt;&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; &lt;span class='m'&gt;10&lt;/span&gt;k
+
+    :&lt;span class='nb'&gt;nnoremap&lt;/span&gt; &lt;span class='p'&gt;&amp;lt;&lt;/span&gt;CR&lt;span class='p'&gt;&amp;gt;&lt;/span&gt; :&lt;span class='k'&gt;nohlsearch&lt;/span&gt;&lt;span class='p'&gt;&amp;lt;&lt;/span&gt;&lt;span class='k'&gt;cr&lt;/span&gt;&lt;span class='p'&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;nmap K &amp;lt;nop&amp;gt;&lt;/code&gt; simply maps &amp;#8220;K&amp;#8221; to do nothing. In Vim, hitting &lt;code&gt;K&lt;/code&gt; when hovering over the word causes Vim to open a new split with any Unix man pages it can find on that particular word. I never use it, but it causes me a ton of grief, so now it does nothing!&lt;/p&gt;
+
+&lt;p&gt;I remap &lt;code&gt;F2&lt;/code&gt;, &lt;code&gt;F3&lt;/code&gt;, &lt;code&gt;F4&lt;/code&gt; to toggle wrapping, line numbers and paste mode respectively.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;gV&lt;/code&gt; will highlight the last block of text I had highlighted.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;nnoremap &amp;lt;Leader&amp;gt;&amp;lt;leader&amp;gt; &amp;lt;c-^&amp;gt;&lt;/code&gt; maps the &lt;code&gt;,,&lt;/code&gt; key to toggle between the last file I had opened, then the current one again.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;CTRL-j&lt;/code&gt; and &lt;code&gt;CTRL-k&lt;/code&gt; move up/down 10 lines for quicker movement.&lt;/p&gt;
+
+&lt;p&gt;And finally, I map the enter key to turn off search highlighting.&lt;/p&gt;
+
+&lt;h2 id='plugins'&gt;Plugins&lt;/h2&gt;
+
+&lt;p&gt;I&amp;#8217;ve drastically reduced the number of plugins I used to use. I did this partially because I was encountering some odd behaviour in the editor that I suspect was being caused by conflicting settings. In the end, I reset back to scratch and only added in plugins when I felt myself actually missing something.&lt;/p&gt;
+
+&lt;h3 id='pathogen'&gt;Pathogen&lt;/h3&gt;
+
+&lt;p&gt;I keep all of my plugins in &lt;code&gt;~/.vim/bundles&lt;/code&gt; as git submodules to keep them synced with all the different computers I use. &lt;a href='https://github.com/tpope/vim-pathogen'&gt;Pathogen&lt;/a&gt; has made managing these plugins a breeze and I implore you to consider using it.&lt;/p&gt;
+
+&lt;p&gt;Even though the list is pretty small, I will make note of one plugin in particular:&lt;/p&gt;
+
+&lt;h3 id='commandt'&gt;Command-T&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href='https://github.com/wincent/Command-T'&gt;Command-T&lt;/a&gt; is a plugin that lets you find files in your source tree quickly. I tried &lt;a href='http://kien.github.com/ctrlp.vim/'&gt;CTRL-P&lt;/a&gt; for a little while, but found it slow on our office server. It was a while ago now, however, so I plan on giving it a try again. For now, Command-T &lt;em&gt;just works&lt;/em&gt;. The only downside is that I have to re-compile it with ruby every time I switch to a new server and clone down my dotfiles.&lt;/p&gt;
+
+&lt;p&gt;The remaining plugins are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href='http://www.vim.org/scripts/script.php?script_id=2572'&gt;ack.vim&lt;/a&gt;: For acking the source tree without having to leave my editor.&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/tpope/vim-commentary'&gt;vim-commentary&lt;/a&gt;: To quickly comment/uncomment lines&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/tpope/vim-endwise'&gt;vim-endwise&lt;/a&gt;: Helps end certain structures in code easily&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/tpope/vim-fugitive/'&gt;vim-fugitive&lt;/a&gt;: Command Git through Vim&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/sickill/vim-pasta'&gt;vim-pasta&lt;/a&gt;: Maintain indent levels in an intelligent way when pasting&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/Lokaltog/vim-powerline/'&gt;vim-powerline&lt;/a&gt;: Better status bar&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/tpope/vim-rails/'&gt;vim-rails&lt;/a&gt;: Helps development with rails&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/vim-ruby/vim-ruby/'&gt;vim-ruby&lt;/a&gt;: Makes syntax highlighting, auto completion and indentation better when using ruby&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='http://www.vim.org/scripts/script.php?script_id=664'&gt;vim-scratch&lt;/a&gt;: Creates a temporary scratch buffer for when I&amp;#8217;m working out ideas&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/tpope/vim-surround/'&gt;vim-surround&lt;/a&gt;: Quickly change surround brackets (like &lt;code&gt;[]&lt;/code&gt;&amp;#8217;s to &lt;code&gt;{}&lt;/code&gt;&amp;#8217;s&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/tpope/vim-unimpaired'&gt;vim-unimpaired&lt;/a&gt;: Mappings for some very common tasks&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='http://www.vim.org/scripts/script.php?script_id=2501'&gt;vim-clojure&lt;/a&gt;: Syntax highlighting/indentation for Clojure&lt;/li&gt;
+
+&lt;li&gt;&lt;a href='https://github.com/jpalardy/vim-slime/'&gt;vim-slime&lt;/a&gt;: Allows me to send highlighted code blocks to a tmux pane. Useful for when I want to quickly try something out in a repl.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2012/01/27/watch-yourself</id>

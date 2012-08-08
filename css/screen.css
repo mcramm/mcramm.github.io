@@ -222,35 +222,36 @@ code {
   line-height: 18px;
   margin-top: 20px;
   margin-bottom: 20px;
+  overflow-x: scroll;
 }
-/* line 141, ../sass/screen.scss */
+/* line 142, ../sass/screen.scss */
 .highlight code {
   background-color: #fafafa;
   padding: 0px;
 }
 
-/* line 147, ../sass/screen.scss */
+/* line 148, ../sass/screen.scss */
 .navigation {
   float: right;
 }
-/* line 149, ../sass/screen.scss */
+/* line 150, ../sass/screen.scss */
 .navigation a {
   display: inline-block;
   padding: 2px 5px;
   font-family: Arvo;
 }
 
-/* line 156, ../sass/screen.scss */
+/* line 157, ../sass/screen.scss */
 .footer-wrap {
   margin-top: 50px;
   width: inherit;
 }
-/* line 159, ../sass/screen.scss */
+/* line 160, ../sass/screen.scss */
 .footer-wrap .footer {
   padding-top: 5px;
   border-top: 1px dotted #AAA;
 }
-/* line 162, ../sass/screen.scss */
+/* line 163, ../sass/screen.scss */
 .footer-wrap .footer .copyright {
   text-align: right;
   color: #888;
