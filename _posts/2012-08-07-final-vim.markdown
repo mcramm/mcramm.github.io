@@ -7,8 +7,6 @@ but the entire thing has gone through quite a change since my last
 post. I've recently gone with a more minimalistic setup, removing
 all of the extra plugins and vimrc setup that I was never using.
 
-I'm sure I could remove even more then what I have here.
-
 There are already a ton of blog posts out there that go over
 recommendations for Vim, so I thought throw yet another one onto the
 pile. Hopefully this will help at least one person out there.

@@ -4,7 +4,7 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2012-08-07T19:42:43-06:00</updated>
+  <updated>2012-08-07T19:44:36-06:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
@@ -13,17 +13,15 @@
 
   
   <entry>
-    <id>http://mcramm.com/2012/08/05/final-vim</id>
-    <link type="text/html" rel="alternate" href="http://mcramm.com/2012/08/05/final-vim.html"/>
+    <id>http://mcramm.com/2012/08/07/final-vim</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2012/08/07/final-vim.html"/>
     <title>Final Vim</title>
-    <updated>2012-08-05T00:00:00-06:00</updated>
+    <updated>2012-08-07T00:00:00-06:00</updated>
     <author>
       <name>Michael Cramm</name>
       <uri>http://mcramm.com/</uri>
     </author>
     <content type="html">&lt;p&gt;I&amp;#8217;ve written about &lt;a href='http://mcramm.com/2011/12/06/vim-reboot-7.html'&gt;my Vim setup before&lt;/a&gt;, but the entire thing has gone through quite a change since my last post. I&amp;#8217;ve recently gone with a more minimalistic setup, removing all of the extra plugins and vimrc setup that I was never using.&lt;/p&gt;
-
-&lt;p&gt;I&amp;#8217;m sure I could remove even more then what I have here.&lt;/p&gt;
 
 &lt;p&gt;There are already a ton of blog posts out there that go over recommendations for Vim, so I thought throw yet another one onto the pile. Hopefully this will help at least one person out there.&lt;/p&gt;
 
