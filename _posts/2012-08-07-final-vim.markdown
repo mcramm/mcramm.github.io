@@ -28,11 +28,6 @@ I haven't written any (useful) plugins myself, but I have managed to try out a
 fair number of them while collecting a fair number of useful settings
 that don't come in the standard setup.
 
-While I haven't written any (useful) plugins myself, I have had the
-opportunity to experiment with a large number of them over the years.
-I've also collected a health amount of settings that don't come in the
-standard setup.
-
 I'm pretty diligent about keeping my [dotfiles](https://github.com/mcramm/dotfiles) for Vim updated on Github,
 so unless you're reading this post on the same day it was released, then
 chances are I've already made some changes.
