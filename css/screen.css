@@ -257,3 +257,10 @@ code {
   color: #888;
   font-size: 11px;
 }
+
+/* line 171, ../sass/screen.scss */
+.respond {
+  text-align: center;
+  color: #888;
+  font-size: 15px;
+}
