@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Specificity In Clojurescript</title>
+    <link href='http://fonts.googleapis.com/css?family=Arvo&v2' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Chivo' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet' href='/css/screen.css'></link>
+    <link rel='stylesheet' href='/css/highlight.css'></link>
+    <link rel='shortcut icon' type='image/ico' href='http://mcramm.com/favicon.png'></link>
+  </head>
+  <body>
+    <div class='header'>
+        <a class='header-text' href='/'>mcramm.com</a>
+        <div class='navigation'>
+            <a href='/'>About</a>
+            <a href='/posts.html'>Posts</a>
+            <a target='_blank' href='http://feeds.feedburner.com/mcramm'>Feed</a>
+        </div>
+    </div>
+    <div class='content'>
+    <h1>Specificity In Clojurescript </h1>
+    <p><a href="https://github.com/clojure/clojurescript/commit/571e156d2daa223dcef273106827e932283e2f93">This commit</a> was pushed up to Clojurescript core recently, adding a new macro <code>specify</code>. This means we can now have instance-level implementations of protocols on specific values:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>ns </span><span class='nv'>example1</span><span class='p'>)</span>
+    <span class='p'>(</span><span class='nf'>enable-console-print!</span><span class='p'>)</span>
+
+    <span class='p'>(</span><span class='kd'>defprotocol </span><span class='nv'>Listable</span>
+      <span class='p'>(</span><span class='nf'>render</span> <span class='p'>[</span><span class='nv'>items</span><span class='p'>]))</span>
+
+
+    <span class='p'>(</span><span class='k'>def </span><span class='nv'>elements</span>
+     <span class='p'>(</span><span class='nf'>specify</span> <span class='p'>[</span><span class='s'>&quot;one&quot;</span> <span class='s'>&quot;two&quot;</span> <span class='s'>&quot;three&quot;</span><span class='p'>]</span>
+       <span class='nv'>Listable</span>
+       <span class='p'>(</span><span class='nf'>render</span> <span class='p'>[</span><span class='nv'>items</span><span class='p'>]</span>
+         <span class='p'>(</span><span class='nf'>str</span>
+           <span class='s'>&quot;&lt;ul&gt;&quot;</span>
+           <span class='p'>(</span><span class='nb'>apply str </span><span class='p'>(</span><span class='nb'>map </span><span class='o'>#</span><span class='p'>(</span><span class='nb'>str </span><span class='s'>&quot;&lt;li&gt;&quot;</span> <span class='nv'>%</span> <span class='s'>&quot;&lt;/li&gt;&quot;</span><span class='p'>)</span> <span class='nv'>items</span><span class='p'>))</span>
+           <span class='s'>&quot;&lt;/ul&gt;&quot;</span><span class='p'>))))</span>
+
+    <span class='p'>(</span><span class='nb'>println </span><span class='p'>(</span><span class='nf'>satisfies?</span> <span class='nv'>Listable</span> <span class='nv'>elements</span><span class='p'>))</span>
+    <span class='c1'>; true</span>
+
+    <span class='p'>(</span><span class='nb'>println </span><span class='p'>(</span><span class='nf'>satisfies?</span> <span class='nv'>Listable</span> <span class='p'>[</span><span class='s'>&quot;one&quot;</span> <span class='s'>&quot;two&quot;</span> <span class='s'>&quot;three&quot;</span><span class='p'>]))</span> <span class='c1'>; false</span>
+    <span class='c1'>; false</span>
+
+    <span class='p'>(</span><span class='nb'>println </span><span class='p'>(</span><span class='nf'>render</span> <span class='nv'>elements</span><span class='p'>))</span>
+    <span class='c1'>; &lt;ul&gt;&lt;li&gt;one&lt;/li&gt;&lt;li&gt;two&lt;/li&gt;&lt;li&gt;three&lt;/li&gt;&lt;/ul&gt;</span>
+
+    <span class='p'>(</span><span class='nb'>println </span><span class='nv'>elements</span><span class='p'>)</span>
+    <span class='c1'>; [one two three]</span>
+
+    <span class='p'>(</span><span class='nb'>println </span><span class='p'>(</span><span class='nb'>= </span><span class='nv'>elements</span> <span class='p'>[</span><span class='s'>&quot;one&quot;</span> <span class='s'>&quot;two&quot;</span> <span class='s'>&quot;three&quot;</span><span class='p'>]))</span>
+    <span class='c1'>; true</span>
+    <span class='p'>(</span><span class='nb'>println </span><span class='p'>(</span><span class='nb'>identical? </span><span class='nv'>elements</span> <span class='p'>[</span><span class='s'>&quot;one&quot;</span> <span class='s'>&quot;two&quot;</span> <span class='s'>&quot;three&quot;</span><span class='p'>]))</span>
+    <span class='c1'>; false</span>
+</code></pre></div>
+<p>This is pretty important feature for Clojurescript. <code>extend-type</code> is still powerful, but there is the odd time where you want to make a specific value conform to an interface. Because we&#39;re on Javascript, we can get this level of modularity without a huge performance cost.</p>
+
+<p>Note that this relies on version <code>0.0-2138</code> of Clojurescript.</p>
+
+<p>This change was authored by the indomitable <a href="http://swannodette.github.io/">David Nolen</a> whose <a href="https://github.com/swannodette/om">latest open source offering</a> in a Clojurescript interface over Facebook&#39;s <a href="http://facebook.github.io/react/">React</a>.</p>
+</div>
+<div class='respond'>
+    Want to comment? Send a message to <a href='https://twitter.com/intent/tweet?text=@cramm'>@cramm</a> on Twitter.
+</div>
+
+
+    <div class='footer-wrap'>
+        <div class='footer'>
+            <div class='copyright'>&copy; 2014 Michael Cramm</div>
+        </div>
+    </div>
+</body>
+</html>

@@ -4,13 +4,63 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2014-01-02T16:42:46-07:00</updated>
+  <updated>2014-01-02T17:17:12-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2014/01/02/specificity-in-clojurescript</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2014/01/02/specificity-in-clojurescript.html"/>
+    <title>Specificity In Clojurescript</title>
+    <updated>2014-01-02T00:00:00-07:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;https://github.com/clojure/clojurescript/commit/571e156d2daa223dcef273106827e932283e2f93&quot;&gt;This commit&lt;/a&gt; was pushed up to Clojurescript core recently, adding a new macro &lt;code&gt;specify&lt;/code&gt;. This means we can now have instance-level implementations of protocols on specific values:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;ns &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;example1&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;enable-console-print!&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;defprotocol &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;Listable&lt;/span&gt;
+      &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;items&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]))&lt;/span&gt;
+
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;def &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;elements&lt;/span&gt;
+     &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;specify&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;one&amp;quot;&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;two&amp;quot;&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;three&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+       &lt;span class=&#39;nv&#39;&gt;Listable&lt;/span&gt;
+       &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;items&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+         &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;str&lt;/span&gt;
+           &lt;span class=&#39;s&#39;&gt;&amp;quot;&amp;lt;ul&amp;gt;&amp;quot;&lt;/span&gt;
+           &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;apply str &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;map &lt;/span&gt;&lt;span class=&#39;o&#39;&gt;#&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;str &lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;&amp;lt;li&amp;gt;&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;%&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;&amp;lt;/li&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;items&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))&lt;/span&gt;
+           &lt;span class=&#39;s&#39;&gt;&amp;quot;&amp;lt;/ul&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))))&lt;/span&gt;
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;println &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;satisfies?&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;Listable&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;elements&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))&lt;/span&gt;
+    &lt;span class=&#39;c1&#39;&gt;; true&lt;/span&gt;
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;println &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;satisfies?&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;Listable&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;one&amp;quot;&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;two&amp;quot;&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;three&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]))&lt;/span&gt; &lt;span class=&#39;c1&#39;&gt;; false&lt;/span&gt;
+    &lt;span class=&#39;c1&#39;&gt;; false&lt;/span&gt;
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;println &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;elements&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))&lt;/span&gt;
+    &lt;span class=&#39;c1&#39;&gt;; &amp;lt;ul&amp;gt;&amp;lt;li&amp;gt;one&amp;lt;/li&amp;gt;&amp;lt;li&amp;gt;two&amp;lt;/li&amp;gt;&amp;lt;li&amp;gt;three&amp;lt;/li&amp;gt;&amp;lt;/ul&amp;gt;&lt;/span&gt;
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;println &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;elements&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+    &lt;span class=&#39;c1&#39;&gt;; [one two three]&lt;/span&gt;
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;println &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;= &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;elements&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;one&amp;quot;&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;two&amp;quot;&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;three&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]))&lt;/span&gt;
+    &lt;span class=&#39;c1&#39;&gt;; true&lt;/span&gt;
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;println &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;identical? &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;elements&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;one&amp;quot;&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;two&amp;quot;&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;three&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]))&lt;/span&gt;
+    &lt;span class=&#39;c1&#39;&gt;; false&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This is pretty important feature for Clojurescript. &lt;code&gt;extend-type&lt;/code&gt; is still powerful, but there is the odd time where you want to make a specific value conform to an interface. Because we&amp;#39;re on Javascript, we can get this level of modularity without a huge performance cost.&lt;/p&gt;
+
+&lt;p&gt;Note that this relies on version &lt;code&gt;0.0-2138&lt;/code&gt; of Clojurescript.&lt;/p&gt;
+
+&lt;p&gt;This change was authored by the indomitable &lt;a href=&quot;http://swannodette.github.io/&quot;&gt;David Nolen&lt;/a&gt; whose &lt;a href=&quot;https://github.com/swannodette/om&quot;&gt;latest open source offering&lt;/a&gt; in a Clojurescript interface over Facebook&amp;#39;s &lt;a href=&quot;http://facebook.github.io/react/&quot;&gt;React&lt;/a&gt;.&lt;/p&gt;</content>
+  </entry>
   
 
 </feed>
