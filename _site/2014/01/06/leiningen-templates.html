@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Leiningen Templates</title>
+    <link href='http://fonts.googleapis.com/css?family=Arvo&v2' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Chivo' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet' href='/css/screen.css'></link>
+    <link rel='stylesheet' href='/css/highlight.css'></link>
+    <link rel='shortcut icon' type='image/ico' href='http://mcramm.com/favicon.png'></link>
+  </head>
+  <body>
+    <div class='header'>
+        <a class='header-text' href='/'>mcramm.com</a>
+        <div class='navigation'>
+            <a href='/'>About</a>
+            <a href='/posts.html'>Posts</a>
+            <a target='_blank' href='http://feeds.feedburner.com/mcramm'>Feed</a>
+        </div>
+    </div>
+    <div class='content'>
+    <h1>Leiningen Templates </h1>
+    <p>Getting started with Clojurescript can be tough if you&#39;ve never done it before, and once you do you might find yourself running through the same steps to get new projects into a structure that makes sense. In either case, the solution is to use a Leiningen template. My goal here is to show how easy it can be to create one of your own. Most templates are built for Clojure, but we&#39;ll be creating one for Clojurescript. On top of that we&#39;ll get ourselves started off with the new Om library.</p>
+
+<p>Before beginning I want to make it clear that this isn&#39;t meant as an introduction to Clojurescript, <a href="https://github.com/swannodette/om">Om</a>, or the framework it acts as an interface to (<a href="http://facebook.github.io/react/">React</a>). This is meant to help you through creating a Leiningen template that will get you going quickly on a new project. If you want a bare-bones template for a new Clojurescript project, then I recommend <a href="https://clojars.org/mies/lein-template">mies</a>.</p>
+
+<p>Using Leiningen you can create new templates with a default project structure through the <code>new</code> task: <code>lein new &lt;template&gt; &lt;name&gt;</code>.</p>
+
+<p>Let&#39;s create one together. Since we&#39;re creating one for the Om library, we&#39;ll call it &#39;Hum&#39;:</p>
+<div class='highlight'><pre><code class='bash'>    lein new template hum
+</code></pre></div>
+<p>To install this template locally, <code>cd</code> into it and run <code>lein install</code>. Let&#39;s see what a project based off this bare template looks like. Run <code>lein new hum my-app</code>. You should get a directory tree with one file like this: <code>my-app/src/my_app/foo.clj</code>.</p>
+
+<p>The contents of this file should simply be <code>(def my-app :foo)</code>.</p>
+
+<p>Open up <code>src/leiningen/new/hum.clj</code> and look at the <code>hum</code> function:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>hum</span>
+      <span class='s'>&quot;FIXME: write documentation&quot;</span>
+      <span class='p'>[</span><span class='nv'>name</span><span class='p'>]</span>
+      <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>data</span> <span class='p'>{</span><span class='ss'>:name</span> <span class='nv'>name</span>
+                  <span class='ss'>:sanitized</span> <span class='p'>(</span><span class='nf'>name-to-path</span> <span class='nv'>name</span><span class='p'>)}]</span>
+        <span class='p'>(</span><span class='nf'>main/info</span> <span class='s'>&quot;Generating fresh &#39;lein new&#39; hum project.&quot;</span><span class='p'>)</span>
+        <span class='p'>(</span><span class='nf'>-&gt;files</span> <span class='nv'>data</span>
+                 <span class='p'>[</span><span class='s'>&quot;src/{{sanitized}}/foo.clj&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;foo.clj&quot;</span> <span class='nv'>data</span><span class='p'>)])))</span>
+</code></pre></div>
+<p>Let&#39;s go through this line by line. This function takes a name then creates a map, <code>data</code>, that contains this name and a sanitized version of it. <code>name-to-path</code> simply takes a name and first replaces any dashes with underscores, then any periods with directory separators. So a name like <code>lawrence-of.arabia</code> becomes <code>lawrence_of/arabia</code>. For us, <code>hum</code> will remain unchanged.</p>
+
+<p>The <code>main/info</code> line is simply printing some info to the user.</p>
+
+<p><code>-&gt;files</code> is where the action happens. This function takes a map containing at least the key <code>name</code> and a variable number of &quot;paths&quot;. Each path is a vector containing a string representing the path to a file, and some content for that file.</p>
+
+<p>To understand the <code>render</code> call a little better, we need to look at the definition right above this function:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>def </span><span class='nv'>render</span> <span class='p'>(</span><span class='nf'>renderer</span> <span class='s'>&quot;hum&quot;</span><span class='p'>))</span>
+</code></pre></div>
+<p>All this does is create a renderer that will process one of our templates and replace the appropriate variables. This templating is based off of mustache which you&#39;ll see in a moment. For now, all you need to know is that <code>render</code> will take the name of a file in <code>src/leiningen/new/hum</code> and replaces certain areas that we specify with our supplied <code>data</code>. If we don&#39;t supply any data then the file remains unchanged.</p>
+
+<p>Keeping with our example, using this line:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>[</span><span class='s'>&quot;src/{{sanitized}}/foo.clj&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;foo.clj&quot;</span> <span class='nv'>data</span><span class='p'>)]</span>
+</code></pre></div>
+<p>Will create a file at <code>src/hum/foo.clj</code> with the content of the file <code>foo.clj</code>. Let&#39;s open that file up and see this templating in action:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>def </span><span class='p'>{{</span><span class='nv'>name</span><span class='p'>}}</span> <span class='ss'>:foo</span><span class='p'>)</span>
+</code></pre></div>
+<p>Remember that the <code>:name</code> key in <code>data</code> is set the unsanitized value we supply.</p>
+
+<p>Now lets start making some changes. Create a file at <code>src/leiningen/new/hum/project.clj</code> and give it the following content:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>defproject </span><span class='p'>{{</span><span class='nv'>name</span><span class='p'>}}</span> <span class='s'>&quot;0.1.0-SNAPSHOT&quot;</span>
+      <span class='ss'>:description</span> <span class='s'>&quot;FIXME: write this!&quot;</span>
+      <span class='ss'>:url</span> <span class='s'>&quot;http://example.com/FIXME&quot;</span>
+
+      <span class='ss'>:dependencies</span> <span class='p'>[[</span><span class='nv'>org.clojure/clojure</span> <span class='s'>&quot;1.5.1&quot;</span><span class='p'>]</span>
+                     <span class='p'>[</span><span class='nv'>org.clojure/clojurescript</span> <span class='s'>&quot;0.0-2138&quot;</span><span class='p'>]</span>
+                     <span class='p'>[</span><span class='nv'>om</span> <span class='s'>&quot;0.1.4&quot;</span><span class='p'>]]</span>
+
+      <span class='ss'>:plugins</span> <span class='p'>[[</span><span class='nv'>lein-cljsbuild</span> <span class='s'>&quot;1.0.1&quot;</span><span class='p'>]]</span>
+
+      <span class='ss'>:cljsbuild</span> <span class='p'>{</span>
+        <span class='ss'>:builds</span> <span class='p'>[{</span><span class='ss'>:id</span> <span class='s'>&quot;dev&quot;</span>
+                  <span class='ss'>:source-paths</span> <span class='p'>[</span><span class='s'>&quot;src&quot;</span><span class='p'>]</span>
+                  <span class='ss'>:compiler</span> <span class='p'>{</span>
+                    <span class='ss'>:output-to</span> <span class='s'>&quot;{{sanitized}}.js&quot;</span>
+                    <span class='ss'>:output-dir</span> <span class='s'>&quot;out&quot;</span>
+                    <span class='ss'>:optimizations</span> <span class='ss'>:none</span>
+                    <span class='ss'>:source-map</span> <span class='nv'>true</span>
+                    <span class='ss'>:externs</span> <span class='p'>[</span><span class='s'>&quot;om/externs/react.js&quot;</span><span class='p'>]}}]})</span>
+</code></pre></div>
+<p>This is doing a bunch of stuff, but is a reasonably standard starting point. The main differences is that I&#39;ve included the Om library as a dependency.</p>
+
+<p>Now add this to the list of processed files in <code>hum.clj</code>:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='nf'>-&gt;files</span> <span class='nv'>data</span>
+             <span class='p'>[</span><span class='s'>&quot;project.clj&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;project.clj&quot;</span> <span class='nv'>data</span><span class='p'>)]</span>
+             <span class='p'>[</span><span class='s'>&quot;src/{{sanitized}}/foo.clj&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;foo.clj&quot;</span> <span class='nv'>data</span><span class='p'>)])))</span>
+</code></pre></div>
+<p>To test it out, run <code>lein new hum my-app</code>. Remember to remove the previous test first, and make sure you are in the root of the template project. Open up <code>my-app/project.clj</code> and marvel at the magic.</p>
+
+<p>There are few more things we need to add to finish this off. First let&#39;s get rid of <code>foo.clj</code> by renaming it to a Clojurescript file, like <code>core.cljs</code>. Change the content of the file to this:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>ns </span><span class='p'>{{</span><span class='nv'>name</span><span class='p'>}}</span><span class='nv'>.core</span>
+      <span class='p'>(</span><span class='ss'>:require</span> <span class='p'>[</span><span class='nv'>om.core</span> <span class='ss'>:as</span> <span class='nv'>om</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]</span>
+                <span class='p'>[</span><span class='nv'>om.dom</span> <span class='ss'>:as</span> <span class='nv'>dom</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]))</span>
+
+    <span class='p'>(</span><span class='nf'>enable-console-print!</span><span class='p'>)</span>
+
+    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span>
+      <span class='p'>(</span><span class='nf'>atom</span> <span class='p'>{</span><span class='ss'>:clicks</span> <span class='mi'>0</span><span class='p'>}))</span>
+
+    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>button</span> <span class='p'>[</span><span class='nv'>data</span> <span class='nv'>owner</span><span class='p'>]</span>
+      <span class='p'>(</span><span class='nf'>om/component</span>
+        <span class='p'>(</span><span class='nf'>dom/div</span> <span class='nv'>nil</span>
+                 <span class='p'>(</span><span class='nf'>dom/button</span>
+                   <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:onClick</span> <span class='o'>#</span><span class='p'>(</span><span class='nf'>om/transact!</span> <span class='nv'>data</span> <span class='ss'>:clicks</span> <span class='nv'>inc</span><span class='p'>)}</span>
+                   <span class='s'>&quot;Click Me&quot;</span><span class='p'>)</span>
+                 <span class='p'>(</span><span class='nf'>dom/span</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{}</span> <span class='p'>(</span><span class='ss'>:clicks</span> <span class='nv'>data</span><span class='p'>)))))</span>
+
+    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>my-app</span> <span class='p'>[</span><span class='nv'>app</span> <span class='nv'>owner</span><span class='p'>]</span>
+      <span class='p'>(</span><span class='nf'>reify</span>
+        <span class='nv'>om/IRender</span>
+        <span class='p'>(</span><span class='nf'>render</span> <span class='p'>[</span><span class='nv'>_</span><span class='p'>]</span>
+          <span class='p'>(</span><span class='nf'>om/build</span> <span class='nv'>button</span> <span class='nv'>app</span> <span class='p'>{}))))</span>
+
+    <span class='p'>(</span><span class='nf'>om/root</span> <span class='nv'>app-state</span> <span class='nv'>my-app</span> <span class='nv'>js/document.body</span><span class='p'>)</span>
+</code></pre></div>
+<p>Again the intent here is not to introduce you to Om, or Clojurescript. All you need to know for now is that this creates a button and counter that tracks how many times the button has been clicked.</p>
+
+<p>Your list of processed files should look something like this:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>[</span><span class='s'>&quot;project.clj&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;project.clj&quot;</span> <span class='nv'>data</span><span class='p'>)]</span>
+    <span class='p'>[</span><span class='s'>&quot;src/{{sanitized}}/core.cljs&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;core.cljs&quot;</span> <span class='nv'>data</span><span class='p'>)]</span>
+</code></pre></div>
+<p>Let&#39;s add in one more file, <code>index.html</code>:</p>
+<div class='highlight'><pre><code class='html'>    <span class='nt'>&lt;html&gt;</span>
+        <span class='nt'>&lt;body&gt;</span>
+            <span class='nt'>&lt;script </span><span class='na'>src=</span><span class='s'>&quot;http://fb.me/react-0.8.0.js&quot;</span><span class='nt'>&gt;&lt;/script&gt;</span>
+            <span class='nt'>&lt;script </span><span class='na'>src=</span><span class='s'>&quot;out/goog/base.js&quot;</span> <span class='na'>type=</span><span class='s'>&quot;text/javascript&quot;</span><span class='nt'>&gt;&lt;/script&gt;</span>
+            <span class='nt'>&lt;script </span><span class='na'>src=</span><span class='s'>&quot;{{sanitized}}.js&quot;</span> <span class='na'>type=</span><span class='s'>&quot;text/javascript&quot;</span><span class='nt'>&gt;&lt;/script&gt;</span>
+            <span class='nt'>&lt;script </span><span class='na'>type=</span><span class='s'>&quot;text/javascript&quot;</span><span class='nt'>&gt;</span><span class='nx'>goog</span><span class='p'>.</span><span class='nx'>require</span><span class='p'>(</span><span class='s2'>&quot;{{sanitized}}.core&quot;</span><span class='p'>);</span><span class='nt'>&lt;/script&gt;</span>
+        <span class='nt'>&lt;/body&gt;</span>
+    <span class='nt'>&lt;/html&gt;</span>
+</code></pre></div>
+<p>And to the list of processed files:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>[</span><span class='s'>&quot;index.html&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;index.html&quot;</span> <span class='nv'>data</span><span class='p'>)]</span>
+    <span class='p'>[</span><span class='s'>&quot;project.clj&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;project.clj&quot;</span> <span class='nv'>data</span><span class='p'>)]</span>
+    <span class='p'>[</span><span class='s'>&quot;src/{{sanitized}}/core.cljs&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;core.cljs&quot;</span> <span class='nv'>data</span><span class='p'>)]</span>
+</code></pre></div>
+<p>The full <code>hum</code> function should look similar to this:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>hum</span> <span class='p'>[</span><span class='nv'>name</span><span class='p'>]</span>
+      <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>data</span> <span class='p'>{</span><span class='ss'>:name</span> <span class='nv'>name</span>
+                  <span class='ss'>:sanitized</span> <span class='p'>(</span><span class='nf'>name-to-path</span> <span class='nv'>name</span><span class='p'>)}]</span>
+        <span class='p'>(</span><span class='nf'>main/info</span> <span class='s'>&quot;Generating a new Om project using the Hum template&quot;</span><span class='p'>)</span>
+        <span class='p'>(</span><span class='nf'>-&gt;files</span> <span class='nv'>data</span>
+                 <span class='p'>[</span><span class='s'>&quot;index.html&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;index.html&quot;</span> <span class='nv'>data</span><span class='p'>)]</span>
+                 <span class='p'>[</span><span class='s'>&quot;project.clj&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;project.clj&quot;</span> <span class='nv'>data</span><span class='p'>)]</span>
+                 <span class='p'>[</span><span class='s'>&quot;src/{{sanitized}}/core.cljs&quot;</span> <span class='p'>(</span><span class='nf'>render</span> <span class='s'>&quot;core.cljs&quot;</span> <span class='nv'>data</span><span class='p'>)])))</span>
+</code></pre></div>
+<p>Now we&#39;re done. Run <code>lein new hum my-app</code> again and <code>cd</code> into it. Run <code>lein deps</code> to get any dependencies, then <code>lein cljsbuild once dev</code>. Open up <code>index.html</code> and voila! You should see something like the following:</p>
+<div class='highlight example' id='lein-templates-example'> </div>
+<p>If you&#39;re looking for more about creating templates, then I recommend the excellent <a href="https://github.com/technomancy/leiningen/blob/stable/doc/TEMPLATES.md">Leiningen docs</a>.</p>
+
+<p>The full source for this template can be found <a href="https://github.com/mcramm/hum">here</a>.</p>
+<script src='/js/lein-templates.js'><![CDATA[]]></script>
+</div>
+<div class='respond'>
+    Want to comment? Send a message to <a href='https://twitter.com/intent/tweet?text=@cramm'>@cramm</a> on Twitter.
+</div>
+
+
+    <div class='footer-wrap'>
+        <div class='footer'>
+            <div class='copyright'>&copy; 2014 Michael Cramm</div>
+        </div>
+    </div>
+</body>
+</html>

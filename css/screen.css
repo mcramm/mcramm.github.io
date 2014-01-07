@@ -264,3 +264,8 @@ code {
   color: #888;
   font-size: 15px;
 }
+
+/* line 177, ../sass/screen.scss */
+.example {
+  padding: 20px;
+}

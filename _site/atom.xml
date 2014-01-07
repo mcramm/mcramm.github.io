@@ -4,13 +4,159 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2014-01-02T17:17:12-07:00</updated>
+  <updated>2014-01-06T17:09:51-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2014/01/06/leiningen-templates</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2014/01/06/leiningen-templates.html"/>
+    <title>Leiningen Templates</title>
+    <updated>2014-01-06T00:00:00-07:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;p&gt;Getting started with Clojurescript can be tough if you&amp;#39;ve never done it before, and once you do you might find yourself running through the same steps to get new projects into a structure that makes sense. In either case, the solution is to use a Leiningen template. My goal here is to show how easy it can be to create one of your own. Most templates are built for Clojure, but we&amp;#39;ll be creating one for Clojurescript. On top of that we&amp;#39;ll get ourselves started off with the new Om library.&lt;/p&gt;
+
+&lt;p&gt;Before beginning I want to make it clear that this isn&amp;#39;t meant as an introduction to Clojurescript, &lt;a href=&quot;https://github.com/swannodette/om&quot;&gt;Om&lt;/a&gt;, or the framework it acts as an interface to (&lt;a href=&quot;http://facebook.github.io/react/&quot;&gt;React&lt;/a&gt;). This is meant to help you through creating a Leiningen template that will get you going quickly on a new project. If you want a bare-bones template for a new Clojurescript project, then I recommend &lt;a href=&quot;https://clojars.org/mies/lein-template&quot;&gt;mies&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Using Leiningen you can create new templates with a default project structure through the &lt;code&gt;new&lt;/code&gt; task: &lt;code&gt;lein new &amp;lt;template&amp;gt; &amp;lt;name&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;#39;s create one together. Since we&amp;#39;re creating one for the Om library, we&amp;#39;ll call it &amp;#39;Hum&amp;#39;:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;bash&#39;&gt;    lein new template hum
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To install this template locally, &lt;code&gt;cd&lt;/code&gt; into it and run &lt;code&gt;lein install&lt;/code&gt;. Let&amp;#39;s see what a project based off this bare template looks like. Run &lt;code&gt;lein new hum my-app&lt;/code&gt;. You should get a directory tree with one file like this: &lt;code&gt;my-app/src/my_app/foo.clj&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The contents of this file should simply be &lt;code&gt;(def my-app :foo)&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Open up &lt;code&gt;src/leiningen/new/hum.clj&lt;/code&gt; and look at the &lt;code&gt;hum&lt;/code&gt; function:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;defn &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;hum&lt;/span&gt;
+      &lt;span class=&#39;s&#39;&gt;&amp;quot;FIXME: write documentation&amp;quot;&lt;/span&gt;
+      &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+      &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;let &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:name&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;name&lt;/span&gt;
+                  &lt;span class=&#39;ss&#39;&gt;:sanitized&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;name-to-path&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)}]&lt;/span&gt;
+        &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;main/info&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;Generating fresh &amp;#39;lein new&amp;#39; hum project.&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+        &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;-&amp;gt;files&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;
+                 &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;src/{{sanitized}}/foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)])))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Let&amp;#39;s go through this line by line. This function takes a name then creates a map, &lt;code&gt;data&lt;/code&gt;, that contains this name and a sanitized version of it. &lt;code&gt;name-to-path&lt;/code&gt; simply takes a name and first replaces any dashes with underscores, then any periods with directory separators. So a name like &lt;code&gt;lawrence-of.arabia&lt;/code&gt; becomes &lt;code&gt;lawrence_of/arabia&lt;/code&gt;. For us, &lt;code&gt;hum&lt;/code&gt; will remain unchanged.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;main/info&lt;/code&gt; line is simply printing some info to the user.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;-&amp;gt;files&lt;/code&gt; is where the action happens. This function takes a map containing at least the key &lt;code&gt;name&lt;/code&gt; and a variable number of &amp;quot;paths&amp;quot;. Each path is a vector containing a string representing the path to a file, and some content for that file.&lt;/p&gt;
+
+&lt;p&gt;To understand the &lt;code&gt;render&lt;/code&gt; call a little better, we need to look at the definition right above this function:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;def &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;renderer&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;hum&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;All this does is create a renderer that will process one of our templates and replace the appropriate variables. This templating is based off of mustache which you&amp;#39;ll see in a moment. For now, all you need to know is that &lt;code&gt;render&lt;/code&gt; will take the name of a file in &lt;code&gt;src/leiningen/new/hum&lt;/code&gt; and replaces certain areas that we specify with our supplied &lt;code&gt;data&lt;/code&gt;. If we don&amp;#39;t supply any data then the file remains unchanged.&lt;/p&gt;
+
+&lt;p&gt;Keeping with our example, using this line:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;src/{{sanitized}}/foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Will create a file at &lt;code&gt;src/hum/foo.clj&lt;/code&gt; with the content of the file &lt;code&gt;foo.clj&lt;/code&gt;. Let&amp;#39;s open that file up and see this templating in action:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;def &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;{{&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;}}&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:foo&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Remember that the &lt;code&gt;:name&lt;/code&gt; key in &lt;code&gt;data&lt;/code&gt; is set the unsanitized value we supply.&lt;/p&gt;
+
+&lt;p&gt;Now lets start making some changes. Create a file at &lt;code&gt;src/leiningen/new/hum/project.clj&lt;/code&gt; and give it the following content:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;defproject &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;{{&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;}}&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;0.1.0-SNAPSHOT&amp;quot;&lt;/span&gt;
+      &lt;span class=&#39;ss&#39;&gt;:description&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;FIXME: write this!&amp;quot;&lt;/span&gt;
+      &lt;span class=&#39;ss&#39;&gt;:url&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;http://example.com/FIXME&amp;quot;&lt;/span&gt;
+
+      &lt;span class=&#39;ss&#39;&gt;:dependencies&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;org.clojure/clojure&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;1.5.1&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+                     &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;org.clojure/clojurescript&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;0.0-2138&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+                     &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;0.1.4&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]]&lt;/span&gt;
+
+      &lt;span class=&#39;ss&#39;&gt;:plugins&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;lein-cljsbuild&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;1.0.1&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]]&lt;/span&gt;
+
+      &lt;span class=&#39;ss&#39;&gt;:cljsbuild&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+        &lt;span class=&#39;ss&#39;&gt;:builds&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:id&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;dev&amp;quot;&lt;/span&gt;
+                  &lt;span class=&#39;ss&#39;&gt;:source-paths&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;src&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+                  &lt;span class=&#39;ss&#39;&gt;:compiler&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:output-to&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;{{sanitized}}.js&amp;quot;&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:output-dir&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;out&amp;quot;&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:optimizations&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:none&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:source-map&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;true&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:externs&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;om/externs/react.js&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]}}]})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This is doing a bunch of stuff, but is a reasonably standard starting point. The main differences is that I&amp;#39;ve included the Om library as a dependency.&lt;/p&gt;
+
+&lt;p&gt;Now add this to the list of processed files in &lt;code&gt;hum.clj&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;-&amp;gt;files&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;
+             &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
+             &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;src/{{sanitized}}/foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)])))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To test it out, run &lt;code&gt;lein new hum my-app&lt;/code&gt;. Remember to remove the previous test first, and make sure you are in the root of the template project. Open up &lt;code&gt;my-app/project.clj&lt;/code&gt; and marvel at the magic.&lt;/p&gt;
+
+&lt;p&gt;There are few more things we need to add to finish this off. First let&amp;#39;s get rid of &lt;code&gt;foo.clj&lt;/code&gt; by renaming it to a Clojurescript file, like &lt;code&gt;core.cljs&lt;/code&gt;. Change the content of the file to this:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;ns &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;{{&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;}}&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;.core&lt;/span&gt;
+      &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:require&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om.core&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:as&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;om&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:include-macros&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;true&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+                &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om.dom&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:as&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;dom&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:include-macros&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;true&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]))&lt;/span&gt;
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;enable-console-print!&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;def &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;app-state&lt;/span&gt;
+      &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;atom&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:clicks&lt;/span&gt; &lt;span class=&#39;mi&#39;&gt;0&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;}))&lt;/span&gt;
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;defn &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;button&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;owner&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+      &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;om/component&lt;/span&gt;
+        &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;dom/div&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;nil&lt;/span&gt;
+                 &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;dom/button&lt;/span&gt;
+                   &lt;span class=&#39;o&#39;&gt;#&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;js&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:onClick&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;#&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;om/transact!&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:clicks&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;inc&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)}&lt;/span&gt;
+                   &lt;span class=&#39;s&#39;&gt;&amp;quot;Click Me&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+                 &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;dom/span&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;#&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;js&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{}&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:clicks&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)))))&lt;/span&gt;
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;defn &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;my-app&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;app&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;owner&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+      &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;reify&lt;/span&gt;
+        &lt;span class=&#39;nv&#39;&gt;om/IRender&lt;/span&gt;
+        &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;_&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+          &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;om/build&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;button&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;app&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{}))))&lt;/span&gt;
+
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;om/root&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;app-state&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;my-app&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;js/document.body&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Again the intent here is not to introduce you to Om, or Clojurescript. All you need to know for now is that this creates a button and counter that tracks how many times the button has been clicked.&lt;/p&gt;
+
+&lt;p&gt;Your list of processed files should look something like this:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
+    &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;src/{{sanitized}}/core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Let&amp;#39;s add in one more file, &lt;code&gt;index.html&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    &lt;span class=&#39;nt&#39;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+        &lt;span class=&#39;nt&#39;&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;src=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;http://fb.me/react-0.8.0.js&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;src=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;out/goog/base.js&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;src=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;{{sanitized}}.js&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#39;nx&#39;&gt;goog&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;nx&#39;&gt;require&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;s2&#39;&gt;&amp;quot;{{sanitized}}.core&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+        &lt;span class=&#39;nt&#39;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
+    &lt;span class=&#39;nt&#39;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And to the list of processed files:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
+    &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
+    &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;src/{{sanitized}}/core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The full &lt;code&gt;hum&lt;/code&gt; function should look similar to this:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;defn &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;hum&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+      &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;let &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:name&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;name&lt;/span&gt;
+                  &lt;span class=&#39;ss&#39;&gt;:sanitized&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;name-to-path&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)}]&lt;/span&gt;
+        &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;main/info&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;Generating a new Om project using the Hum template&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+        &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;-&amp;gt;files&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;
+                 &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
+                 &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
+                 &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;src/{{sanitized}}/core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;render&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;data&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)])))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now we&amp;#39;re done. Run &lt;code&gt;lein new hum my-app&lt;/code&gt; again and &lt;code&gt;cd&lt;/code&gt; into it. Run &lt;code&gt;lein deps&lt;/code&gt; to get any dependencies, then &lt;code&gt;lein cljsbuild once dev&lt;/code&gt;. Open up &lt;code&gt;index.html&lt;/code&gt; and voila! You should see something like the following:&lt;/p&gt;
+&lt;div class=&#39;highlight example&#39; id=&#39;lein-templates-example&#39;&gt; &lt;/div&gt;
+&lt;p&gt;If you&amp;#39;re looking for more about creating templates, then I recommend the excellent &lt;a href=&quot;https://github.com/technomancy/leiningen/blob/stable/doc/TEMPLATES.md&quot;&gt;Leiningen docs&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The full source for this template can be found &lt;a href=&quot;https://github.com/mcramm/hum&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;script src=&#39;/js/lein-templates.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2014/01/02/specificity-in-clojurescript</id>
