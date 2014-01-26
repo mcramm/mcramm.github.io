@@ -4,7 +4,7 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2014-01-26T14:15:20-07:00</updated>
+  <updated>2014-01-26T14:16:24-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
@@ -16,7 +16,7 @@
     <id>http://mcramm.com/2014/01/26/react-intro</id>
     <link type="text/html" rel="alternate" href="http://mcramm.com/2014/01/26/react-intro.html"/>
     <title>React Intro</title>
-    <updated>2014-01-26T14:15:20-07:00</updated>
+    <updated>2014-01-26T14:16:24-07:00</updated>
     <author>
       <name>Michael Cramm</name>
       <uri>http://mcramm.com/</uri>
@@ -272,7 +272,7 @@
 
 &lt;p&gt;Most of this should be pretty straight forward. Again, the goal here was to create something simple to get your feet wet with. There are a few opportunities to make things even simpler, but I&amp;#39;ll leave that as an exercise for the reader.&lt;/p&gt;
 
-&lt;p&gt;If you plan on exploring more of React, then I would recommend going through their &lt;a href=&quot;http://facebook.github.io/react/docs/tutorial.html&quot;&gt;Tutorial&lt;/a&gt;, and checking out the different &lt;a href=&quot;http://facebook.github.io/react/docs/component-specs.html&quot;&gt;life cycle methods&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;If you plan on exploring more of React, then I recommend going through their &lt;a href=&quot;http://facebook.github.io/react/docs/tutorial.html&quot;&gt;tutorial&lt;/a&gt;, and checking out the different &lt;a href=&quot;http://facebook.github.io/react/docs/component-specs.html&quot;&gt;life cycle methods&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;In an upcoming post, I&amp;#39;ll be creating a similar app in &lt;a href=&quot;https://github.com/swannodette/om&quot;&gt;Om&lt;/a&gt;.&lt;/p&gt;
 &lt;script src=&#39;http://fb.me/react-0.8.0.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;&lt;script src=&#39;/js/react_intro/build/ex1.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;&lt;script src=&#39;/js/react_intro/build/ex2.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;&lt;script src=&#39;/js/react_intro/build/ex3.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;</content>

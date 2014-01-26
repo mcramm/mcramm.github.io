@@ -329,8 +329,8 @@ Most of this should be pretty straight forward. Again, the goal here was to
 create something simple to get your feet wet with. There are a few opportunities
 to make things even simpler, but I\'ll leave that as an exercise for the reader.
 
-If you plan on exploring more of React, then I would recommend going through
-their [Tutorial](http://facebook.github.io/react/docs/tutorial.html), and
+If you plan on exploring more of React, then I recommend going through
+their [tutorial](http://facebook.github.io/react/docs/tutorial.html), and
 checking out the different [life cycle methods](http://facebook.github.io/react/docs/component-specs.html).
 
 In an upcoming post, I\'ll be creating a similar app in [Om](https://github.com/swannodette/om).
