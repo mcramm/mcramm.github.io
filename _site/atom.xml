@@ -4,13 +4,279 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2014-01-06T17:09:51-07:00</updated>
+  <updated>2014-01-26T14:20:12-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2014/01/26/react-intro</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2014/01/26/react-intro.html"/>
+    <title>React Intro</title>
+    <updated>2014-01-26T00:00:00-07:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;http://facebook.github.io/react/&quot;&gt;React&lt;/a&gt; is a new-ish library from Facebook/Instagram that is designed to make building user interfaces easy.&lt;/p&gt;
+
+&lt;p&gt;I thought it would be fun to build a basic example in React, and then contrast it with the same example in Om.&lt;/p&gt;
+
+&lt;p&gt;First let&amp;#39;s setup the page where our example will live. We&amp;#39;re going to want a container for the React root component, which we&amp;#39;ll give the id &lt;code&gt;app&lt;/code&gt;, and we&amp;#39;ll include the React library and the JSX transformer.&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    &lt;span class=&#39;nt&#39;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+        &lt;span class=&#39;nt&#39;&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;#39;app&amp;#39;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;src=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;http://fb.me/react-0.8.0.js&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;src=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;http://fb.me/JSXTransformer-0.8.0.js&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;#39;text/jsx&amp;#39;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
+                &lt;span class=&#39;cm&#39;&gt;/**&lt;/span&gt;
+&lt;span class=&#39;cm&#39;&gt;                * @jsx React.DOM&lt;/span&gt;
+&lt;span class=&#39;cm&#39;&gt;                */&lt;/span&gt;
+                &lt;span class=&#39;c1&#39;&gt;// Your code goes here&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+        &lt;span class=&#39;nt&#39;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
+    &lt;span class=&#39;nt&#39;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Note the &lt;code&gt;@jsx React.DOM&lt;/code&gt; in the block comment at the top of the script tag where our code will go. This is required for the JSX transformer to be able to process elements in our components from this:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    &lt;span class=&#39;nt&#39;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;href=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;http://google.com&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;Click Me&lt;span class=&#39;nt&#39;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Into this:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    React.DOM.a( {href:&amp;quot;http://google.com&amp;quot;}, &amp;quot;Click Me&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;JSX is completely optional, but it is a little bit easier to visualize the arrangement of nodes, so I&amp;#39;ll be using it for this example.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;#39;s start writing some code. Our first goal is to create a text input where any entered text is rendered out to some node.&lt;/p&gt;
+
+&lt;p&gt;First we&amp;#39;ll create our root component and pass it some initial state:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    var VariableText = React.createClass({
+        render: function() {
+            return (
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;p&amp;gt;&lt;/span&gt;{this.props.defaultText}&lt;span class=&#39;nt&#39;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+            );
+        }
+    });
+    React.renderComponent(
+        &lt;span class=&#39;nt&#39;&gt;&amp;lt;VariableText&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;defaultText=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Some text&amp;quot;&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;,
+        document.getElementById(&amp;#39;app&amp;#39;)
+    );
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;What we&amp;#39;re doing here is create a component called &lt;code&gt;VariableText&lt;/code&gt; that knows how to render itself. &lt;code&gt;render&lt;/code&gt; simply creates a &lt;code&gt;&amp;lt;p&amp;gt;&lt;/code&gt; tag and inserts &lt;code&gt;defaultText&lt;/code&gt; inside of it. The second argument to &lt;code&gt;renderComponent&lt;/code&gt; is simply explaining where to insert our component on our page.&lt;/p&gt;
+
+&lt;p&gt;This is great, but kinda boring. Let&amp;#39;s create our text input and change the content of the &lt;code&gt;&amp;lt;p&amp;gt;&lt;/code&gt; tag when we type into it. This next snippet will be a little bit bigger, but all we really want to do is create a &lt;code&gt;TextInput&lt;/code&gt; component that renders an &lt;code&gt;input&lt;/code&gt; tag and responds to changes. We&amp;#39;ll also want to pass it our default text to set the input&amp;#39;s initial value.&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    var TextInput = React.createClass({
+        handleChange: function() {
+            var text = this.refs.text.getDOMNode().value;
+            this.props.onTextChanged(text);
+            return false;
+        },
+        render: function() {
+            return (
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;div&amp;gt;&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;&amp;lt;input&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;ref=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;text&amp;quot;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;onChange=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.handleChange}&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;#39;text&amp;#39;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;value=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.props.inputValue}&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+            );
+        }
+    });
+
+    var VariableText = React.createClass({
+        getInitialState: function() {
+            return {
+                text: this.props.defaultText
+           }
+        },
+        handleTextChange: function(text) {
+            this.setState({text: text});
+        },
+        render: function() {
+            return (
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;div&amp;gt;&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;&amp;lt;TextInput&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;onTextChanged=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.handleTextChange}&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;inputValue=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.state.text}&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;&amp;lt;p&amp;gt;&lt;/span&gt;{this.state.text}&lt;span class=&#39;nt&#39;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+            );
+        }
+    });
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We&amp;#39;ve had to change our &lt;code&gt;VariableText&lt;/code&gt; component since we&amp;#39;ll need to introduce some mutable state, the value of the text input, into our app. The &lt;code&gt;getInitialState&lt;/code&gt; function is called once, before the component is mounted. The return value of this function will set the initial value of the &lt;code&gt;state&lt;/code&gt; attribute for this component. Here we&amp;#39;re setting it to the default text property. &lt;code&gt;VariableText&lt;/code&gt; is going to be our root component, and will coordinate any state changes based on events triggered on its children.&lt;/p&gt;
+
+&lt;p&gt;Our first child component is &lt;code&gt;TextInput&lt;/code&gt;. As mentioned before this component renders an input tag and calls the component&amp;#39;s &lt;code&gt;handleChange&lt;/code&gt; function whenever the value changes. &lt;code&gt;handleChange&lt;/code&gt; gets the value from the input via the &lt;code&gt;refs&lt;/code&gt; attribute. When we create components in &lt;code&gt;render&lt;/code&gt;, we can attach a special property &lt;code&gt;ref&lt;/code&gt; to it that lets us refer back to it later. Once we get the value, we execute a callback that was assigned in our root component. This is the typical way a child communicates with its parent, and we&amp;#39;ll see this pattern occur throughout the rest of the example.&lt;/p&gt;
+
+&lt;p&gt;If you&amp;#39;re following along on your own, this is what you should have so far:&lt;/p&gt;
+&lt;div class=&#39;highlight example&#39; id=&#39;ex1&#39;&gt; &lt;/div&gt;
+&lt;p&gt;Now let&amp;#39;s introduce a slider to change the font size of our output text. We&amp;#39;ll create a &lt;code&gt;FontSizeSlider&lt;/code&gt; component that again renders an &lt;code&gt;input&lt;/code&gt; tag.&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    var FontSizeSlider = React.createClass({
+        handleChange: function() {
+            var value = this.refs.slider.getDOMNode().value;
+            this.props.onSliderChanged(value);
+            return false;
+        },
+        render: function() {
+            return (
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;div&amp;gt;&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;&amp;lt;input&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;ref=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;slider&amp;quot;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;onChange=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.handleChange}&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;value=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.props.size}&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;#39;range&amp;#39;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;min=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;9&amp;quot;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;max=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;50&amp;quot;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;step=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;0.2&amp;quot;&lt;/span&gt; 
+                    &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;&amp;lt;span&amp;gt;&lt;/span&gt; Font Size: {this.props.size} &lt;span class=&#39;nt&#39;&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+            );
+        }
+    });
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This should look very similar to the &lt;code&gt;TextInput&lt;/code&gt; component. Here is what changed on &lt;code&gt;VariableText&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    getInitialState: function() {
+        return {
+            size: this.props.defaultSize,
+            text: this.props.defaultText,
+        }
+    },
+    handleFontSizeChange: function(size) {
+        this.setState({size: size});
+        this.refs.outputText.getDOMNode().style.fontSize = size + &amp;quot;px&amp;quot;;
+    },
+    render: function() {
+        return (
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;div&amp;gt;&lt;/span&gt;
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;TextInput&lt;/span&gt;
+                    &lt;span class=&#39;na&#39;&gt;onTextChanged=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.handleTextChange}&lt;/span&gt;
+                    &lt;span class=&#39;na&#39;&gt;inputValue=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.state.text}&lt;/span&gt;
+                &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;FontSizeSlider&lt;/span&gt;
+                    &lt;span class=&#39;na&#39;&gt;onSliderChanged=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.handleFontSizeChange}&lt;/span&gt;
+                    &lt;span class=&#39;na&#39;&gt;size=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.state.size}&lt;/span&gt;
+                &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;ref=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;#39;outputText&amp;#39;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;{this.state.text}&lt;span class=&#39;nt&#39;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+        );
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Again this should look similar to the previous change. All we&amp;#39;ve done is add another child component and react to it changing it the same way as &lt;code&gt;TextInput&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;defaultSize&lt;/code&gt; prop will also need to be passed into the root component:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    &lt;span class=&#39;nt&#39;&gt;&amp;lt;VariableText&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;defaultText=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Some text&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;defaultSize=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{15}/&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;,
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You should now see something like the following:&lt;/p&gt;
+&lt;div class=&#39;highlight example&#39; id=&#39;ex2&#39;&gt; &lt;/div&gt;
+&lt;p&gt;Let&amp;#39;s create a few more sliders and see how React gives you the ability to reduce code duplication. These sliders will control the red, green, and blue levels of our output text.&lt;/p&gt;
+
+&lt;p&gt;Since these sliders will respond to change similarly to our &lt;code&gt;FontSizeSlider&lt;/code&gt; component, we&amp;#39;ll create a mixin:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    var HandleSliderChangeMixin = {
+        handleChange: function() {
+            var value = this.refs.slider.getDOMNode().value;
+            this.props.onSliderChanged(value);
+            return false;
+        }
+    };
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Each of these color sliders will be pretty similar. They will all range from 0 to 255, and have a label to display its value. Let&amp;#39;s create a generic component first:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    var FontColorSlider = React.createClass({
+        mixins: [HandleSliderChangeMixin],
+        render: function() {
+            return (
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;div&amp;gt;&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;&amp;lt;input&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;ref=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;slider&amp;quot;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;onChange=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.handleChange}&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;value=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.props.value}&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;#39;range&amp;#39;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;min=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;0&amp;quot;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;max=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;255&amp;quot;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;step=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;1&amp;quot;&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;{this.props.label}: {this.props.value}&lt;span class=&#39;nt&#39;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+            );
+        }
+    });
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Note that we use the &lt;code&gt;HandleSliderChangeMixin&lt;/code&gt; here. We&amp;#39;ll also want to update &lt;code&gt;FontSizeSlider&lt;/code&gt; to use this mixin.&lt;/p&gt;
+
+&lt;p&gt;Next we&amp;#39;ll create a component that will create a &lt;code&gt;FontColorSlider&lt;/code&gt; for each color value and communicate to our root component with the new values.&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    var FontColorSliders = React.createClass({
+        handleChange: function(r, g, b) {
+            this.props.onColorsChanged({r: r, g: g, b: b});
+        },
+        handleRedChange: function(value) {
+            this.handleChange(value, this.props.colors.g, this.props.colors.b);
+        },
+        handleGreenChange: function(value) {
+            this.handleChange(this.props.colors.r, value, this.props.colors.b);
+        },
+        handleBlueChange: function(value) {
+            this.handleChange(this.props.colors.r, this.props.colors.g, value);
+        },
+        render: function() {
+            return (
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;div&amp;gt;&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;&amp;lt;FontColorSlider&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;onSliderChanged=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.handleRedChange}&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;label=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Red&amp;quot;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;value=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.props.colors.r}&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;&amp;lt;FontColorSlider&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;onSliderChanged=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.handleGreenChange}&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;label=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Green&amp;quot;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;value=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.props.colors.g}&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;&amp;lt;FontColorSlider&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;onSliderChanged=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.handleBlueChange}&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;label=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Blue&amp;quot;&lt;/span&gt;
+                        &lt;span class=&#39;na&#39;&gt;value=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.props.colors.b}&lt;/span&gt;
+                    &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+            );
+        }
+    });
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Here are the changes to &lt;code&gt;VariableText&lt;/code&gt; that we&amp;#39;ll need to make:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    getInitialState: function() {
+        return {
+            size: this.props.defaultSize,
+            text: this.props.defaultText,
+            colors: {r:0, g:0, b:0}
+        }
+    },
+    colorsToRGB: function(colors) {
+        return &amp;quot;rgb(&amp;quot; + colors.r + &amp;quot;,&amp;quot; + colors.g + &amp;quot;,&amp;quot; + colors.b + &amp;quot;)&amp;quot;;
+    },
+    handleColorsChange: function(colors) {
+        this.setState({colors: colors});
+        this.refs.outputText.getDOMNode().style.color = this.colorsToRGB(colors);
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Don&amp;#39;t forget to add our new component to the &lt;code&gt;render&lt;/code&gt; method:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    &lt;span class=&#39;nt&#39;&gt;&amp;lt;FontColorSliders&lt;/span&gt;
+        &lt;span class=&#39;na&#39;&gt;onColorsChanged=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.handleColorsChange}&lt;/span&gt;
+        &lt;span class=&#39;na&#39;&gt;colors=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{this.state.colors}&lt;/span&gt;
+    &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Here is the final product:&lt;/p&gt;
+&lt;div class=&#39;highlight example&#39; id=&#39;ex3&#39;&gt; &lt;/div&gt;
+&lt;p&gt;The full source for this example can be found &lt;a href=&quot;https://gist.github.com/mcramm/8636822&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Most of this should be pretty straight forward. Again, the goal here was to create something simple to get your feet wet with. There are a few opportunities to make things even simpler, but I&amp;#39;ll leave that as an exercise for the reader.&lt;/p&gt;
+
+&lt;p&gt;If you plan on exploring more of React, then I recommend going through their &lt;a href=&quot;http://facebook.github.io/react/docs/tutorial.html&quot;&gt;tutorial&lt;/a&gt;, and checking out the different &lt;a href=&quot;http://facebook.github.io/react/docs/component-specs.html&quot;&gt;life cycle methods&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In an upcoming post, I&amp;#39;ll be creating a similar app in &lt;a href=&quot;https://github.com/swannodette/om&quot;&gt;Om&lt;/a&gt;.&lt;/p&gt;
+&lt;script src=&#39;http://fb.me/react-0.8.0.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;&lt;script src=&#39;/js/react_intro/build/ex1.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;&lt;script src=&#39;/js/react_intro/build/ex2.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;&lt;script src=&#39;/js/react_intro/build/ex3.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2014/01/06/leiningen-templates</id>
