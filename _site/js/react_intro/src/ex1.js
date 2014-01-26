@@ -38,7 +38,7 @@ var VariableText = React.createClass({
                     onTextChanged={this.handleTextChange}
                     inputValue={this.state.text}
                 />
-                <div className='example-text' ref='text'>{this.state.text}</div>
+                <div className='example-text'>{this.state.text}</div>
             </div>
         );
     }

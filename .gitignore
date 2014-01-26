@@ -1,2 +1,6 @@
 .rvmrc
 .sass-cache
+.module-cache/
+target/
+.lock.pid
+_site/dev
