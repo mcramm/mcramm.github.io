@@ -19,11 +19,11 @@
     </div>
     <div class='content'>
     <h1>React Intro </h1>
-    <p><a href="http://facebook.github.io/react/">React</a> is a new-ish library from Facebook/Instagram that is is designed to make building user interfaces easy.</p>
+    <p><a href="http://facebook.github.io/react/">React</a> is a new-ish library from Facebook/Instagram that is designed to make building user interfaces easy.</p>
 
 <p>I thought it would be fun to build a basic example in React, and then contrast it with the same example in Om.</p>
 
-<p>First lets setup the page where our example will live. We&#39;re going to want a container for the React root component, which we&#39;ll give the id <code>app</code>, and we&#39;ll include the React library and the JSX transformer.</p>
+<p>First let&#39;s setup the page where our example will live. We&#39;re going to want a container for the React root component, which we&#39;ll give the id <code>app</code>, and we&#39;ll include the React library and the JSX transformer.</p>
 <div class='highlight'><pre><code class='html'>    <span class='nt'>&lt;html&gt;</span>
         <span class='nt'>&lt;body&gt;</span>
             <span class='nt'>&lt;div</span> <span class='na'>id=</span><span class='s'>&#39;app&#39;</span><span class='nt'>&gt;&lt;/div&gt;</span>
@@ -46,7 +46,7 @@
 </code></pre></div>
 <p>JSX is completely optional, but it is a little bit easier to visualize the arrangement of nodes, so I&#39;ll be using it for this example.</p>
 
-<p>Let&#39;s start writing some code. Our first goal here is to create a text input where any entered text is rendered out to some node.</p>
+<p>Let&#39;s start writing some code. Our first goal is to create a text input where any entered text is rendered out to some node.</p>
 
 <p>First we&#39;ll create our root component and pass it some initial state:</p>
 <div class='highlight'><pre><code class='html'>    var VariableText = React.createClass({
@@ -61,9 +61,9 @@
         document.getElementById(&#39;app&#39;)
     );
 </code></pre></div>
-<p>What we&#39;re doing here is create a component called <code>VariableText</code> that knows how to render itself. <code>render</code> simply creates a <code>&lt;p&gt;</code> tag and inserts the <code>defaultText</code> inside of it. The second argument to <code>renderComponent</code> is simply explaining where to insert our component on our page.</p>
+<p>What we&#39;re doing here is create a component called <code>VariableText</code> that knows how to render itself. <code>render</code> simply creates a <code>&lt;p&gt;</code> tag and inserts <code>defaultText</code> inside of it. The second argument to <code>renderComponent</code> is simply explaining where to insert our component on our page.</p>
 
-<p>This is great, but kinda boring. Let&#39;s create our text input and change this text when we type into it. This next snippet will be a little bit bigger, but all we really want to do is create a <code>TextInput</code> component that renders an <code>input</code> tag and responds to changes. We&#39;ll also want to pass it our default text to set it&#39;s initial value.</p>
+<p>This is great, but kinda boring. Let&#39;s create our text input and change the content of the <code>&lt;p&gt;</code> tag when we type into it. This next snippet will be a little bit bigger, but all we really want to do is create a <code>TextInput</code> component that renders an <code>input</code> tag and responds to changes. We&#39;ll also want to pass it our default text to set the input&#39;s initial value.</p>
 <div class='highlight'><pre><code class='html'>    var TextInput = React.createClass({
         handleChange: function() {
             var text = this.refs.text.getDOMNode().value;
@@ -106,9 +106,9 @@
         }
     });
 </code></pre></div>
-<p>We&#39;ve had to change our <code>VariableText</code> component since we&#39;ll need to introduce some mutable state, the value of the text input, into our app. The <code>getInitialState</code> function is caled once, before the component is mounted. The return value of this function will be set to the initial <code>state</code> attribute of this component. Here, we&#39;re setting it the default text property. <code>VariableText</code> is going to be our root component, and will any state changes based on events triggered on it&#39;s children.</p>
+<p>We&#39;ve had to change our <code>VariableText</code> component since we&#39;ll need to introduce some mutable state, the value of the text input, into our app. The <code>getInitialState</code> function is called once, before the component is mounted. The return value of this function will set the initial value of the <code>state</code> attribute for this component. Here we&#39;re setting it to the default text property. <code>VariableText</code> is going to be our root component, and will coordinate any state changes based on events triggered on its children.</p>
 
-<p>Our first child component is <code>TextInput</code>. As mentioned before, this component renders an input tag and calls the component&#39;s <code>handleChange</code> function whenever it’s value changes. <code>handleChange</code> gets the value from the input via the <code>refs</code> attribute. When we create components in <code>render</code>, we can attach a special property to it that lets us refer back to it later. Once we get the value, we execute a callback that was assigned in our root component. This is the typical way a child can communicate with it&#39;s parent, and we&#39;ll see this pattern occur throughout the rest of the example.</p>
+<p>Our first child component is <code>TextInput</code>. As mentioned before this component renders an input tag and calls the component&#39;s <code>handleChange</code> function whenever the value changes. <code>handleChange</code> gets the value from the input via the <code>refs</code> attribute. When we create components in <code>render</code>, we can attach a special property <code>ref</code> to it that lets us refer back to it later. Once we get the value, we execute a callback that was assigned in our root component. This is the typical way a child communicates with its parent, and we&#39;ll see this pattern occur throughout the rest of the example.</p>
 
 <p>If you&#39;re following along on your own, this is what you should have so far:</p>
 <div class='highlight example' id='ex1'> </div>
@@ -164,14 +164,14 @@
         );
     }
 </code></pre></div>
-<p>Again, this should look similar to the previous change. All we&#39;ve done is add another child component and react to it changing it the same way as <code>TextInput</code>.</p>
+<p>Again this should look similar to the previous change. All we&#39;ve done is add another child component and react to it changing it the same way as <code>TextInput</code>.</p>
 
 <p>The <code>defaultSize</code> prop will also need to be passed into the root component:</p>
 <div class='highlight'><pre><code class='html'>    <span class='nt'>&lt;VariableText</span> <span class='na'>defaultText=</span><span class='s'>&quot;Some text&quot;</span> <span class='na'>defaultSize=</span><span class='s'>{15}/</span><span class='nt'>&gt;</span>,
 </code></pre></div>
-<p>You should now see something like the following;</p>
+<p>You should now see something like the following:</p>
 <div class='highlight example' id='ex2'> </div>
-<p>Let`s create a few more sliders and I&#39;ll show you how React gives you the ability to reduce code duplication. These sliders will control the red, green, and blue levels of our output text.</p>
+<p>Let&#39;s create a few more sliders and see how React gives you the ability to reduce code duplication. These sliders will control the red, green, and blue levels of our output text.</p>
 
 <p>Since these sliders will respond to change similarly to our <code>FontSizeSlider</code> component, we&#39;ll create a mixin:</p>
 <div class='highlight'><pre><code class='html'>    var HandleSliderChangeMixin = {
@@ -182,7 +182,7 @@
         }
     };
 </code></pre></div>
-<p>Each of these color sliders will be pretty similar. They will all range from 0 to 255, and we’ll want to give it a label and display it&#39;s value. Let\s create a generic component first:</p>
+<p>Each of these color sliders will be pretty similar. They will all range from 0 to 255, and have a label to display its value. Let&#39;s create a generic component first:</p>
 <div class='highlight'><pre><code class='html'>    var FontColorSlider = React.createClass({
         mixins: [HandleSliderChangeMixin],
         render: function() {
@@ -203,7 +203,7 @@
         }
     });
 </code></pre></div>
-<p>Not that we use the <code>HandleSliderChangeMixin</code> here. We&#39;ll also want to update <code>FontSizeSlider</code> to use this mixin.</p>
+<p>Note that we use the <code>HandleSliderChangeMixin</code> here. We&#39;ll also want to update <code>FontSizeSlider</code> to use this mixin.</p>
 
 <p>Next we&#39;ll create a component that will create a <code>FontColorSlider</code> for each color value and communicate to our root component with the new values.</p>
 <div class='highlight'><pre><code class='html'>    var FontColorSliders = React.createClass({
@@ -242,7 +242,7 @@
         }
     });
 </code></pre></div>
-<p>Here are the changes to <code>WariableText</code> that we’ll need to make:</p>
+<p>Here are the changes to <code>VariableText</code> that we&#39;ll need to make:</p>
 <div class='highlight'><pre><code class='html'>    getInitialState: function() {
         return {
             size: this.props.defaultSize,
@@ -266,13 +266,13 @@
 </code></pre></div>
 <p>Here is the final product:</p>
 <div class='highlight example' id='ex3'> </div>
-<p>The full source for this app can be found <a href="https://gist.github.com/mcramm/8636822">here</a>.</p>
+<p>The full source for this example can be found <a href="https://gist.github.com/mcramm/8636822">here</a>.</p>
 
-<p>Most of this should be pretty straight forward. Again, the goal here was to create something simple to get your feet wet with. There are a few opportunites to make things even simpler, but I&#39;ll leave that as an exercise for the reader.</p>
+<p>Most of this should be pretty straight forward. Again, the goal here was to create something simple to get your feet wet with. There are a few opportunities to make things even simpler, but I&#39;ll leave that as an exercise for the reader.</p>
 
-<p>If you plan on exploring more of React, then I would recommend going through their <a href="http://facebook.github.io/react/docs/tutorial.html">Tutorial</a>, and checking out the different <a href="http://facebook.github.io/react/docs/component-specs.html">lifecycle methods</a>.</p>
+<p>If you plan on exploring more of React, then I would recommend going through their <a href="http://facebook.github.io/react/docs/tutorial.html">Tutorial</a>, and checking out the different <a href="http://facebook.github.io/react/docs/component-specs.html">life cycle methods</a>.</p>
 
-<p>In an upcoming post, I’ll be creating a similar app in <a href="https://github.com/swannodette/om">Om</a>.</p>
+<p>In an upcoming post, I&#39;ll be creating a similar app in <a href="https://github.com/swannodette/om">Om</a>.</p>
 <script src='http://fb.me/react-0.8.0.js'><![CDATA[]]></script><script src='/js/react_intro/build/ex1.js'><![CDATA[]]></script><script src='/js/react_intro/build/ex2.js'><![CDATA[]]></script><script src='/js/react_intro/build/ex3.js'><![CDATA[]]></script>
 </div>
 <div class='respond'>

@@ -4,7 +4,7 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2014-01-26T11:07:42-07:00</updated>
+  <updated>2014-01-26T14:15:20-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
@@ -16,16 +16,16 @@
     <id>http://mcramm.com/2014/01/26/react-intro</id>
     <link type="text/html" rel="alternate" href="http://mcramm.com/2014/01/26/react-intro.html"/>
     <title>React Intro</title>
-    <updated>2014-01-26T11:07:10-07:00</updated>
+    <updated>2014-01-26T14:15:20-07:00</updated>
     <author>
       <name>Michael Cramm</name>
       <uri>http://mcramm.com/</uri>
     </author>
-    <content type="html">&lt;p&gt;&lt;a href=&quot;http://facebook.github.io/react/&quot;&gt;React&lt;/a&gt; is a new-ish library from Facebook/Instagram that is is designed to make building user interfaces easy.&lt;/p&gt;
+    <content type="html">&lt;p&gt;&lt;a href=&quot;http://facebook.github.io/react/&quot;&gt;React&lt;/a&gt; is a new-ish library from Facebook/Instagram that is designed to make building user interfaces easy.&lt;/p&gt;
 
 &lt;p&gt;I thought it would be fun to build a basic example in React, and then contrast it with the same example in Om.&lt;/p&gt;
 
-&lt;p&gt;First lets setup the page where our example will live. We&amp;#39;re going to want a container for the React root component, which we&amp;#39;ll give the id &lt;code&gt;app&lt;/code&gt;, and we&amp;#39;ll include the React library and the JSX transformer.&lt;/p&gt;
+&lt;p&gt;First let&amp;#39;s setup the page where our example will live. We&amp;#39;re going to want a container for the React root component, which we&amp;#39;ll give the id &lt;code&gt;app&lt;/code&gt;, and we&amp;#39;ll include the React library and the JSX transformer.&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    &lt;span class=&#39;nt&#39;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
         &lt;span class=&#39;nt&#39;&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
             &lt;span class=&#39;nt&#39;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;#39;app&amp;#39;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
@@ -48,7 +48,7 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;JSX is completely optional, but it is a little bit easier to visualize the arrangement of nodes, so I&amp;#39;ll be using it for this example.&lt;/p&gt;
 
-&lt;p&gt;Let&amp;#39;s start writing some code. Our first goal here is to create a text input where any entered text is rendered out to some node.&lt;/p&gt;
+&lt;p&gt;Let&amp;#39;s start writing some code. Our first goal is to create a text input where any entered text is rendered out to some node.&lt;/p&gt;
 
 &lt;p&gt;First we&amp;#39;ll create our root component and pass it some initial state:&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    var VariableText = React.createClass({
@@ -63,9 +63,9 @@
         document.getElementById(&amp;#39;app&amp;#39;)
     );
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;What we&amp;#39;re doing here is create a component called &lt;code&gt;VariableText&lt;/code&gt; that knows how to render itself. &lt;code&gt;render&lt;/code&gt; simply creates a &lt;code&gt;&amp;lt;p&amp;gt;&lt;/code&gt; tag and inserts the &lt;code&gt;defaultText&lt;/code&gt; inside of it. The second argument to &lt;code&gt;renderComponent&lt;/code&gt; is simply explaining where to insert our component on our page.&lt;/p&gt;
+&lt;p&gt;What we&amp;#39;re doing here is create a component called &lt;code&gt;VariableText&lt;/code&gt; that knows how to render itself. &lt;code&gt;render&lt;/code&gt; simply creates a &lt;code&gt;&amp;lt;p&amp;gt;&lt;/code&gt; tag and inserts &lt;code&gt;defaultText&lt;/code&gt; inside of it. The second argument to &lt;code&gt;renderComponent&lt;/code&gt; is simply explaining where to insert our component on our page.&lt;/p&gt;
 
-&lt;p&gt;This is great, but kinda boring. Let&amp;#39;s create our text input and change this text when we type into it. This next snippet will be a little bit bigger, but all we really want to do is create a &lt;code&gt;TextInput&lt;/code&gt; component that renders an &lt;code&gt;input&lt;/code&gt; tag and responds to changes. We&amp;#39;ll also want to pass it our default text to set it&amp;#39;s initial value.&lt;/p&gt;
+&lt;p&gt;This is great, but kinda boring. Let&amp;#39;s create our text input and change the content of the &lt;code&gt;&amp;lt;p&amp;gt;&lt;/code&gt; tag when we type into it. This next snippet will be a little bit bigger, but all we really want to do is create a &lt;code&gt;TextInput&lt;/code&gt; component that renders an &lt;code&gt;input&lt;/code&gt; tag and responds to changes. We&amp;#39;ll also want to pass it our default text to set the input&amp;#39;s initial value.&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    var TextInput = React.createClass({
         handleChange: function() {
             var text = this.refs.text.getDOMNode().value;
@@ -108,9 +108,9 @@
         }
     });
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;We&amp;#39;ve had to change our &lt;code&gt;VariableText&lt;/code&gt; component since we&amp;#39;ll need to introduce some mutable state, the value of the text input, into our app. The &lt;code&gt;getInitialState&lt;/code&gt; function is caled once, before the component is mounted. The return value of this function will be set to the initial &lt;code&gt;state&lt;/code&gt; attribute of this component. Here, we&amp;#39;re setting it the default text property. &lt;code&gt;VariableText&lt;/code&gt; is going to be our root component, and will any state changes based on events triggered on it&amp;#39;s children.&lt;/p&gt;
+&lt;p&gt;We&amp;#39;ve had to change our &lt;code&gt;VariableText&lt;/code&gt; component since we&amp;#39;ll need to introduce some mutable state, the value of the text input, into our app. The &lt;code&gt;getInitialState&lt;/code&gt; function is called once, before the component is mounted. The return value of this function will set the initial value of the &lt;code&gt;state&lt;/code&gt; attribute for this component. Here we&amp;#39;re setting it to the default text property. &lt;code&gt;VariableText&lt;/code&gt; is going to be our root component, and will coordinate any state changes based on events triggered on its children.&lt;/p&gt;
 
-&lt;p&gt;Our first child component is &lt;code&gt;TextInput&lt;/code&gt;. As mentioned before, this component renders an input tag and calls the component&amp;#39;s &lt;code&gt;handleChange&lt;/code&gt; function whenever it’s value changes. &lt;code&gt;handleChange&lt;/code&gt; gets the value from the input via the &lt;code&gt;refs&lt;/code&gt; attribute. When we create components in &lt;code&gt;render&lt;/code&gt;, we can attach a special property to it that lets us refer back to it later. Once we get the value, we execute a callback that was assigned in our root component. This is the typical way a child can communicate with it&amp;#39;s parent, and we&amp;#39;ll see this pattern occur throughout the rest of the example.&lt;/p&gt;
+&lt;p&gt;Our first child component is &lt;code&gt;TextInput&lt;/code&gt;. As mentioned before this component renders an input tag and calls the component&amp;#39;s &lt;code&gt;handleChange&lt;/code&gt; function whenever the value changes. &lt;code&gt;handleChange&lt;/code&gt; gets the value from the input via the &lt;code&gt;refs&lt;/code&gt; attribute. When we create components in &lt;code&gt;render&lt;/code&gt;, we can attach a special property &lt;code&gt;ref&lt;/code&gt; to it that lets us refer back to it later. Once we get the value, we execute a callback that was assigned in our root component. This is the typical way a child communicates with its parent, and we&amp;#39;ll see this pattern occur throughout the rest of the example.&lt;/p&gt;
 
 &lt;p&gt;If you&amp;#39;re following along on your own, this is what you should have so far:&lt;/p&gt;
 &lt;div class=&#39;highlight example&#39; id=&#39;ex1&#39;&gt; &lt;/div&gt;
@@ -166,14 +166,14 @@
         );
     }
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Again, this should look similar to the previous change. All we&amp;#39;ve done is add another child component and react to it changing it the same way as &lt;code&gt;TextInput&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Again this should look similar to the previous change. All we&amp;#39;ve done is add another child component and react to it changing it the same way as &lt;code&gt;TextInput&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;The &lt;code&gt;defaultSize&lt;/code&gt; prop will also need to be passed into the root component:&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    &lt;span class=&#39;nt&#39;&gt;&amp;lt;VariableText&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;defaultText=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Some text&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;defaultSize=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;{15}/&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;,
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;You should now see something like the following;&lt;/p&gt;
+&lt;p&gt;You should now see something like the following:&lt;/p&gt;
 &lt;div class=&#39;highlight example&#39; id=&#39;ex2&#39;&gt; &lt;/div&gt;
-&lt;p&gt;Let`s create a few more sliders and I&amp;#39;ll show you how React gives you the ability to reduce code duplication. These sliders will control the red, green, and blue levels of our output text.&lt;/p&gt;
+&lt;p&gt;Let&amp;#39;s create a few more sliders and see how React gives you the ability to reduce code duplication. These sliders will control the red, green, and blue levels of our output text.&lt;/p&gt;
 
 &lt;p&gt;Since these sliders will respond to change similarly to our &lt;code&gt;FontSizeSlider&lt;/code&gt; component, we&amp;#39;ll create a mixin:&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    var HandleSliderChangeMixin = {
@@ -184,7 +184,7 @@
         }
     };
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Each of these color sliders will be pretty similar. They will all range from 0 to 255, and we’ll want to give it a label and display it&amp;#39;s value. Let\s create a generic component first:&lt;/p&gt;
+&lt;p&gt;Each of these color sliders will be pretty similar. They will all range from 0 to 255, and have a label to display its value. Let&amp;#39;s create a generic component first:&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    var FontColorSlider = React.createClass({
         mixins: [HandleSliderChangeMixin],
         render: function() {
@@ -205,7 +205,7 @@
         }
     });
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Not that we use the &lt;code&gt;HandleSliderChangeMixin&lt;/code&gt; here. We&amp;#39;ll also want to update &lt;code&gt;FontSizeSlider&lt;/code&gt; to use this mixin.&lt;/p&gt;
+&lt;p&gt;Note that we use the &lt;code&gt;HandleSliderChangeMixin&lt;/code&gt; here. We&amp;#39;ll also want to update &lt;code&gt;FontSizeSlider&lt;/code&gt; to use this mixin.&lt;/p&gt;
 
 &lt;p&gt;Next we&amp;#39;ll create a component that will create a &lt;code&gt;FontColorSlider&lt;/code&gt; for each color value and communicate to our root component with the new values.&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    var FontColorSliders = React.createClass({
@@ -244,7 +244,7 @@
         }
     });
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Here are the changes to &lt;code&gt;WariableText&lt;/code&gt; that we’ll need to make:&lt;/p&gt;
+&lt;p&gt;Here are the changes to &lt;code&gt;VariableText&lt;/code&gt; that we&amp;#39;ll need to make:&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    getInitialState: function() {
         return {
             size: this.props.defaultSize,
@@ -268,13 +268,13 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Here is the final product:&lt;/p&gt;
 &lt;div class=&#39;highlight example&#39; id=&#39;ex3&#39;&gt; &lt;/div&gt;
-&lt;p&gt;The full source for this app can be found &lt;a href=&quot;https://gist.github.com/mcramm/8636822&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The full source for this example can be found &lt;a href=&quot;https://gist.github.com/mcramm/8636822&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;Most of this should be pretty straight forward. Again, the goal here was to create something simple to get your feet wet with. There are a few opportunites to make things even simpler, but I&amp;#39;ll leave that as an exercise for the reader.&lt;/p&gt;
+&lt;p&gt;Most of this should be pretty straight forward. Again, the goal here was to create something simple to get your feet wet with. There are a few opportunities to make things even simpler, but I&amp;#39;ll leave that as an exercise for the reader.&lt;/p&gt;
 
-&lt;p&gt;If you plan on exploring more of React, then I would recommend going through their &lt;a href=&quot;http://facebook.github.io/react/docs/tutorial.html&quot;&gt;Tutorial&lt;/a&gt;, and checking out the different &lt;a href=&quot;http://facebook.github.io/react/docs/component-specs.html&quot;&gt;lifecycle methods&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;If you plan on exploring more of React, then I would recommend going through their &lt;a href=&quot;http://facebook.github.io/react/docs/tutorial.html&quot;&gt;Tutorial&lt;/a&gt;, and checking out the different &lt;a href=&quot;http://facebook.github.io/react/docs/component-specs.html&quot;&gt;life cycle methods&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;In an upcoming post, I’ll be creating a similar app in &lt;a href=&quot;https://github.com/swannodette/om&quot;&gt;Om&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;In an upcoming post, I&amp;#39;ll be creating a similar app in &lt;a href=&quot;https://github.com/swannodette/om&quot;&gt;Om&lt;/a&gt;.&lt;/p&gt;
 &lt;script src=&#39;http://fb.me/react-0.8.0.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;&lt;script src=&#39;/js/react_intro/build/ex1.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;&lt;script src=&#39;/js/react_intro/build/ex2.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;&lt;script src=&#39;/js/react_intro/build/ex3.js&#39;&gt;&lt;![CDATA[]]&gt;&lt;/script&gt;</content>
   </entry>
   
