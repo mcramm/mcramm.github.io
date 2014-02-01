@@ -30,7 +30,8 @@
                                             (-> (om/get-node owner "text")
                                                 .-value))})
 
-               (dom/div nil (:text app))))))
+               (dom/div #js {:className "example-text"}
+                        (:text app))))))
 (om/root
   app-state
   my-widget

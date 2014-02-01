@@ -143,22 +143,14 @@ aosnehanoe
 {% highlight clojure %}
     (let [putfn (fn [k o]
                  (put! (:colors comm) [k (get-value o "color")]))]
-      (dom/div nil
-              (om/build color-slider
-                        (:colors app)
-                        {:opts {:label "Red"
-                                :color-key :red
-                                :onChange putfn}})
-              (om/build color-slider
-                        (:colors app)
-                        {:opts {:label "Green"
-                                :color-key :green
-                                :onChange putfn}})
-              (om/build color-slider
-                        (:colors app)
-                        {:opts {:label "Blue"
-                                :color-key :blue
-                                :onChange putfn}})))
+        (apply dom/div nil
+             (map (fn [[label color-key]]
+                    (om/build color-slider
+                              (:colors app)
+                              {:opts {:label label
+                                      :color-key color-key
+                                      :onChange putfn}}))
+                  [["Red" :red] ["Green" :green] ["Blue" :blue]])))
 {% endhighlight %}
 {% highlight clojure %}
     (let [size (:size app)

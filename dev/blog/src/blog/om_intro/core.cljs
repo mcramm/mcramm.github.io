@@ -68,36 +68,14 @@
                         (dom/label nil (str (:size app) "px")))
                (let [putfn (fn [k o]
                              (put! (:colors comm) [k (get-value o "color")]))]
-                 (dom/div nil
-                          (om/build color-slider
-                                    (:colors app)
-                                    {:opts {:label "Red"
-                                            :color-key :red
-                                            :onChange putfn}})
-                          (om/build color-slider
-                                    (:colors app)
-                                    {:opts {:label "Green"
-                                            :color-key :green
-                                            :onChange putfn}})
-                          (om/build color-slider
-                                    (:colors app)
-                                    {:opts {:label "Blue"
-                                            :color-key :blue
-                                            :onChange putfn}})
-                          )
-                 )
-               ; (om/build color-slider
-               ;           (:colors app)
-               ;           {:init-state {:comm (:colors comm)}
-               ;            :opts {:label "Red" :color-key :red}})
-               ; (om/build color-slider
-               ;           (:colors app)
-               ;           {:init-state {:comm (:colors comm)}
-               ;            :opts {:label "Green" :color-key :green}})
-               ; (om/build color-slider
-               ;           (:colors app)
-               ;           {:init-state {:comm (:colors comm)}
-               ;            :opts {:label "Blue" :color-key :blue}})
+                 (apply dom/div nil
+                        (map (fn [[label color-key]]
+                               (om/build color-slider
+                                         (:colors app)
+                                         {:opts {:label label
+                                                 :color-key color-key
+                                                 :onChange putfn}}))
+                             [["Red" :red] ["Green" :green] ["Blue" :blue]])))
 
                (let [size (:size app)
                      {:keys [red green blue]} (:colors app)]

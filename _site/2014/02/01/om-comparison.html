@@ -129,22 +129,14 @@
             <span class='p'>(</span><span class='nf'>om/update!</span> <span class='nv'>app</span> <span class='nv'>assoc-in</span> <span class='p'>[</span><span class='ss'>:colors</span> <span class='nv'>c</span><span class='p'>]</span> <span class='nv'>value</span><span class='p'>))))))</span>
 </code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>putfn</span> <span class='p'>(</span><span class='k'>fn </span><span class='p'>[</span><span class='nv'>k</span> <span class='nv'>o</span><span class='p'>]</span>
                  <span class='p'>(</span><span class='nf'>put!</span> <span class='p'>(</span><span class='ss'>:colors</span> <span class='nv'>comm</span><span class='p'>)</span> <span class='p'>[</span><span class='nv'>k</span> <span class='p'>(</span><span class='nf'>get-value</span> <span class='nv'>o</span> <span class='s'>&quot;color&quot;</span><span class='p'>)]))]</span>
-      <span class='p'>(</span><span class='nf'>dom/div</span> <span class='nv'>nil</span>
-              <span class='p'>(</span><span class='nf'>om/build</span> <span class='nv'>color-slider</span>
-                        <span class='p'>(</span><span class='ss'>:colors</span> <span class='nv'>app</span><span class='p'>)</span>
-                        <span class='p'>{</span><span class='ss'>:opts</span> <span class='p'>{</span><span class='ss'>:label</span> <span class='s'>&quot;Red&quot;</span>
-                                <span class='ss'>:color-key</span> <span class='ss'>:red</span>
-                                <span class='ss'>:onChange</span> <span class='nv'>putfn</span><span class='p'>}})</span>
-              <span class='p'>(</span><span class='nf'>om/build</span> <span class='nv'>color-slider</span>
-                        <span class='p'>(</span><span class='ss'>:colors</span> <span class='nv'>app</span><span class='p'>)</span>
-                        <span class='p'>{</span><span class='ss'>:opts</span> <span class='p'>{</span><span class='ss'>:label</span> <span class='s'>&quot;Green&quot;</span>
-                                <span class='ss'>:color-key</span> <span class='ss'>:green</span>
-                                <span class='ss'>:onChange</span> <span class='nv'>putfn</span><span class='p'>}})</span>
-              <span class='p'>(</span><span class='nf'>om/build</span> <span class='nv'>color-slider</span>
-                        <span class='p'>(</span><span class='ss'>:colors</span> <span class='nv'>app</span><span class='p'>)</span>
-                        <span class='p'>{</span><span class='ss'>:opts</span> <span class='p'>{</span><span class='ss'>:label</span> <span class='s'>&quot;Blue&quot;</span>
-                                <span class='ss'>:color-key</span> <span class='ss'>:blue</span>
-                                <span class='ss'>:onChange</span> <span class='nv'>putfn</span><span class='p'>}})))</span>
+        <span class='p'>(</span><span class='nb'>apply </span><span class='nv'>dom/div</span> <span class='nv'>nil</span>
+             <span class='p'>(</span><span class='nb'>map </span><span class='p'>(</span><span class='k'>fn </span><span class='p'>[[</span><span class='nv'>label</span> <span class='nv'>color-key</span><span class='p'>]]</span>
+                    <span class='p'>(</span><span class='nf'>om/build</span> <span class='nv'>color-slider</span>
+                              <span class='p'>(</span><span class='ss'>:colors</span> <span class='nv'>app</span><span class='p'>)</span>
+                              <span class='p'>{</span><span class='ss'>:opts</span> <span class='p'>{</span><span class='ss'>:label</span> <span class='nv'>label</span>
+                                      <span class='ss'>:color-key</span> <span class='nv'>color-key</span>
+                                      <span class='ss'>:onChange</span> <span class='nv'>putfn</span><span class='p'>}}))</span>
+                  <span class='p'>[[</span><span class='s'>&quot;Red&quot;</span> <span class='ss'>:red</span><span class='p'>]</span> <span class='p'>[</span><span class='s'>&quot;Green&quot;</span> <span class='ss'>:green</span><span class='p'>]</span> <span class='p'>[</span><span class='s'>&quot;Blue&quot;</span> <span class='ss'>:blue</span><span class='p'>]])))</span>
 </code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>size</span> <span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)</span>
          <span class='p'>{</span><span class='ss'>:keys</span> <span class='p'>[</span><span class='nv'>red</span> <span class='nv'>green</span> <span class='nv'>blue</span><span class='p'>]}</span> <span class='p'>(</span><span class='ss'>:colors</span> <span class='nv'>app</span><span class='p'>)]</span>
      <span class='p'>(</span><span class='nf'>dom/div</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:style</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:font-size</span> <span class='p'>(</span><span class='nb'>str </span><span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)</span> <span class='s'>&quot;px&quot;</span><span class='p'>)</span>
