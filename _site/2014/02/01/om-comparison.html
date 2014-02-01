@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Om Comparison</title>
+    <link href='http://fonts.googleapis.com/css?family=Arvo&v2' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Chivo' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet' href='/css/screen.css'></link>
+    <link rel='stylesheet' href='/css/highlight.css'></link>
+    <link rel='shortcut icon' type='image/ico' href='http://mcramm.com/favicon.png'></link>
+  </head>
+  <body>
+    <div class='header'>
+        <a class='header-text' href='/'>mcramm.com</a>
+        <div class='navigation'>
+            <a href='/'>About</a>
+            <a href='/posts.html'>Posts</a>
+            <a target='_blank' href='http://feeds.feedburner.com/mcramm'>Feed</a>
+        </div>
+    </div>
+    <div class='content'>
+    <h1>Om Comparison </h1>
+    <p>blah</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>ns </span><span class='nv'>om-intro.core</span>
+      <span class='p'>(</span><span class='ss'>:require</span> <span class='p'>[</span><span class='nv'>om.core</span> <span class='ss'>:as</span> <span class='nv'>om</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]</span>
+                <span class='p'>[</span><span class='nv'>om.dom</span> <span class='ss'>:as</span> <span class='nv'>dom</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]))</span>
+
+    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span> <span class='p'>(</span><span class='nf'>atom</span> <span class='ss'>:text</span> <span class='s'>&quot;Some Text&quot;</span><span class='p'>))</span>
+
+    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>my-widget</span> <span class='p'>[</span><span class='nv'>app</span> <span class='nv'>owner</span><span class='p'>]</span>
+      <span class='p'>(</span><span class='nf'>reify</span>
+        <span class='nv'>om/IRender</span>
+        <span class='p'>(</span><span class='nf'>render</span> <span class='p'>[</span><span class='nv'>this</span><span class='p'>]</span>
+          <span class='p'>(</span><span class='nf'>dom/div</span> <span class='nv'>nil</span> <span class='p'>(</span><span class='ss'>:text</span> <span class='nv'>app</span><span class='p'>)))))</span>
+
+    <span class='p'>(</span><span class='nf'>om/root</span>
+      <span class='nv'>app-state</span>
+      <span class='nv'>my-widget</span>
+      <span class='p'>(</span><span class='k'>. </span><span class='nv'>js/document</span> <span class='p'>(</span><span class='nf'>getElementById</span> <span class='s'>&quot;app&quot;</span><span class='p'>)))</span>
+</code></pre></div>
+<p>aosnehanoe</p>
+<div class='highlight example' id='ex1'> </div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>ns </span><span class='nv'>om-intro.core</span>
+      <span class='p'>(</span><span class='ss'>:require-macros</span> <span class='p'>[</span><span class='nv'>cljs.core.async.macros</span> <span class='ss'>:refer</span> <span class='p'>[</span><span class='nv'>go</span><span class='p'>]])</span>
+      <span class='p'>(</span><span class='ss'>:require</span> <span class='p'>[</span><span class='nv'>om.core</span> <span class='ss'>:as</span> <span class='nv'>om</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]</span>
+                <span class='p'>[</span><span class='nv'>om.dom</span> <span class='ss'>:as</span> <span class='nv'>dom</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]</span>
+                <span class='p'>[</span><span class='nv'>cljs.core.async</span> <span class='ss'>:refer</span> <span class='p'>[</span><span class='nv'>put!</span> <span class='nv'>chan</span> <span class='nv'>&lt;!</span> <span class='nv'>sliding-buffer</span><span class='p'>]]))</span>
+</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>my-widget</span> <span class='p'>[</span><span class='nv'>app</span> <span class='nv'>owner</span><span class='p'>]</span>
+      <span class='p'>(</span><span class='nf'>reify</span>
+        <span class='nv'>om/IInitState</span>
+        <span class='p'>(</span><span class='nf'>init-state</span> <span class='p'>[</span><span class='nv'>this</span><span class='p'>]</span>
+          <span class='p'>{</span><span class='ss'>:comm</span> <span class='p'>{</span><span class='ss'>:string</span> <span class='p'>(</span><span class='nf'>chan</span><span class='p'>)}})</span>
+
+        <span class='nv'>om/IWillMount</span>
+        <span class='p'>(</span><span class='nf'>will-mount</span> <span class='p'>[</span><span class='nv'>this</span><span class='p'>]</span>
+          <span class='p'>(</span><span class='k'>let </span><span class='p'>[{</span><span class='ss'>:keys</span> <span class='p'>[</span><span class='nv'>string</span><span class='p'>]</span> <span class='ss'>:as</span> <span class='nv'>comm</span><span class='p'>}</span> <span class='p'>(</span><span class='nf'>om/get-state</span> <span class='nv'>owner</span> <span class='ss'>:comm</span><span class='p'>)]</span>
+            <span class='p'>(</span><span class='nf'>go</span> <span class='p'>(</span><span class='nf'>while</span> <span class='nv'>true</span>
+                  <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>value</span> <span class='p'>(</span><span class='nf'>&lt;!</span> <span class='nv'>string</span><span class='p'>)]</span>
+                    <span class='p'>(</span><span class='nf'>om/transact!</span> <span class='nv'>app</span> <span class='ss'>:text</span> <span class='p'>(</span><span class='k'>fn </span><span class='p'>[</span><span class='nv'>_</span><span class='p'>]</span> <span class='nv'>value</span><span class='p'>)))))))</span>
+
+        <span class='nv'>om/IRenderState</span>
+        <span class='p'>(</span><span class='nf'>render-state</span> <span class='p'>[</span><span class='nv'>this</span> <span class='p'>{</span><span class='ss'>:keys</span> <span class='p'>[</span><span class='nv'>comm</span><span class='p'>]}]</span>
+          <span class='p'>(</span><span class='nf'>dom/div</span> <span class='nv'>nil</span>
+                   <span class='p'>(</span><span class='nf'>dom/input</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:type</span> <span class='s'>&quot;text&quot;</span>
+                                   <span class='ss'>:ref</span> <span class='s'>&quot;text&quot;</span>
+                                   <span class='ss'>:value</span> <span class='p'>(</span><span class='ss'>:text</span> <span class='nv'>app</span><span class='p'>)</span>
+                                   <span class='ss'>:onChange</span> <span class='o'>#</span><span class='p'>(</span><span class='nf'>put!</span>
+                                                <span class='p'>(</span><span class='ss'>:string</span> <span class='nv'>comm</span><span class='p'>)</span>
+                                                <span class='p'>(</span><span class='nb'>-&gt; </span><span class='p'>(</span><span class='nf'>om/get-node</span> <span class='nv'>owner</span> <span class='s'>&quot;text&quot;</span><span class='p'>)</span>
+                                                    <span class='nv'>.-value</span><span class='p'>))})</span>
+
+                   <span class='p'>(</span><span class='nf'>dom/div</span> <span class='nv'>nil</span> <span class='p'>(</span><span class='ss'>:text</span> <span class='nv'>app</span><span class='p'>))))))</span>
+</code></pre></div><div class='highlight example' id='ex2'> </div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span> <span class='p'>(</span><span class='nf'>atom</span> <span class='p'>{</span><span class='ss'>:text</span> <span class='s'>&quot;Some Text&quot;</span>
+                          <span class='ss'>:size</span> <span class='mi'>15</span><span class='p'>}))</span>
+</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='nv'>om/IInitState</span>
+    <span class='p'>(</span><span class='nf'>init-state</span> <span class='p'>[</span><span class='nv'>this</span><span class='p'>]</span>
+      <span class='p'>{</span><span class='ss'>:comm</span> <span class='p'>{</span><span class='ss'>:string</span> <span class='p'>(</span><span class='nf'>chan</span><span class='p'>)</span>
+              <span class='ss'>:size</span> <span class='p'>(</span><span class='nf'>chan</span><span class='p'>)}})</span>
+</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='nv'>om/IWillMount</span>
+    <span class='p'>(</span><span class='nf'>will-mount</span> <span class='p'>[</span><span class='nv'>this</span><span class='p'>]</span>
+      <span class='p'>(</span><span class='k'>let </span><span class='p'>[{</span><span class='ss'>:keys</span> <span class='p'>[</span><span class='nv'>string</span> <span class='nv'>size</span><span class='p'>]</span> <span class='ss'>:as</span> <span class='nv'>comm</span><span class='p'>}</span> <span class='p'>(</span><span class='nf'>om/get-state</span> <span class='nv'>owner</span> <span class='ss'>:comm</span><span class='p'>)]</span>
+        <span class='p'>(</span><span class='nf'>go</span> <span class='p'>(</span><span class='nf'>while</span> <span class='nv'>true</span>
+              <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>value</span> <span class='p'>(</span><span class='nf'>&lt;!</span> <span class='nv'>string</span><span class='p'>)]</span>
+                <span class='p'>(</span><span class='nf'>om/transact!</span> <span class='nv'>app</span> <span class='ss'>:text</span> <span class='p'>(</span><span class='k'>fn </span><span class='p'>[</span><span class='nv'>_</span><span class='p'>]</span> <span class='nv'>value</span><span class='p'>)))))</span>
+        <span class='p'>(</span><span class='nf'>go</span> <span class='p'>(</span><span class='nf'>while</span> <span class='nv'>true</span>
+              <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>value</span> <span class='p'>(</span><span class='nf'>&lt;!</span> <span class='nv'>size</span><span class='p'>)]</span>
+                <span class='p'>(</span><span class='nf'>om/transact!</span> <span class='nv'>app</span> <span class='ss'>:size</span> <span class='p'>(</span><span class='k'>fn </span><span class='p'>[</span><span class='nv'>_</span><span class='p'>]</span> <span class='nv'>value</span><span class='p'>)))))))</span>
+</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='nf'>dom/div</span> <span class='nv'>nil</span>
+            <span class='p'>(</span><span class='nf'>dom/input</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:type</span> <span class='s'>&quot;range&quot;</span>
+                            <span class='ss'>:min</span> <span class='mi'>10</span>
+                            <span class='ss'>:max</span> <span class='mi'>50</span>
+                            <span class='ss'>:step</span> <span class='mf'>0.2</span>
+                            <span class='ss'>:ref</span> <span class='s'>&quot;size&quot;</span>
+                            <span class='ss'>:value</span> <span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)</span>
+                            <span class='ss'>:onChange</span> <span class='o'>#</span><span class='p'>(</span><span class='nf'>put!</span>
+                                        <span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>comm</span><span class='p'>)</span>
+                                        <span class='p'>(</span><span class='nf'>get-value</span> <span class='nv'>owner</span> <span class='s'>&quot;size&quot;</span><span class='p'>))})</span>
+            <span class='p'>(</span><span class='nf'>dom/label</span> <span class='nv'>nil</span> <span class='p'>(</span><span class='nb'>str </span><span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)</span> <span class='s'>&quot;px&quot;</span><span class='p'>)))</span>
+</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>get-value</span> <span class='p'>[</span><span class='nv'>owner</span> <span class='nv'>ref</span><span class='p'>]</span>
+      <span class='p'>(</span><span class='nb'>-&gt; </span><span class='p'>(</span><span class='nf'>om/get-node</span> <span class='nv'>owner</span> <span class='nv'>ref</span><span class='p'>)</span>
+          <span class='nv'>.-value</span><span class='p'>))</span>
+</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>size</span> <span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)]</span>
+     <span class='p'>(</span><span class='nf'>dom/div</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:style</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:font-size</span> <span class='p'>(</span><span class='nb'>str </span><span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)</span> <span class='s'>&quot;px&quot;</span><span class='p'>)}</span>
+                   <span class='ss'>:className</span> <span class='s'>&quot;example-text&quot;</span><span class='p'>}</span>
+              <span class='p'>(</span><span class='ss'>:text</span> <span class='nv'>app</span><span class='p'>)))</span>
+</code></pre></div><div class='highlight example' id='ex3'> </div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span> <span class='p'>(</span><span class='nf'>atom</span> <span class='p'>{</span><span class='ss'>:text</span> <span class='s'>&quot;Some Text&quot;</span>
+                          <span class='ss'>:size</span> <span class='mi'>15</span>
+                          <span class='ss'>:colors</span> <span class='p'>{</span><span class='ss'>:red</span> <span class='mi'>0</span>
+                                   <span class='ss'>:green</span> <span class='mi'>0</span>
+                                   <span class='ss'>:blue</span> <span class='mi'>0</span><span class='p'>}}))</span>
+</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>color-slider</span> <span class='p'>[</span><span class='nv'>colors</span> <span class='nv'>owner</span> <span class='p'>{</span><span class='ss'>:keys</span> <span class='p'>[</span><span class='nv'>label</span> <span class='nv'>onChange</span> <span class='nv'>color-key</span><span class='p'>]}]</span>
+      <span class='p'>(</span><span class='nf'>reify</span>
+        <span class='nv'>om/IRenderState</span>
+        <span class='p'>(</span><span class='nf'>render-state</span> <span class='p'>[</span><span class='nv'>this</span> <span class='p'>{</span><span class='ss'>:keys</span> <span class='p'>[</span><span class='nv'>comm</span><span class='p'>]}]</span>
+          <span class='p'>(</span><span class='nf'>dom/div</span> <span class='nv'>nil</span>
+                   <span class='p'>(</span><span class='nf'>dom/input</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:type</span> <span class='s'>&quot;range&quot;</span>
+                                   <span class='ss'>:min</span> <span class='mi'>0</span>
+                                   <span class='ss'>:max</span> <span class='mi'>255</span>
+                                   <span class='ss'>:step</span> <span class='mi'>1</span>
+                                   <span class='ss'>:ref</span> <span class='s'>&quot;color&quot;</span>
+                                   <span class='ss'>:value</span> <span class='p'>(</span><span class='nf'>color-key</span> <span class='nv'>colors</span><span class='p'>)</span>
+                                   <span class='ss'>:onChange</span> <span class='o'>#</span><span class='p'>(</span><span class='nf'>onChange</span> <span class='nv'>color-key</span> <span class='nv'>owner</span><span class='p'>)})</span>
+                   <span class='p'>(</span><span class='nf'>dom/label</span> <span class='nv'>nil</span> <span class='p'>(</span><span class='nb'>str </span><span class='nv'>label</span> <span class='s'>&quot;: &quot;</span> <span class='p'>(</span><span class='nf'>color-key</span> <span class='nv'>colors</span><span class='p'>)))))))</span>
+</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='nv'>om/IInitState</span>
+    <span class='p'>(</span><span class='nf'>init-state</span> <span class='p'>[</span><span class='nv'>this</span><span class='p'>]</span>
+      <span class='p'>{</span><span class='ss'>:comm</span> <span class='p'>{</span><span class='ss'>:string</span> <span class='p'>(</span><span class='nf'>chan</span><span class='p'>)</span>
+              <span class='ss'>:size</span> <span class='p'>(</span><span class='nf'>chan</span><span class='p'>)</span>
+              <span class='ss'>:colors</span> <span class='p'>(</span><span class='nf'>chan</span><span class='p'>)}})</span>
+</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='nf'>go</span> <span class='p'>(</span><span class='nf'>while</span> <span class='nv'>true</span>
+          <span class='p'>(</span><span class='k'>let </span><span class='p'>[[</span><span class='nv'>c</span> <span class='nv'>value</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>&lt;!</span> <span class='nv'>colors</span><span class='p'>)]</span>
+            <span class='p'>(</span><span class='nf'>om/update!</span> <span class='nv'>app</span> <span class='nv'>assoc-in</span> <span class='p'>[</span><span class='ss'>:colors</span> <span class='nv'>c</span><span class='p'>]</span> <span class='nv'>value</span><span class='p'>))))))</span>
+</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>putfn</span> <span class='p'>(</span><span class='k'>fn </span><span class='p'>[</span><span class='nv'>k</span> <span class='nv'>o</span><span class='p'>]</span>
+                 <span class='p'>(</span><span class='nf'>put!</span> <span class='p'>(</span><span class='ss'>:colors</span> <span class='nv'>comm</span><span class='p'>)</span> <span class='p'>[</span><span class='nv'>k</span> <span class='p'>(</span><span class='nf'>get-value</span> <span class='nv'>o</span> <span class='s'>&quot;color&quot;</span><span class='p'>)]))]</span>
+      <span class='p'>(</span><span class='nf'>dom/div</span> <span class='nv'>nil</span>
+              <span class='p'>(</span><span class='nf'>om/build</span> <span class='nv'>color-slider</span>
+                        <span class='p'>(</span><span class='ss'>:colors</span> <span class='nv'>app</span><span class='p'>)</span>
+                        <span class='p'>{</span><span class='ss'>:opts</span> <span class='p'>{</span><span class='ss'>:label</span> <span class='s'>&quot;Red&quot;</span>
+                                <span class='ss'>:color-key</span> <span class='ss'>:red</span>
+                                <span class='ss'>:onChange</span> <span class='nv'>putfn</span><span class='p'>}})</span>
+              <span class='p'>(</span><span class='nf'>om/build</span> <span class='nv'>color-slider</span>
+                        <span class='p'>(</span><span class='ss'>:colors</span> <span class='nv'>app</span><span class='p'>)</span>
+                        <span class='p'>{</span><span class='ss'>:opts</span> <span class='p'>{</span><span class='ss'>:label</span> <span class='s'>&quot;Green&quot;</span>
+                                <span class='ss'>:color-key</span> <span class='ss'>:green</span>
+                                <span class='ss'>:onChange</span> <span class='nv'>putfn</span><span class='p'>}})</span>
+              <span class='p'>(</span><span class='nf'>om/build</span> <span class='nv'>color-slider</span>
+                        <span class='p'>(</span><span class='ss'>:colors</span> <span class='nv'>app</span><span class='p'>)</span>
+                        <span class='p'>{</span><span class='ss'>:opts</span> <span class='p'>{</span><span class='ss'>:label</span> <span class='s'>&quot;Blue&quot;</span>
+                                <span class='ss'>:color-key</span> <span class='ss'>:blue</span>
+                                <span class='ss'>:onChange</span> <span class='nv'>putfn</span><span class='p'>}})))</span>
+</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>size</span> <span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)</span>
+         <span class='p'>{</span><span class='ss'>:keys</span> <span class='p'>[</span><span class='nv'>red</span> <span class='nv'>green</span> <span class='nv'>blue</span><span class='p'>]}</span> <span class='p'>(</span><span class='ss'>:colors</span> <span class='nv'>app</span><span class='p'>)]</span>
+     <span class='p'>(</span><span class='nf'>dom/div</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:style</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:font-size</span> <span class='p'>(</span><span class='nb'>str </span><span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)</span> <span class='s'>&quot;px&quot;</span><span class='p'>)</span>
+                               <span class='ss'>:color</span> <span class='p'>(</span><span class='nb'>str </span><span class='s'>&quot;rgb(&quot;</span> <span class='nv'>red</span> <span class='s'>&quot;,&quot;</span> <span class='nv'>green</span> <span class='s'>&quot;,&quot;</span> <span class='nv'>blue</span> <span class='s'>&quot;)&quot;</span><span class='p'>)}}</span>
+              <span class='p'>(</span><span class='ss'>:text</span> <span class='nv'>app</span><span class='p'>)))))))</span>
+</code></pre></div><div class='highlight example' id='final'> </div><script src='/js/om-intro.js' type='text/javascript'><![CDATA[]]></script>
+</div>
+<div class='respond'>
+    Want to comment? Send a message to <a href='https://twitter.com/intent/tweet?text=@cramm'>@cramm</a> on Twitter.
+</div>
+
+
+    <div class='footer-wrap'>
+        <div class='footer'>
+            <div class='copyright'>&copy; 2014 Michael Cramm</div>
+        </div>
+    </div>
+</body>
+</html>
