@@ -19,7 +19,7 @@
     </div>
     <div class='content'>
     <h1>Om Comparison </h1>
-    <p>In my <a href="http://mcramm.com/2014/01/26/react-intro.html">last post</a> I built a simple text manipulation widget with <a href="http://facebook.github.io/react/">React</a>. I recommend reading through that post first, before this one. As promised, I&#39;ve built the same widget in <a href="">Om</a>, a Clojurescript library that sits on top of React.</p>
+    <p>In my <a href="http://mcramm.com/2014/01/26/react-intro.html">last post</a> I built a simple text manipulation widget with <a href="http://facebook.github.io/react/">React</a>. I recommend reading through that post first, before this one. As promised, I&#39;ve built the same widget in <a href="https://github.com/swannodette/om">Om</a>, a Clojurescript library that sits on top of React.</p>
 
 <p>If you want to follow along, you&#39;ll need to install Leiningen and run:</p>
 <div class='highlight'><pre><code class='bash'>    lein new mies-om om-intro
@@ -71,7 +71,7 @@ cljsbuild once dev</code>. Open <code>index.html</code> in a browser and you sho
       <span class='p'>(</span><span class='ss'>:require</span> <span class='p'>[</span><span class='nv'>om.core</span> <span class='ss'>:as</span> <span class='nv'>om</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]</span>
                 <span class='p'>[</span><span class='nv'>om.dom</span> <span class='ss'>:as</span> <span class='nv'>dom</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]))</span>
 
-    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span> <span class='p'>(</span><span class='nf'>atom</span> <span class='ss'>:text</span> <span class='s'>&quot;Some Text&quot;</span><span class='p'>))</span>
+    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span> <span class='p'>(</span><span class='nf'>atom</span> <span class='p'>{</span><span class='ss'>:text</span> <span class='s'>&quot;Some Text&quot;</span><span class='p'>}))</span>
 
     <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>my-widget</span> <span class='p'>[</span><span class='nv'>app</span> <span class='nv'>owner</span><span class='p'>]</span>
       <span class='p'>(</span><span class='nf'>reify</span>
@@ -137,10 +137,10 @@ cljsbuild once dev</code>. Open <code>index.html</code> in a browser and you sho
 <p>In <code>om/IWillMount</code>, we setup a go loop that blocks on the channel assigned to <code>:string</code> earlier, then sets the <code>:text</code> attribute in our application state to the value we get off of that channel. Once it&#39;s done it goes back to waiting on the channel.</p>
 
 <blockquote>
-<p>If you&#39;re new to Clojure, then the destructuring we do in the <code>let</code> binding can be a little confusing. The gist of what we&#39;re doing is creating a local <code>string</code> variable for our go block that is the key a map returned by <code>(om/get-state owner :comm)</code>. In other words, it takes the map we created earlier and creates a local variable that is assigned the value of the <code>:string</code> key.</p>
+<p>If you&#39;re new to Clojure, then the destructuring we do in the <code>let</code> binding can be a little confusing. The gist of what we&#39;re doing is creating a local <code>string</code> variable for our go block that is based on a key in the map returned by <code>(om/get-state owner :comm)</code>. In other words, it takes the map we created earlier and creates a local variable that is assigned the value of the <code>:string</code> key.</p>
 </blockquote>
 
-<p>We use <code>om/trasact!</code> here since updating an atom needs to occur within a transaction. We could have also used <code>swap!</code> here to modify the <code>atom</code> manually.</p>
+<p>We use <code>om/transact!</code> here since updating an atom needs to occur within a transaction. We could have also used <code>swap!</code> here to modify the <code>atom</code> manually.</p>
 
 <p><code>will-mount</code> is called once, before the component is mounted into the DOM.</p>
 
@@ -155,7 +155,7 @@ cljsbuild once dev</code>. Open <code>index.html</code> in a browser and you sho
                                 <span class='p'>(</span><span class='nb'>-&gt; </span><span class='p'>(</span><span class='nf'>om/get-node</span> <span class='nv'>owner</span> <span class='s'>&quot;text&quot;</span><span class='p'>)</span>
                                     <span class='nv'>.-value</span><span class='p'>))})</span>
 </code></pre></div>
-<p>The element is actually only taking a single argument, though it looks like two. <code>#js</code> is a reader literal for Clojurscript that transforms the following object into literal JavaScript object. The map that we pass is setting some attributes on the component. In this case, we want a text input that contains the value of the <code>:text</code> key from our application state. We assign it the ref <code>text</code> so that we can refer to it from <code>onChange</code> callback.</p>
+<p>The element is actually only taking a single argument, though it looks like two. <code>#js</code> is a reader literal for Clojurscript that transforms the following object into literal JavaScript object. The map that we pass is setting some attributes on the component. In this case, we want a text input that contains the value of the <code>:text</code> key from our application state. We assign it the ref <code>text</code> so that we can refer to it from the <code>onChange</code> callback via <code>om/get-node</code>.</p>
 
 <p>This callback is really simple, and is one of the reasons why core.async is so attractive. All it does is take the value of the <code>text</code> node and put it onto the <code>string</code> channel.</p>
 

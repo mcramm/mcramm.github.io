@@ -4,7 +4,7 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2014-02-01T13:38:05-07:00</updated>
+  <updated>2014-02-01T13:59:49-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
@@ -16,12 +16,12 @@
     <id>http://mcramm.com/2014/02/01/om-comparison</id>
     <link type="text/html" rel="alternate" href="http://mcramm.com/2014/02/01/om-comparison.html"/>
     <title>Om Comparison</title>
-    <updated>2014-02-01T13:38:05-07:00</updated>
+    <updated>2014-02-01T13:59:48-07:00</updated>
     <author>
       <name>Michael Cramm</name>
       <uri>http://mcramm.com/</uri>
     </author>
-    <content type="html">&lt;p&gt;In my &lt;a href=&quot;http://mcramm.com/2014/01/26/react-intro.html&quot;&gt;last post&lt;/a&gt; I built a simple text manipulation widget with &lt;a href=&quot;http://facebook.github.io/react/&quot;&gt;React&lt;/a&gt;. I recommend reading through that post first, before this one. As promised, I&amp;#39;ve built the same widget in &lt;a href=&quot;&quot;&gt;Om&lt;/a&gt;, a Clojurescript library that sits on top of React.&lt;/p&gt;
+    <content type="html">&lt;p&gt;In my &lt;a href=&quot;http://mcramm.com/2014/01/26/react-intro.html&quot;&gt;last post&lt;/a&gt; I built a simple text manipulation widget with &lt;a href=&quot;http://facebook.github.io/react/&quot;&gt;React&lt;/a&gt;. I recommend reading through that post first, before this one. As promised, I&amp;#39;ve built the same widget in &lt;a href=&quot;https://github.com/swannodette/om&quot;&gt;Om&lt;/a&gt;, a Clojurescript library that sits on top of React.&lt;/p&gt;
 
 &lt;p&gt;If you want to follow along, you&amp;#39;ll need to install Leiningen and run:&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;bash&#39;&gt;    lein new mies-om om-intro
@@ -73,7 +73,7 @@ cljsbuild once dev&lt;/code&gt;. Open &lt;code&gt;index.html&lt;/code&gt; in a b
       &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:require&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om.core&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:as&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;om&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:include-macros&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;true&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
                 &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om.dom&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:as&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;dom&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:include-macros&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;true&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]))&lt;/span&gt;
 
-    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;def &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;app-state&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;atom&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:text&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;Some Text&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))&lt;/span&gt;
+    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;def &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;app-state&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;atom&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:text&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;Some Text&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;}))&lt;/span&gt;
 
     &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;defn &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;my-widget&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;app&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;owner&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
       &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;reify&lt;/span&gt;
@@ -139,10 +139,10 @@ cljsbuild once dev&lt;/code&gt;. Open &lt;code&gt;index.html&lt;/code&gt; in a b
 &lt;p&gt;In &lt;code&gt;om/IWillMount&lt;/code&gt;, we setup a go loop that blocks on the channel assigned to &lt;code&gt;:string&lt;/code&gt; earlier, then sets the &lt;code&gt;:text&lt;/code&gt; attribute in our application state to the value we get off of that channel. Once it&amp;#39;s done it goes back to waiting on the channel.&lt;/p&gt;
 
 &lt;blockquote&gt;
-&lt;p&gt;If you&amp;#39;re new to Clojure, then the destructuring we do in the &lt;code&gt;let&lt;/code&gt; binding can be a little confusing. The gist of what we&amp;#39;re doing is creating a local &lt;code&gt;string&lt;/code&gt; variable for our go block that is the key a map returned by &lt;code&gt;(om/get-state owner :comm)&lt;/code&gt;. In other words, it takes the map we created earlier and creates a local variable that is assigned the value of the &lt;code&gt;:string&lt;/code&gt; key.&lt;/p&gt;
+&lt;p&gt;If you&amp;#39;re new to Clojure, then the destructuring we do in the &lt;code&gt;let&lt;/code&gt; binding can be a little confusing. The gist of what we&amp;#39;re doing is creating a local &lt;code&gt;string&lt;/code&gt; variable for our go block that is based on a key in the map returned by &lt;code&gt;(om/get-state owner :comm)&lt;/code&gt;. In other words, it takes the map we created earlier and creates a local variable that is assigned the value of the &lt;code&gt;:string&lt;/code&gt; key.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;We use &lt;code&gt;om/trasact!&lt;/code&gt; here since updating an atom needs to occur within a transaction. We could have also used &lt;code&gt;swap!&lt;/code&gt; here to modify the &lt;code&gt;atom&lt;/code&gt; manually.&lt;/p&gt;
+&lt;p&gt;We use &lt;code&gt;om/transact!&lt;/code&gt; here since updating an atom needs to occur within a transaction. We could have also used &lt;code&gt;swap!&lt;/code&gt; here to modify the &lt;code&gt;atom&lt;/code&gt; manually.&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;will-mount&lt;/code&gt; is called once, before the component is mounted into the DOM.&lt;/p&gt;
 
@@ -157,7 +157,7 @@ cljsbuild once dev&lt;/code&gt;. Open &lt;code&gt;index.html&lt;/code&gt; in a b
                                 &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;-&amp;gt; &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;om/get-node&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;owner&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;text&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
                                     &lt;span class=&#39;nv&#39;&gt;.-value&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))})&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;The element is actually only taking a single argument, though it looks like two. &lt;code&gt;#js&lt;/code&gt; is a reader literal for Clojurscript that transforms the following object into literal JavaScript object. The map that we pass is setting some attributes on the component. In this case, we want a text input that contains the value of the &lt;code&gt;:text&lt;/code&gt; key from our application state. We assign it the ref &lt;code&gt;text&lt;/code&gt; so that we can refer to it from &lt;code&gt;onChange&lt;/code&gt; callback.&lt;/p&gt;
+&lt;p&gt;The element is actually only taking a single argument, though it looks like two. &lt;code&gt;#js&lt;/code&gt; is a reader literal for Clojurscript that transforms the following object into literal JavaScript object. The map that we pass is setting some attributes on the component. In this case, we want a text input that contains the value of the &lt;code&gt;:text&lt;/code&gt; key from our application state. We assign it the ref &lt;code&gt;text&lt;/code&gt; so that we can refer to it from the &lt;code&gt;onChange&lt;/code&gt; callback via &lt;code&gt;om/get-node&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;This callback is really simple, and is one of the reasons why core.async is so attractive. All it does is take the value of the &lt;code&gt;text&lt;/code&gt; node and put it onto the &lt;code&gt;string&lt;/code&gt; channel.&lt;/p&gt;
 

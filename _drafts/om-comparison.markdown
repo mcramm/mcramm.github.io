@@ -4,7 +4,8 @@ layout: post
 
 In my [last post](http://mcramm.com/2014/01/26/react-intro.html) I built a simple text manipulation widget with [React](http://facebook.github.io/react/).
 I recommend reading through that post first, before this one.
-As promised, I\'ve built the same widget in [Om](), a Clojurescript library that
+As promised, I\'ve built the same widget in
+[Om](https://github.com/swannodette/om), a Clojurescript library that
 sits on top of React.
 
 If you want to follow along, you\'ll need to install Leiningen and run:
@@ -72,7 +73,7 @@ With the setup out of the way we can start rebuilding this widget.
       (:require [om.core :as om :include-macros true]
                 [om.dom :as dom :include-macros true]))
 
-    (def app-state (atom :text "Some Text"))
+    (def app-state (atom {:text "Some Text"}))
 
     (defn my-widget [app owner]
       (reify
@@ -164,12 +165,12 @@ the channel.
 
 > If you\'re new to Clojure, then the destructuring we do in the `let` binding can
 > be a little confusing. The gist of what we\'re doing is creating a local
-> `string` variable for our go block that is the key a map returned by
+> `string` variable for our go block that is based on a key in the map returned by
 > `(om/get-state owner :comm)`. In other words, it takes the map we created
 > earlier and creates a local variable that is assigned the value of the
 > `:string` key.
 
-We use `om/trasact!` here since updating an atom needs to occur within a
+We use `om/transact!` here since updating an atom needs to occur within a
 transaction. We could have also used `swap!` here to modify the `atom` manually.
 
 `will-mount` is called once, before the component is mounted into the DOM.
@@ -196,7 +197,7 @@ The element is actually only taking a single argument, though it looks like two.
 into literal JavaScript object. The map that we pass is setting some attributes
 on the component. In this case, we want a text input that contains the value of
 the `:text` key from our application state. We assign it the ref `text` so that
-we can refer to it from `onChange` callback.
+we can refer to it from the `onChange` callback via `om/get-node`.
 
 This callback is really simple, and is one of the reasons why core.async is so
 attractive. All it does is take the value of the `text` node and put it onto the
