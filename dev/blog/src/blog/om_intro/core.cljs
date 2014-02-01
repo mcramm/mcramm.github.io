@@ -78,11 +78,12 @@
                              [["Red" :red] ["Green" :green] ["Blue" :blue]])))
 
                (let [size (:size app)
+                     text (:text app)
                      {:keys [red green blue]} (:colors app)]
-                 (dom/div #js {:style #js {:font-size (str (:size app) "px")
+                 (dom/div #js {:style #js {:font-size (str size "px")
                                            :color (str "rgb(" red "," green "," blue ")")}
                                :className "example-text"}
-                          (:text app)))))))
+                          text))))))
 (om/root
   app-state
   my-widget

@@ -285,6 +285,8 @@ You should see this now:
 
 <div class='highlight example' id="ex3"> </div>
 
+Now for the color sliders. First, we\'ll add in the new state:
+
 {% highlight clojure %}
     (def app-state (atom {:text "Some Text"
                           :size 15
@@ -292,6 +294,9 @@ You should see this now:
                                    :green 0
                                    :blue 0}}))
 {% endhighlight %}
+
+As in the React widget, we\'ll create a more general `color-slider`:
+
 {% highlight clojure %}
     (defn color-slider [colors owner {:keys [label onChange color-key]}]
       (reify
@@ -307,6 +312,13 @@ You should see this now:
                                    :onChange #(onChange color-key owner)})
                    (dom/label nil (str label ": " (color-key colors)))))))
 {% endhighlight %}
+
+The important bit here is extra map of attributes we\'ll be passing to this
+component. We\'re going to give it a label, a color key to pull from the
+application state, and an onChange function.
+
+Next we\'ll create a channel for the changing colors:
+
 {% highlight clojure %}
     om/IInitState
     (init-state [this]
@@ -314,11 +326,17 @@ You should see this now:
               :size (chan)
               :colors (chan)}})
 {% endhighlight %}
+
+And a go block:
 {% highlight clojure %}
     (go (while true
           (let [[c value] (<! colors)]
             (om/update! app assoc-in [:colors c] value))))))
 {% endhighlight %}
+
+This looks slightly different than the previous go blocks because we\'re dealing
+with a map of colors in the application state instead of a straight value.
+
 {% highlight clojure %}
     (let [putfn (fn [k o]
                  (put! (:colors comm) [k (get-value o "color")]))]
@@ -331,14 +349,28 @@ You should see this now:
                                       :onChange putfn}}))
                   [["Red" :red] ["Green" :green] ["Blue" :blue]])))
 {% endhighlight %}
+
+Next we\'ll add the inputs right below the text size slider. We use some
+high level functions here to avoid having to write three calls to `om/build`.
+
+Finally we can modify the `div` to re-color our text:
+
 {% highlight clojure %}
     (let [size (:size app)
-         {:keys [red green blue]} (:colors app)]
-     (dom/div #js {:style #js {:font-size (str (:size app) "px")
+          text (:text app)
+          {:keys [red green blue]} (:colors app)]
+     (dom/div #js {:style #js {:font-size (str size "px")
                                :color (str "rgb(" red "," green "," blue ")")}}
-              (:text app)))))))
+              text))))))
 {% endhighlight %}
+
+Here is the final product, for the second time:
 <div class='highlight example' id="final"> </div>
 
+The full source for this example can be found [here](https://gist.github.com/mcramm/8755952).
+
+Om is still very new, and changing rapidly. If you\'re interested, then I
+recommend running through the
+[Tutorial](https://github.com/swannodette/om/wiki/Tutorial) in LightTable.
 
 <script src="/js/om-intro.js" type="text/javascript"></script>
