@@ -46,10 +46,9 @@
                                         :onChange #(put! (:size comm) (get-value owner "size"))})
                         (dom/label nil (str (:size app) "px")))
 
-               (let [size (:size app)]
-                 (dom/div #js {:style #js {:font-size (str (:size app) "px")}
-                               :className "example-text"}
-                          (:text app)))))))
+              (dom/div #js {:style #js {:font-size (str (:size app) "px")}
+                                             :className "example-text"}
+                                        (:text app))))))
 (om/root
   app-state
   my-widget

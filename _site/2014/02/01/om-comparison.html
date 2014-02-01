@@ -160,13 +160,19 @@ cljsbuild once dev</code>. Open <code>index.html</code> in a browser and you sho
 <p>This callback is really simple, and is one of the reasons why core.async is so attractive. All it does is take the value of the <code>text</code> node and put it onto the <code>string</code> channel.</p>
 
 <p>If you&#39;ve been following along, then you should see the following:</p>
-<div class='highlight example' id='ex2'> </div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span> <span class='p'>(</span><span class='nf'>atom</span> <span class='p'>{</span><span class='ss'>:text</span> <span class='s'>&quot;Some Text&quot;</span>
+<div class='highlight example' id='ex2'> </div>
+<p>The next step is to add in the text-size slider. First, let&#39;s add the size to our application state:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span> <span class='p'>(</span><span class='nf'>atom</span> <span class='p'>{</span><span class='ss'>:text</span> <span class='s'>&quot;Some Text&quot;</span>
                           <span class='ss'>:size</span> <span class='mi'>15</span><span class='p'>}))</span>
-</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='nv'>om/IInitState</span>
+</code></pre></div>
+<p>Next we&#39;ll create another channel for manipulating this size:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='nv'>om/IInitState</span>
     <span class='p'>(</span><span class='nf'>init-state</span> <span class='p'>[</span><span class='nv'>this</span><span class='p'>]</span>
       <span class='p'>{</span><span class='ss'>:comm</span> <span class='p'>{</span><span class='ss'>:string</span> <span class='p'>(</span><span class='nf'>chan</span><span class='p'>)</span>
               <span class='ss'>:size</span> <span class='p'>(</span><span class='nf'>chan</span><span class='p'>)}})</span>
-</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='nv'>om/IWillMount</span>
+</code></pre></div>
+<p>We&#39;ll create another go block to update <code>:size</code> whenever we get a value off of this channel:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='nv'>om/IWillMount</span>
     <span class='p'>(</span><span class='nf'>will-mount</span> <span class='p'>[</span><span class='nv'>this</span><span class='p'>]</span>
       <span class='p'>(</span><span class='k'>let </span><span class='p'>[{</span><span class='ss'>:keys</span> <span class='p'>[</span><span class='nv'>string</span> <span class='nv'>size</span><span class='p'>]</span> <span class='ss'>:as</span> <span class='nv'>comm</span><span class='p'>}</span> <span class='p'>(</span><span class='nf'>om/get-state</span> <span class='nv'>owner</span> <span class='ss'>:comm</span><span class='p'>)]</span>
         <span class='p'>(</span><span class='nf'>go</span> <span class='p'>(</span><span class='nf'>while</span> <span class='nv'>true</span>
@@ -175,6 +181,11 @@ cljsbuild once dev</code>. Open <code>index.html</code> in a browser and you sho
         <span class='p'>(</span><span class='nf'>go</span> <span class='p'>(</span><span class='nf'>while</span> <span class='nv'>true</span>
               <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>value</span> <span class='p'>(</span><span class='nf'>&lt;!</span> <span class='nv'>size</span><span class='p'>)]</span>
                 <span class='p'>(</span><span class='nf'>om/transact!</span> <span class='nv'>app</span> <span class='ss'>:size</span> <span class='p'>(</span><span class='k'>fn </span><span class='p'>[</span><span class='nv'>_</span><span class='p'>]</span> <span class='nv'>value</span><span class='p'>)))))))</span>
+</code></pre></div>
+<p>And then we&#39;ll add the input. Since we&#39;re getting the value off in the input in a similar way as before, I created a small helper to do this. I would place this function at the top of your source file, underneath the atom:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>get-value</span> <span class='p'>[</span><span class='nv'>owner</span> <span class='nv'>ref</span><span class='p'>]</span>
+      <span class='p'>(</span><span class='nb'>-&gt; </span><span class='p'>(</span><span class='nf'>om/get-node</span> <span class='nv'>owner</span> <span class='nv'>ref</span><span class='p'>)</span>
+          <span class='nv'>.-value</span><span class='p'>))</span>
 </code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='nf'>dom/div</span> <span class='nv'>nil</span>
             <span class='p'>(</span><span class='nf'>dom/input</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:type</span> <span class='s'>&quot;range&quot;</span>
                             <span class='ss'>:min</span> <span class='mi'>10</span>
@@ -186,14 +197,20 @@ cljsbuild once dev</code>. Open <code>index.html</code> in a browser and you sho
                                         <span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>comm</span><span class='p'>)</span>
                                         <span class='p'>(</span><span class='nf'>get-value</span> <span class='nv'>owner</span> <span class='s'>&quot;size&quot;</span><span class='p'>))})</span>
             <span class='p'>(</span><span class='nf'>dom/label</span> <span class='nv'>nil</span> <span class='p'>(</span><span class='nb'>str </span><span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)</span> <span class='s'>&quot;px&quot;</span><span class='p'>)))</span>
-</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>get-value</span> <span class='p'>[</span><span class='nv'>owner</span> <span class='nv'>ref</span><span class='p'>]</span>
-      <span class='p'>(</span><span class='nb'>-&gt; </span><span class='p'>(</span><span class='nf'>om/get-node</span> <span class='nv'>owner</span> <span class='nv'>ref</span><span class='p'>)</span>
-          <span class='nv'>.-value</span><span class='p'>))</span>
-</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>size</span> <span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)]</span>
-     <span class='p'>(</span><span class='nf'>dom/div</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:style</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:font-size</span> <span class='p'>(</span><span class='nb'>str </span><span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)</span> <span class='s'>&quot;px&quot;</span><span class='p'>)}</span>
-                   <span class='ss'>:className</span> <span class='s'>&quot;example-text&quot;</span><span class='p'>}</span>
-              <span class='p'>(</span><span class='ss'>:text</span> <span class='nv'>app</span><span class='p'>)))</span>
-</code></pre></div><div class='highlight example' id='ex3'> </div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span> <span class='p'>(</span><span class='nf'>atom</span> <span class='p'>{</span><span class='ss'>:text</span> <span class='s'>&quot;Some Text&quot;</span>
+</code></pre></div>
+<p>Note that you may want to update the text input as well.</p>
+
+<p>Finally, we wan&#39;t to modify our <code>div</code> to have it&#39;s font-size restyled whenever this changes. Right now it looks like this:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='nf'>dom/div</span> <span class='nv'>nil</span> <span class='p'>(</span><span class='ss'>:text</span> <span class='nv'>app</span><span class='p'>))</span>
+</code></pre></div>
+<p>Change it to this:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='nf'>dom/div</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:style</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:font-size</span> <span class='p'>(</span><span class='nb'>str </span><span class='p'>(</span><span class='ss'>:size</span> <span class='nv'>app</span><span class='p'>)</span> <span class='s'>&quot;px&quot;</span><span class='p'>)}}</span>
+          <span class='p'>(</span><span class='ss'>:text</span> <span class='nv'>app</span><span class='p'>))</span>
+</code></pre></div>
+<p>Again, <code>#js</code> turns the following object into a JavaScript object. It&#39;s shallow, so we need to do it twice to set <code>:style</code> correctly.</p>
+
+<p>You should see this now:</p>
+<div class='highlight example' id='ex3'> </div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span> <span class='p'>(</span><span class='nf'>atom</span> <span class='p'>{</span><span class='ss'>:text</span> <span class='s'>&quot;Some Text&quot;</span>
                           <span class='ss'>:size</span> <span class='mi'>15</span>
                           <span class='ss'>:colors</span> <span class='p'>{</span><span class='ss'>:red</span> <span class='mi'>0</span>
                                    <span class='ss'>:green</span> <span class='mi'>0</span>

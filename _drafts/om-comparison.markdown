@@ -206,16 +206,26 @@ If you\'ve been following along, then you should see the following:
 
 <div class='highlight example' id="ex2"> </div>
 
+The next step is to add in the text-size slider. First, let\'s add the size to
+our application state:
+
 {% highlight clojure %}
     (def app-state (atom {:text "Some Text"
                           :size 15}))
 {% endhighlight %}
+
+Next we\'ll create another channel for manipulating this size:
+
 {% highlight clojure %}
     om/IInitState
     (init-state [this]
       {:comm {:string (chan)
               :size (chan)}})
 {% endhighlight %}
+
+We\'ll create another go block to update `:size` whenever we get a value off of
+this channel:
+
 {% highlight clojure %}
     om/IWillMount
     (will-mount [this]
@@ -227,6 +237,17 @@ If you\'ve been following along, then you should see the following:
               (let [value (<! size)]
                 (om/transact! app :size (fn [_] value)))))))
 {% endhighlight %}
+
+And then we\'ll add the input. Since we\'re getting the value off in the input
+in a similar way as before, I created a small helper to do this. I would place
+this function at the top of your source file, underneath the atom:
+
+{% highlight clojure %}
+    (defn get-value [owner ref]
+      (-> (om/get-node owner ref)
+          .-value))
+{% endhighlight %}
+
 {% highlight clojure %}
     (dom/div nil
             (dom/input #js {:type "range"
@@ -240,18 +261,30 @@ If you\'ve been following along, then you should see the following:
                                         (get-value owner "size"))})
             (dom/label nil (str (:size app) "px")))
 {% endhighlight %}
+
+Note that you may want to update the text input as well.
+
+Finally, we wan\'t to modify our `div` to have it\'s font-size restyled whenever
+this changes. Right now it looks like this:
+
 {% highlight clojure %}
-    (defn get-value [owner ref]
-      (-> (om/get-node owner ref)
-          .-value))
+    (dom/div nil (:text app))
 {% endhighlight %}
+
+Change it to this:
+
 {% highlight clojure %}
-    (let [size (:size app)]
-     (dom/div #js {:style #js {:font-size (str (:size app) "px")}
-                   :className "example-text"}
-              (:text app)))
+    (dom/div #js {:style #js {:font-size (str (:size app) "px")}}
+          (:text app))
 {% endhighlight %}
+
+Again, `#js` turns the following object into a JavaScript object. It\'s shallow,
+so we need to do it twice to set `:style` correctly.
+
+You should see this now:
+
 <div class='highlight example' id="ex3"> </div>
+
 {% highlight clojure %}
     (def app-state (atom {:text "Some Text"
                           :size 15
