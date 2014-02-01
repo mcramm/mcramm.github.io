@@ -4,7 +4,7 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2014-02-01T11:33:24-07:00</updated>
+  <updated>2014-02-01T12:52:45-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
@@ -16,12 +16,12 @@
     <id>http://mcramm.com/2014/02/01/om-comparison</id>
     <link type="text/html" rel="alternate" href="http://mcramm.com/2014/02/01/om-comparison.html"/>
     <title>Om Comparison</title>
-    <updated>2014-02-01T11:33:24-07:00</updated>
+    <updated>2014-02-01T12:52:44-07:00</updated>
     <author>
       <name>Michael Cramm</name>
       <uri>http://mcramm.com/</uri>
     </author>
-    <content type="html">&lt;p&gt;In my &lt;a href=&quot;http://mcramm.com/2014/01/26/react-intro.html&quot;&gt;last post&lt;/a&gt; I built a simple text manipulation widget with &lt;a href=&quot;http://facebook.github.io/react/&quot;&gt;React&lt;/a&gt;. As promised, I&amp;#39;ve built the same widget in &lt;a href=&quot;&quot;&gt;Om&lt;/a&gt;, a Clojurescript library that sits on top of React.&lt;/p&gt;
+    <content type="html">&lt;p&gt;In my &lt;a href=&quot;http://mcramm.com/2014/01/26/react-intro.html&quot;&gt;last post&lt;/a&gt; I built a simple text manipulation widget with &lt;a href=&quot;http://facebook.github.io/react/&quot;&gt;React&lt;/a&gt;. I recommend reading through that post first, before this one. As promised, I&amp;#39;ve built the same widget in &lt;a href=&quot;&quot;&gt;Om&lt;/a&gt;, a Clojurescript library that sits on top of React.&lt;/p&gt;
 
 &lt;p&gt;If you want to follow along, you&amp;#39;ll need to install Leiningen and run:&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;bash&#39;&gt;    lein new mies-om om-intro
@@ -66,7 +66,7 @@ cljsbuild once dev&lt;/code&gt;. Open &lt;code&gt;index.html&lt;/code&gt; in a b
 
 &lt;p&gt;For the rest of this tutorial, I recommend running &lt;code&gt;lein cljsbuild auto dev&lt;/code&gt; in a separate terminal. The first time the project gets built takes a second or two, but after the JVM has warmed up, it takes just milliseconds.&lt;/p&gt;
 
-&lt;p&gt;The snippets above are for a development build of the project. The final example I link to at the end of this post contains a release build, that generates a single Javascript file.&lt;/p&gt;
+&lt;p&gt;The snippets above are for a development build of the project. The final example I link to at the end of this post contains a release build, that generates a single JavaScript file.&lt;/p&gt;
 
 &lt;p&gt;With the setup out of the way we can start rebuilding this widget.&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;ns &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om-intro.core&lt;/span&gt;
@@ -86,13 +86,27 @@ cljsbuild once dev&lt;/code&gt;. Open &lt;code&gt;index.html&lt;/code&gt; in a b
       &lt;span class=&#39;nv&#39;&gt;my-widget&lt;/span&gt;
       &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;. &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;js/document&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;getElementById&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;app&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;aosnehanoe&lt;/p&gt;
-&lt;div class=&#39;highlight example&#39; id=&#39;ex1&#39;&gt; &lt;/div&gt;&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;ns &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om-intro.core&lt;/span&gt;
+&lt;p&gt;This is analogous to the first example in the React version; all we&amp;#39;re doing is defining a component that renders a &lt;code&gt;div&lt;/code&gt; containing the value of &lt;code&gt;:text&lt;/code&gt; from our application state.&lt;/p&gt;
+
+&lt;p&gt;There are already a differences though. First, we&amp;#39;ve moved all of our state into an atom. Components are given &lt;em&gt;cursors&lt;/em&gt; into this application state that they can use to read/update.&lt;/p&gt;
+
+&lt;p&gt;Second, our &lt;code&gt;my-widget&lt;/code&gt; component is returning a reified object that satisfies the &lt;code&gt;om/IRender&lt;/code&gt; interface. The &lt;code&gt;render&lt;/code&gt; method simply returns the aforementioned &lt;code&gt;div&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You should see something like this:&lt;/p&gt;
+&lt;div class=&#39;highlight example&#39; id=&#39;ex1&#39;&gt; &lt;/div&gt;
+&lt;p&gt;Like our first example in the React version, this is pretty boring. Let&amp;#39;s add in the text input.&lt;/p&gt;
+
+&lt;p&gt;We&amp;#39;re going to be using &lt;a href=&quot;https://github.com/clojure/core.async&quot;&gt;core.async&lt;/a&gt; at the edges of our components, wherever our users will be interacting with the various &lt;code&gt;input&lt;/code&gt;s we&amp;#39;ll eventually have.&lt;/p&gt;
+
+&lt;p&gt;Change the namespace declaration to the following:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;ns &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om-intro.core&lt;/span&gt;
       &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:require-macros&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;cljs.core.async.macros&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:refer&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;go&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]])&lt;/span&gt;
       &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:require&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om.core&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:as&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;om&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:include-macros&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;true&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
                 &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om.dom&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:as&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;dom&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:include-macros&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;true&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
-                &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;cljs.core.async&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:refer&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;put!&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;chan&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;&amp;lt;!&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;sliding-buffer&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]]))&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;defn &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;my-widget&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;app&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;owner&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+                &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;cljs.core.async&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:refer&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;put!&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;chan&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;&amp;lt;!&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]]))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Then we&amp;#39;ll update the widget. We&amp;#39;re going to walk through this step-by-step in a minute, but here is what it should look like:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;defn &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;my-widget&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;app&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;owner&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
       &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;reify&lt;/span&gt;
         &lt;span class=&#39;nv&#39;&gt;om/IInitState&lt;/span&gt;
         &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;init-state&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;this&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
@@ -100,7 +114,7 @@ cljsbuild once dev&lt;/code&gt;. Open &lt;code&gt;index.html&lt;/code&gt; in a b
 
         &lt;span class=&#39;nv&#39;&gt;om/IWillMount&lt;/span&gt;
         &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;will-mount&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;this&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
-          &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;let &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:keys&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:as&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;comm&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;om/get-state&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;owner&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:comm&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
+          &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;let &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:keys&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]}&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;om/get-state&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;owner&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:comm&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
             &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;go&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;while&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;true&lt;/span&gt;
                   &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;let &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;value&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;&amp;lt;!&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)]&lt;/span&gt;
                     &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;om/transact!&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;app&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:text&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;fn &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;_&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;value&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)))))))&lt;/span&gt;
@@ -117,7 +131,38 @@ cljsbuild once dev&lt;/code&gt;. Open &lt;code&gt;index.html&lt;/code&gt; in a b
                                                     &lt;span class=&#39;nv&#39;&gt;.-value&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))})&lt;/span&gt;
 
                    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;dom/div&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;nil&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:text&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;app&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))))))&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#39;highlight example&#39; id=&#39;ex2&#39;&gt; &lt;/div&gt;&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;def &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;app-state&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;atom&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:text&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;Some Text&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We&amp;#39;ve changed our widget to satisfy a few more Om interfaces that take advantage of the &lt;a href=&quot;http://facebook.github.io/react/docs/component-specs.html&quot;&gt;React life cycles&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The first is &lt;code&gt;om/IInitState&lt;/code&gt; which sets up some initial, local state for the component. Here we are creating a map with a channel assigned to the &lt;code&gt;:string&lt;/code&gt; key. &lt;code&gt;init-state&lt;/code&gt; is called once on a component.&lt;/p&gt;
+
+&lt;p&gt;In &lt;code&gt;om/IWillMount&lt;/code&gt;, we setup a go loop that blocks on the channel assigned to &lt;code&gt;:string&lt;/code&gt; earlier, then sets the &lt;code&gt;:text&lt;/code&gt; attribute in our application state to the value we get off of that channel. Once it&amp;#39;s done it goes back to waiting on the channel.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;If you&amp;#39;re new to Clojure, then the destructuring we do in the &lt;code&gt;let&lt;/code&gt; binding can be a little confusing. The gist of what we&amp;#39;re doing is creating a local &lt;code&gt;string&lt;/code&gt; variable for our go block that is the key a map returned by &lt;code&gt;(om/get-state owner :comm)&lt;/code&gt;. In other words, it takes the map we created earlier and creates a local variable that is assigned the value of the &lt;code&gt;:string&lt;/code&gt; key.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We use &lt;code&gt;om/trasact!&lt;/code&gt; here since updating an atom needs to occur within a transaction. We could have also used &lt;code&gt;swap!&lt;/code&gt; here to modify the &lt;code&gt;atom&lt;/code&gt; manually.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;will-mount&lt;/code&gt; is called once, before the component is mounted into the DOM.&lt;/p&gt;
+
+&lt;p&gt;Finally, we&amp;#39;ve changed &lt;code&gt;om/IRender&lt;/code&gt; to &lt;code&gt;om/IRenderState&lt;/code&gt;. Every component needs to satisfy one of these interfaces, but not both. The difference between the two is that &lt;code&gt;IRenderState&lt;/code&gt; is passed the component state as it&amp;#39;s second argument. We need it so that we can have access to the channel we created earlier.&lt;/p&gt;
+
+&lt;p&gt;Finally we create the &lt;code&gt;input&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;dom/input&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;#&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;js&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:type&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;text&amp;quot;&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:ref&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;text&amp;quot;&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:value&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:text&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;app&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:onChange&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;#&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;put!&lt;/span&gt;
+                                &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:string&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;comm&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+                                &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nb&#39;&gt;-&amp;gt; &lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;om/get-node&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;owner&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;text&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+                                    &lt;span class=&#39;nv&#39;&gt;.-value&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The element is actually only taking a single argument, though it looks like two. &lt;code&gt;#js&lt;/code&gt; is a reader literal for Clojurscript that transforms the following object into literal JavaScript object. The map that we pass is setting some attributes on the component. In this case, we want a text input that contains the value of the &lt;code&gt;:text&lt;/code&gt; key from our application state. We assign it the ref &lt;code&gt;text&lt;/code&gt; so that we can refer to it from &lt;code&gt;onChange&lt;/code&gt; callback.&lt;/p&gt;
+
+&lt;p&gt;This callback is really simple, and is one of the reasons why core.async is so attractive. All it does is take the value of the &lt;code&gt;text&lt;/code&gt; node and put it onto the &lt;code&gt;string&lt;/code&gt; channel.&lt;/p&gt;
+
+&lt;p&gt;If you&amp;#39;ve been following along, then you should see the following:&lt;/p&gt;
+&lt;div class=&#39;highlight example&#39; id=&#39;ex2&#39;&gt; &lt;/div&gt;&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;def &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;app-state&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;atom&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:text&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;Some Text&amp;quot;&lt;/span&gt;
                           &lt;span class=&#39;ss&#39;&gt;:size&lt;/span&gt; &lt;span class=&#39;mi&#39;&gt;15&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;}))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;nv&#39;&gt;om/IInitState&lt;/span&gt;
     &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;nf&#39;&gt;init-state&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;this&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;

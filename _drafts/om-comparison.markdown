@@ -3,6 +3,7 @@ layout: post
 ---
 
 In my [last post](http://mcramm.com/2014/01/26/react-intro.html) I built a simple text manipulation widget with [React](http://facebook.github.io/react/).
+I recommend reading through that post first, before this one.
 As promised, I\'ve built the same widget in [Om](), a Clojurescript library that
 sits on top of React.
 
@@ -62,7 +63,7 @@ two, but after the JVM has warmed up, it takes just milliseconds.
 
 The snippets above are for a development build of the project. The final example
 I link to at the end of this post contains a release build, that generates a
-single Javascript file.
+single JavaScript file.
 
 With the setup out of the way we can start rebuilding this widget.
 
@@ -85,15 +86,42 @@ With the setup out of the way we can start rebuilding this widget.
       (. js/document (getElementById "app")))
 {% endhighlight %}
 
-aosnehanoe
+This is analogous to the first example in the React version; all we\'re doing is
+defining a component that renders a `div` containing the value of `:text` from
+our application state.
+
+There are already a differences though. First, we\'ve moved all of our state
+into an atom. Components are given *cursors* into this application state that
+they can use to read/update.
+
+Second, our `my-widget` component is returning a reified object that satisfies
+the `om/IRender` interface. The `render` method simply returns the
+aforementioned `div`.
+
+You should see something like this:
+
 <div class='highlight example' id="ex1"> </div>
+
+Like our first example in the React version, this is pretty boring. Let\'s add
+in the text input.
+
+We\'re going to be using [core.async](https://github.com/clojure/core.async) at
+the edges of our components, wherever our users will be interacting with the
+various `input`s we\'ll eventually have.
+
+Change the namespace declaration to the following:
+
 {% highlight clojure %}
     (ns om-intro.core
       (:require-macros [cljs.core.async.macros :refer [go]])
       (:require [om.core :as om :include-macros true]
                 [om.dom :as dom :include-macros true]
-                [cljs.core.async :refer [put! chan <! sliding-buffer]]))
+                [cljs.core.async :refer [put! chan <!]]))
 {% endhighlight %}
+
+Then we\'ll update the widget. We\'re going to walk through this step-by-step in
+a minute, but here is what it should look like:
+
 {% highlight clojure %}
     (defn my-widget [app owner]
       (reify
@@ -103,7 +131,7 @@ aosnehanoe
 
         om/IWillMount
         (will-mount [this]
-          (let [{:keys [string] :as comm} (om/get-state owner :comm)]
+          (let [{:keys [string]} (om/get-state owner :comm)]
             (go (while true
                   (let [value (<! string)]
                     (om/transact! app :text (fn [_] value)))))))
@@ -121,6 +149,61 @@ aosnehanoe
 
                    (dom/div nil (:text app))))))
 {% endhighlight %}
+
+We\'ve changed our widget to satisfy a few more Om interfaces that take
+advantage of the [React life cycles](http://facebook.github.io/react/docs/component-specs.html).
+
+The first is `om/IInitState` which sets up some initial, local state for the
+component. Here we are creating a map with a channel assigned to the `:string`
+key. `init-state` is called once on a component.
+
+In `om/IWillMount`, we setup a go loop that blocks on the channel assigned to
+`:string` earlier, then sets the `:text` attribute in our application state to
+the value we get off of that channel. Once it\'s done it goes back to waiting on
+the channel.
+
+> If you\'re new to Clojure, then the destructuring we do in the `let` binding can
+> be a little confusing. The gist of what we\'re doing is creating a local
+> `string` variable for our go block that is the key a map returned by
+> `(om/get-state owner :comm)`. In other words, it takes the map we created
+> earlier and creates a local variable that is assigned the value of the
+> `:string` key.
+
+We use `om/trasact!` here since updating an atom needs to occur within a
+transaction. We could have also used `swap!` here to modify the `atom` manually.
+
+`will-mount` is called once, before the component is mounted into the DOM.
+
+Finally, we\'ve changed `om/IRender` to `om/IRenderState`. Every component needs
+to satisfy one of these interfaces, but not both. The difference between the two
+is that `IRenderState` is passed the component state as it\'s second argument. We
+need it so that we can have access to the channel we created earlier.
+
+Finally we create the `input`:
+
+{% highlight clojure %}
+    (dom/input #js {:type "text"
+                    :ref "text"
+                    :value (:text app)
+                    :onChange #(put!
+                                (:string comm)
+                                (-> (om/get-node owner "text")
+                                    .-value))})
+{% endhighlight %}
+
+The element is actually only taking a single argument, though it looks like two.
+`#js` is a reader literal for Clojurscript that transforms the following object
+into literal JavaScript object. The map that we pass is setting some attributes
+on the component. In this case, we want a text input that contains the value of
+the `:text` key from our application state. We assign it the ref `text` so that
+we can refer to it from `onChange` callback.
+
+This callback is really simple, and is one of the reasons why core.async is so
+attractive. All it does is take the value of the `text` node and put it onto the
+`string` channel.
+
+If you\'ve been following along, then you should see the following:
+
 <div class='highlight example' id="ex2"> </div>
 
 {% highlight clojure %}

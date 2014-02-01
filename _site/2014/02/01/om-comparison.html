@@ -19,7 +19,7 @@
     </div>
     <div class='content'>
     <h1>Om Comparison </h1>
-    <p>In my <a href="http://mcramm.com/2014/01/26/react-intro.html">last post</a> I built a simple text manipulation widget with <a href="http://facebook.github.io/react/">React</a>. As promised, I&#39;ve built the same widget in <a href="">Om</a>, a Clojurescript library that sits on top of React.</p>
+    <p>In my <a href="http://mcramm.com/2014/01/26/react-intro.html">last post</a> I built a simple text manipulation widget with <a href="http://facebook.github.io/react/">React</a>. I recommend reading through that post first, before this one. As promised, I&#39;ve built the same widget in <a href="">Om</a>, a Clojurescript library that sits on top of React.</p>
 
 <p>If you want to follow along, you&#39;ll need to install Leiningen and run:</p>
 <div class='highlight'><pre><code class='bash'>    lein new mies-om om-intro
@@ -64,7 +64,7 @@ cljsbuild once dev</code>. Open <code>index.html</code> in a browser and you sho
 
 <p>For the rest of this tutorial, I recommend running <code>lein cljsbuild auto dev</code> in a separate terminal. The first time the project gets built takes a second or two, but after the JVM has warmed up, it takes just milliseconds.</p>
 
-<p>The snippets above are for a development build of the project. The final example I link to at the end of this post contains a release build, that generates a single Javascript file.</p>
+<p>The snippets above are for a development build of the project. The final example I link to at the end of this post contains a release build, that generates a single JavaScript file.</p>
 
 <p>With the setup out of the way we can start rebuilding this widget.</p>
 <div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>ns </span><span class='nv'>om-intro.core</span>
@@ -84,13 +84,27 @@ cljsbuild once dev</code>. Open <code>index.html</code> in a browser and you sho
       <span class='nv'>my-widget</span>
       <span class='p'>(</span><span class='k'>. </span><span class='nv'>js/document</span> <span class='p'>(</span><span class='nf'>getElementById</span> <span class='s'>&quot;app&quot;</span><span class='p'>)))</span>
 </code></pre></div>
-<p>aosnehanoe</p>
-<div class='highlight example' id='ex1'> </div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>ns </span><span class='nv'>om-intro.core</span>
+<p>This is analogous to the first example in the React version; all we&#39;re doing is defining a component that renders a <code>div</code> containing the value of <code>:text</code> from our application state.</p>
+
+<p>There are already a differences though. First, we&#39;ve moved all of our state into an atom. Components are given <em>cursors</em> into this application state that they can use to read/update.</p>
+
+<p>Second, our <code>my-widget</code> component is returning a reified object that satisfies the <code>om/IRender</code> interface. The <code>render</code> method simply returns the aforementioned <code>div</code>.</p>
+
+<p>You should see something like this:</p>
+<div class='highlight example' id='ex1'> </div>
+<p>Like our first example in the React version, this is pretty boring. Let&#39;s add in the text input.</p>
+
+<p>We&#39;re going to be using <a href="https://github.com/clojure/core.async">core.async</a> at the edges of our components, wherever our users will be interacting with the various <code>input</code>s we&#39;ll eventually have.</p>
+
+<p>Change the namespace declaration to the following:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>ns </span><span class='nv'>om-intro.core</span>
       <span class='p'>(</span><span class='ss'>:require-macros</span> <span class='p'>[</span><span class='nv'>cljs.core.async.macros</span> <span class='ss'>:refer</span> <span class='p'>[</span><span class='nv'>go</span><span class='p'>]])</span>
       <span class='p'>(</span><span class='ss'>:require</span> <span class='p'>[</span><span class='nv'>om.core</span> <span class='ss'>:as</span> <span class='nv'>om</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]</span>
                 <span class='p'>[</span><span class='nv'>om.dom</span> <span class='ss'>:as</span> <span class='nv'>dom</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]</span>
-                <span class='p'>[</span><span class='nv'>cljs.core.async</span> <span class='ss'>:refer</span> <span class='p'>[</span><span class='nv'>put!</span> <span class='nv'>chan</span> <span class='nv'>&lt;!</span> <span class='nv'>sliding-buffer</span><span class='p'>]]))</span>
-</code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>my-widget</span> <span class='p'>[</span><span class='nv'>app</span> <span class='nv'>owner</span><span class='p'>]</span>
+                <span class='p'>[</span><span class='nv'>cljs.core.async</span> <span class='ss'>:refer</span> <span class='p'>[</span><span class='nv'>put!</span> <span class='nv'>chan</span> <span class='nv'>&lt;!</span><span class='p'>]]))</span>
+</code></pre></div>
+<p>Then we&#39;ll update the widget. We&#39;re going to walk through this step-by-step in a minute, but here is what it should look like:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>defn </span><span class='nv'>my-widget</span> <span class='p'>[</span><span class='nv'>app</span> <span class='nv'>owner</span><span class='p'>]</span>
       <span class='p'>(</span><span class='nf'>reify</span>
         <span class='nv'>om/IInitState</span>
         <span class='p'>(</span><span class='nf'>init-state</span> <span class='p'>[</span><span class='nv'>this</span><span class='p'>]</span>
@@ -98,7 +112,7 @@ cljsbuild once dev</code>. Open <code>index.html</code> in a browser and you sho
 
         <span class='nv'>om/IWillMount</span>
         <span class='p'>(</span><span class='nf'>will-mount</span> <span class='p'>[</span><span class='nv'>this</span><span class='p'>]</span>
-          <span class='p'>(</span><span class='k'>let </span><span class='p'>[{</span><span class='ss'>:keys</span> <span class='p'>[</span><span class='nv'>string</span><span class='p'>]</span> <span class='ss'>:as</span> <span class='nv'>comm</span><span class='p'>}</span> <span class='p'>(</span><span class='nf'>om/get-state</span> <span class='nv'>owner</span> <span class='ss'>:comm</span><span class='p'>)]</span>
+          <span class='p'>(</span><span class='k'>let </span><span class='p'>[{</span><span class='ss'>:keys</span> <span class='p'>[</span><span class='nv'>string</span><span class='p'>]}</span> <span class='p'>(</span><span class='nf'>om/get-state</span> <span class='nv'>owner</span> <span class='ss'>:comm</span><span class='p'>)]</span>
             <span class='p'>(</span><span class='nf'>go</span> <span class='p'>(</span><span class='nf'>while</span> <span class='nv'>true</span>
                   <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>value</span> <span class='p'>(</span><span class='nf'>&lt;!</span> <span class='nv'>string</span><span class='p'>)]</span>
                     <span class='p'>(</span><span class='nf'>om/transact!</span> <span class='nv'>app</span> <span class='ss'>:text</span> <span class='p'>(</span><span class='k'>fn </span><span class='p'>[</span><span class='nv'>_</span><span class='p'>]</span> <span class='nv'>value</span><span class='p'>)))))))</span>
@@ -115,7 +129,38 @@ cljsbuild once dev</code>. Open <code>index.html</code> in a browser and you sho
                                                     <span class='nv'>.-value</span><span class='p'>))})</span>
 
                    <span class='p'>(</span><span class='nf'>dom/div</span> <span class='nv'>nil</span> <span class='p'>(</span><span class='ss'>:text</span> <span class='nv'>app</span><span class='p'>))))))</span>
-</code></pre></div><div class='highlight example' id='ex2'> </div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span> <span class='p'>(</span><span class='nf'>atom</span> <span class='p'>{</span><span class='ss'>:text</span> <span class='s'>&quot;Some Text&quot;</span>
+</code></pre></div>
+<p>We&#39;ve changed our widget to satisfy a few more Om interfaces that take advantage of the <a href="http://facebook.github.io/react/docs/component-specs.html">React life cycles</a>.</p>
+
+<p>The first is <code>om/IInitState</code> which sets up some initial, local state for the component. Here we are creating a map with a channel assigned to the <code>:string</code> key. <code>init-state</code> is called once on a component.</p>
+
+<p>In <code>om/IWillMount</code>, we setup a go loop that blocks on the channel assigned to <code>:string</code> earlier, then sets the <code>:text</code> attribute in our application state to the value we get off of that channel. Once it&#39;s done it goes back to waiting on the channel.</p>
+
+<blockquote>
+<p>If you&#39;re new to Clojure, then the destructuring we do in the <code>let</code> binding can be a little confusing. The gist of what we&#39;re doing is creating a local <code>string</code> variable for our go block that is the key a map returned by <code>(om/get-state owner :comm)</code>. In other words, it takes the map we created earlier and creates a local variable that is assigned the value of the <code>:string</code> key.</p>
+</blockquote>
+
+<p>We use <code>om/trasact!</code> here since updating an atom needs to occur within a transaction. We could have also used <code>swap!</code> here to modify the <code>atom</code> manually.</p>
+
+<p><code>will-mount</code> is called once, before the component is mounted into the DOM.</p>
+
+<p>Finally, we&#39;ve changed <code>om/IRender</code> to <code>om/IRenderState</code>. Every component needs to satisfy one of these interfaces, but not both. The difference between the two is that <code>IRenderState</code> is passed the component state as it&#39;s second argument. We need it so that we can have access to the channel we created earlier.</p>
+
+<p>Finally we create the <code>input</code>:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='nf'>dom/input</span> <span class='o'>#</span><span class='nv'>js</span> <span class='p'>{</span><span class='ss'>:type</span> <span class='s'>&quot;text&quot;</span>
+                    <span class='ss'>:ref</span> <span class='s'>&quot;text&quot;</span>
+                    <span class='ss'>:value</span> <span class='p'>(</span><span class='ss'>:text</span> <span class='nv'>app</span><span class='p'>)</span>
+                    <span class='ss'>:onChange</span> <span class='o'>#</span><span class='p'>(</span><span class='nf'>put!</span>
+                                <span class='p'>(</span><span class='ss'>:string</span> <span class='nv'>comm</span><span class='p'>)</span>
+                                <span class='p'>(</span><span class='nb'>-&gt; </span><span class='p'>(</span><span class='nf'>om/get-node</span> <span class='nv'>owner</span> <span class='s'>&quot;text&quot;</span><span class='p'>)</span>
+                                    <span class='nv'>.-value</span><span class='p'>))})</span>
+</code></pre></div>
+<p>The element is actually only taking a single argument, though it looks like two. <code>#js</code> is a reader literal for Clojurscript that transforms the following object into literal JavaScript object. The map that we pass is setting some attributes on the component. In this case, we want a text input that contains the value of the <code>:text</code> key from our application state. We assign it the ref <code>text</code> so that we can refer to it from <code>onChange</code> callback.</p>
+
+<p>This callback is really simple, and is one of the reasons why core.async is so attractive. All it does is take the value of the <code>text</code> node and put it onto the <code>string</code> channel.</p>
+
+<p>If you&#39;ve been following along, then you should see the following:</p>
+<div class='highlight example' id='ex2'> </div><div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='k'>def </span><span class='nv'>app-state</span> <span class='p'>(</span><span class='nf'>atom</span> <span class='p'>{</span><span class='ss'>:text</span> <span class='s'>&quot;Some Text&quot;</span>
                           <span class='ss'>:size</span> <span class='mi'>15</span><span class='p'>}))</span>
 </code></pre></div><div class='highlight'><pre><code class='clojure'>    <span class='nv'>om/IInitState</span>
     <span class='p'>(</span><span class='nf'>init-state</span> <span class='p'>[</span><span class='nv'>this</span><span class='p'>]</span>
