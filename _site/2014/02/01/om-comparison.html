@@ -19,7 +19,54 @@
     </div>
     <div class='content'>
     <h1>Om Comparison </h1>
-    <p>blah</p>
+    <p>In my <a href="http://mcramm.com/2014/01/26/react-intro.html">last post</a> I built a simple text manipulation widget with <a href="http://facebook.github.io/react/">React</a>. As promised, I&#39;ve built the same widget in <a href="">Om</a>, a Clojurescript library that sits on top of React.</p>
+
+<p>If you want to follow along, you&#39;ll need to install Leiningen and run:</p>
+<div class='highlight'><pre><code class='bash'>    lein new mies-om om-intro
+</code></pre></div>
+<p><code>cd</code> into the new directory and make your <code>project.clj</code> look like the following:</p>
+<div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>defproject </span><span class='nv'>om-intro</span> <span class='s'>&quot;0.1.0-SNAPSHOT&quot;</span>
+      <span class='ss'>:description</span> <span class='s'>&quot;FIXME: write this!&quot;</span>
+      <span class='ss'>:url</span> <span class='s'>&quot;http://example.com/FIXME&quot;</span>
+     
+      <span class='ss'>:dependencies</span> <span class='p'>[[</span><span class='nv'>org.clojure/clojure</span> <span class='s'>&quot;1.5.1&quot;</span><span class='p'>]</span>
+                     <span class='p'>[</span><span class='nv'>org.clojure/clojurescript</span> <span class='s'>&quot;0.0-2138&quot;</span><span class='p'>]</span>
+                     <span class='p'>[</span><span class='nv'>org.clojure/core.async</span> <span class='s'>&quot;0.1.267.0-0d7780-alpha&quot;</span><span class='p'>]</span>
+                     <span class='p'>[</span><span class='nv'>om</span> <span class='s'>&quot;0.3.1&quot;</span><span class='p'>]</span>
+                     <span class='p'>[</span><span class='nv'>com.facebook/react</span> <span class='s'>&quot;0.8.0.1&quot;</span><span class='p'>]]</span>
+     
+      <span class='ss'>:plugins</span> <span class='p'>[[</span><span class='nv'>lein-cljsbuild</span> <span class='s'>&quot;1.0.1&quot;</span><span class='p'>]]</span>
+     
+      <span class='ss'>:source-paths</span> <span class='p'>[</span><span class='s'>&quot;src&quot;</span><span class='p'>]</span>
+     
+      <span class='ss'>:cljsbuild</span> <span class='p'>{</span>
+        <span class='ss'>:builds</span> <span class='p'>[{</span><span class='ss'>:id</span> <span class='s'>&quot;dev&quot;</span>
+                  <span class='ss'>:source-paths</span> <span class='p'>[</span><span class='s'>&quot;src&quot;</span><span class='p'>]</span>
+                  <span class='ss'>:compiler</span> <span class='p'>{</span>
+                    <span class='ss'>:output-to</span> <span class='s'>&quot;om_intro.js&quot;</span>
+                    <span class='ss'>:output-dir</span> <span class='s'>&quot;out&quot;</span>
+                    <span class='ss'>:optimizations</span> <span class='ss'>:none</span>
+                    <span class='ss'>:source-map</span> <span class='nv'>true</span><span class='p'>}}]})</span>
+</code></pre></div>
+<p>You will also want to update your <code>index.html</code> look like this:</p>
+<div class='highlight'><pre><code class='html'>    <span class='nt'>&lt;html&gt;</span>
+        <span class='nt'>&lt;body&gt;</span>
+            <span class='nt'>&lt;div</span> <span class='na'>id=</span><span class='s'>&quot;app&quot;</span><span class='nt'>&gt;&lt;/div&gt;</span>
+            <span class='nt'>&lt;script </span><span class='na'>src=</span><span class='s'>&quot;http://fb.me/react-0.8.0.js&quot;</span><span class='nt'>&gt;&lt;/script&gt;</span>
+            <span class='nt'>&lt;script </span><span class='na'>src=</span><span class='s'>&quot;out/goog/base.js&quot;</span> <span class='na'>type=</span><span class='s'>&quot;text/javascript&quot;</span><span class='nt'>&gt;&lt;/script&gt;</span>
+            <span class='nt'>&lt;script </span><span class='na'>src=</span><span class='s'>&quot;om_intro.js&quot;</span> <span class='na'>type=</span><span class='s'>&quot;text/javascript&quot;</span><span class='nt'>&gt;&lt;/script&gt;</span>
+            <span class='nt'>&lt;script </span><span class='na'>type=</span><span class='s'>&quot;text/javascript&quot;</span><span class='nt'>&gt;</span><span class='nx'>goog</span><span class='p'>.</span><span class='nx'>require</span><span class='p'>(</span><span class='s2'>&quot;om_intro.core&quot;</span><span class='p'>);</span><span class='nt'>&lt;/script&gt;</span>
+        <span class='nt'>&lt;/body&gt;</span>
+    <span class='nt'>&lt;/html&gt;</span>
+</code></pre></div>
+<p>Get any missing dependencies with <code>lein deps</code>, then build the project with <code>lein
+cljsbuild once dev</code>. Open <code>index.html</code> in a browser and you should see the bare-bones example that comes with this template.</p>
+
+<p>For the rest of this tutorial, I recommend running <code>lein cljsbuild auto dev</code> in a separate terminal. The first time the project gets built takes a second or two, but after the JVM has warmed up, it takes just milliseconds.</p>
+
+<p>The snippets above are for a development build of the project. The final example I link to at the end of this post contains a release build, that generates a single Javascript file.</p>
+
+<p>With the setup out of the way we can start rebuilding this widget.</p>
 <div class='highlight'><pre><code class='clojure'>    <span class='p'>(</span><span class='kd'>ns </span><span class='nv'>om-intro.core</span>
       <span class='p'>(</span><span class='ss'>:require</span> <span class='p'>[</span><span class='nv'>om.core</span> <span class='ss'>:as</span> <span class='nv'>om</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]</span>
                 <span class='p'>[</span><span class='nv'>om.dom</span> <span class='ss'>:as</span> <span class='nv'>dom</span> <span class='ss'>:include-macros</span> <span class='nv'>true</span><span class='p'>]))</span>

@@ -1,7 +1,70 @@
 ---
 layout: post
 ---
-blah
+
+In my [last post](http://mcramm.com/2014/01/26/react-intro.html) I built a simple text manipulation widget with [React](http://facebook.github.io/react/).
+As promised, I\'ve built the same widget in [Om](), a Clojurescript library that
+sits on top of React.
+
+If you want to follow along, you\'ll need to install Leiningen and run:
+
+{% highlight bash %}
+    lein new mies-om om-intro
+{% endhighlight %}
+
+`cd` into the new directory and make your `project.clj` look like the following:
+{% highlight clojure %}
+    (defproject om-intro "0.1.0-SNAPSHOT"
+      :description "FIXME: write this!"
+      :url "http://example.com/FIXME"
+     
+      :dependencies [[org.clojure/clojure "1.5.1"]
+                     [org.clojure/clojurescript "0.0-2138"]
+                     [org.clojure/core.async "0.1.267.0-0d7780-alpha"]
+                     [om "0.3.1"]
+                     [com.facebook/react "0.8.0.1"]]
+     
+      :plugins [[lein-cljsbuild "1.0.1"]]
+     
+      :source-paths ["src"]
+     
+      :cljsbuild {
+        :builds [{:id "dev"
+                  :source-paths ["src"]
+                  :compiler {
+                    :output-to "om_intro.js"
+                    :output-dir "out"
+                    :optimizations :none
+                    :source-map true}}]})
+{% endhighlight %}
+
+You will also want to update your `index.html` look like this:
+
+{% highlight html %}
+    <html>
+        <body>
+            <div id="app"></div>
+            <script src="http://fb.me/react-0.8.0.js"></script>
+            <script src="out/goog/base.js" type="text/javascript"></script>
+            <script src="om_intro.js" type="text/javascript"></script>
+            <script type="text/javascript">goog.require("om_intro.core");</script>
+        </body>
+    </html>
+{% endhighlight %}
+
+Get any missing dependencies with `lein deps`, then build the project with `lein
+cljsbuild once dev`. Open `index.html` in a browser and you should see the
+bare-bones example that comes with this template.
+
+For the rest of this tutorial, I recommend running `lein cljsbuild auto dev` in
+a separate terminal. The first time the project gets built takes a second or
+two, but after the JVM has warmed up, it takes just milliseconds.
+
+The snippets above are for a development build of the project. The final example
+I link to at the end of this post contains a release build, that generates a
+single Javascript file.
+
+With the setup out of the way we can start rebuilding this widget.
 
 {% highlight clojure %}
     (ns om-intro.core

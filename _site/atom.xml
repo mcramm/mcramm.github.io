@@ -4,7 +4,7 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2014-02-01T10:40:15-07:00</updated>
+  <updated>2014-02-01T11:33:24-07:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
@@ -16,12 +16,59 @@
     <id>http://mcramm.com/2014/02/01/om-comparison</id>
     <link type="text/html" rel="alternate" href="http://mcramm.com/2014/02/01/om-comparison.html"/>
     <title>Om Comparison</title>
-    <updated>2014-02-01T10:39:07-07:00</updated>
+    <updated>2014-02-01T11:33:24-07:00</updated>
     <author>
       <name>Michael Cramm</name>
       <uri>http://mcramm.com/</uri>
     </author>
-    <content type="html">&lt;p&gt;blah&lt;/p&gt;
+    <content type="html">&lt;p&gt;In my &lt;a href=&quot;http://mcramm.com/2014/01/26/react-intro.html&quot;&gt;last post&lt;/a&gt; I built a simple text manipulation widget with &lt;a href=&quot;http://facebook.github.io/react/&quot;&gt;React&lt;/a&gt;. As promised, I&amp;#39;ve built the same widget in &lt;a href=&quot;&quot;&gt;Om&lt;/a&gt;, a Clojurescript library that sits on top of React.&lt;/p&gt;
+
+&lt;p&gt;If you want to follow along, you&amp;#39;ll need to install Leiningen and run:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;bash&#39;&gt;    lein new mies-om om-intro
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;cd&lt;/code&gt; into the new directory and make your &lt;code&gt;project.clj&lt;/code&gt; look like the following:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;defproject &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om-intro&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;0.1.0-SNAPSHOT&amp;quot;&lt;/span&gt;
+      &lt;span class=&#39;ss&#39;&gt;:description&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;FIXME: write this!&amp;quot;&lt;/span&gt;
+      &lt;span class=&#39;ss&#39;&gt;:url&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;http://example.com/FIXME&amp;quot;&lt;/span&gt;
+     
+      &lt;span class=&#39;ss&#39;&gt;:dependencies&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;org.clojure/clojure&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;1.5.1&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+                     &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;org.clojure/clojurescript&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;0.0-2138&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+                     &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;org.clojure/core.async&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;0.1.267.0-0d7780-alpha&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+                     &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;0.3.1&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+                     &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;com.facebook/react&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;0.8.0.1&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]]&lt;/span&gt;
+     
+      &lt;span class=&#39;ss&#39;&gt;:plugins&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;lein-cljsbuild&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;1.0.1&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]]&lt;/span&gt;
+     
+      &lt;span class=&#39;ss&#39;&gt;:source-paths&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;src&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+     
+      &lt;span class=&#39;ss&#39;&gt;:cljsbuild&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+        &lt;span class=&#39;ss&#39;&gt;:builds&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[{&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:id&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;dev&amp;quot;&lt;/span&gt;
+                  &lt;span class=&#39;ss&#39;&gt;:source-paths&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;src&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
+                  &lt;span class=&#39;ss&#39;&gt;:compiler&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:output-to&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;om_intro.js&amp;quot;&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:output-dir&lt;/span&gt; &lt;span class=&#39;s&#39;&gt;&amp;quot;out&amp;quot;&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:optimizations&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:none&lt;/span&gt;
+                    &lt;span class=&#39;ss&#39;&gt;:source-map&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;true&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;}}]})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You will also want to update your &lt;code&gt;index.html&lt;/code&gt; look like this:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;    &lt;span class=&#39;nt&#39;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+        &lt;span class=&#39;nt&#39;&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;app&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;src=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;http://fb.me/react-0.8.0.js&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;src=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;out/goog/base.js&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;src=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;om_intro.js&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#39;nx&#39;&gt;goog&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;nx&#39;&gt;require&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;s2&#39;&gt;&amp;quot;om_intro.core&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+        &lt;span class=&#39;nt&#39;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
+    &lt;span class=&#39;nt&#39;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Get any missing dependencies with &lt;code&gt;lein deps&lt;/code&gt;, then build the project with &lt;code&gt;lein
+cljsbuild once dev&lt;/code&gt;. Open &lt;code&gt;index.html&lt;/code&gt; in a browser and you should see the bare-bones example that comes with this template.&lt;/p&gt;
+
+&lt;p&gt;For the rest of this tutorial, I recommend running &lt;code&gt;lein cljsbuild auto dev&lt;/code&gt; in a separate terminal. The first time the project gets built takes a second or two, but after the JVM has warmed up, it takes just milliseconds.&lt;/p&gt;
+
+&lt;p&gt;The snippets above are for a development build of the project. The final example I link to at the end of this post contains a release build, that generates a single Javascript file.&lt;/p&gt;
+
+&lt;p&gt;With the setup out of the way we can start rebuilding this widget.&lt;/p&gt;
 &lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;clojure&#39;&gt;    &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kd&#39;&gt;ns &lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om-intro.core&lt;/span&gt;
       &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;ss&#39;&gt;:require&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om.core&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:as&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;om&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:include-macros&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;true&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt;
                 &lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;nv&#39;&gt;om.dom&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:as&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;dom&lt;/span&gt; &lt;span class=&#39;ss&#39;&gt;:include-macros&lt;/span&gt; &lt;span class=&#39;nv&#39;&gt;true&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]))&lt;/span&gt;
