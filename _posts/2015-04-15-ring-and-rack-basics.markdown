@@ -70,7 +70,7 @@ We can now run `rackup` from our current directory and, navigating to
 response.
 
 Getting our Ring app off the ground requires a little bit more setup, but we\'ll be
-using [Leiningen](http://leiningen.org/) to do most of the trivial (zzzzZZZzz) stuff for us.
+using [Leiningen](http://leiningen.org/) to do most of the trivial stuff for us.
 
 First let\'s create a new project with `lein new app my-ring-app`. Add `[ring "1.3.2"]` to the list of dependencies
 in `project.clj`.
@@ -80,7 +80,7 @@ Ring is similar to Rack in that we need to give it a function that returns
 some standard response. Ring expects a map instead of an array:
 
 {% highlight clojure %}
-(ns my-ring-app.app)
+    (ns my-ring-app.app)
 
     (defn handler [request]
      {:status 200
@@ -112,8 +112,8 @@ Now we can just do `lein run` from our project root. Navigating to
 ## Middleware
 
 Middleware is essentially a series a steps a request has to go through in order
-to generate a response. Once a response is generated, in will back up through
-any middleware in reverse order.
+to generate a response. Once a response is generated, it will return the
+response back up through any middleware in reverse order.
 
 We\'re going to introduce some middleware to both of our applications that
 translates \"Hello\" to it\'s French counterpart \"Bonjour\". Why French? Well
@@ -199,7 +199,7 @@ this middleware in the namespace responsible for booting the app:
       (:require [ring.adapter.jetty :refer [run-jetty]]
                 [my-ring-app.app :as app]
                 [my-ring-app.middleware :refer [wrap-hello-translator]])
-        (:gen-class))
+      (:gen-class))
 
     (defn -main [& args]
       (run-jetty (-> app/handler

@@ -4,13 +4,199 @@
   <title>mcramm.com</title>
   <link href="http://mcramm.com/"/>
   <link type="application/atom+xml" rel="self" href="http://mcramm.com/atom.xml"/>
-  <updated>2015-04-11T09:04:36-06:00</updated>
+  <updated>2015-04-15T19:02:37-06:00</updated>
   <id>http://mcramm.com/</id>
   <author>
     <name>Michael Cramm</name>
     <email>mike@mcramm.com</email>
   </author>
 
+  
+  <entry>
+    <id>http://mcramm.com/2015/04/15/ring-and-rack-basics</id>
+    <link type="text/html" rel="alternate" href="http://mcramm.com/2015/04/15/ring-and-rack-basics.html"/>
+    <title>Ring And Rack Basics</title>
+    <updated>2015-04-15T00:00:00-06:00</updated>
+    <author>
+      <name>Michael Cramm</name>
+      <uri>http://mcramm.com/</uri>
+    </author>
+    <content type="html">&lt;p&gt;In the Clojure world, when you want to write a web app, you will almost certainly be using &lt;a href=&quot;https://github.com/ring-clojure/ring&quot;&gt;Ring&lt;/a&gt;. Ring is directly inspired by &lt;a href=&quot;https://rack.github.io/&quot;&gt;Rack&lt;/a&gt;, the defacto webserver abstraction for frameworks in Ruby.&lt;/p&gt;
+
+&lt;p&gt;The two are conceptually very similar, but there are some slight differences (aside from language) that might be interesting to highlight. I won't be going too in depth with this post, and will focus instead on the basics of using Rack and Ring. I thought I would just get that out of the way before your expectations got too high.&lt;/p&gt;
+
+&lt;p&gt;It's worth noting that most apps won't actually use either Rack or Ring directly like we will here. It would be a lot faster and safer to use something like &lt;a href=&quot;http://www.sinatrarb.com/&quot;&gt;Sinatra&lt;/a&gt; or &lt;a href=&quot;http://rubyonrails.org/&quot;&gt;Rails&lt;/a&gt; for Rack, and &lt;a href=&quot;https://github.com/technomancy/compojure&quot;&gt;Compojure&lt;/a&gt; or &lt;a href=&quot;http://www.luminusweb.net/&quot;&gt;Luminus&lt;/a&gt; for Ring.&lt;/p&gt;
+
+&lt;p&gt;If you want to see the final versions of these examples in their full forms please click:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/mcramm/rack-basics&quot;&gt;Here for the Rack example&lt;/a&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;a href=&quot;https://github.com/mcramm/ring-basics&quot;&gt;Here for the Ring example&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h2 id=&quot;the_minimal_first_step&quot;&gt;The Minimal First Step&lt;/h2&gt;
+
+&lt;p&gt;Let's start with Rack, since it's obviously the more popular of the two. I'm going to assume that you can &lt;a href=&quot;https://github.com/rack/rack#installing-with-rubygems&quot;&gt;read&lt;/a&gt; and get Rack installed if you don't already have it. If you can't read, then I have nothing to worry about because this will all look like gobbledygook to you. I hope ASCII art will serve as an appropriate apology :-).&lt;/p&gt;
+
+&lt;p&gt;The first step in getting either application off the ground is to create a entry point. In the case of Rack this is will be an object with a &lt;code&gt;call&lt;/code&gt; method. This method needs to return the basic structure required for a Rack response, which is an array containing the response status, headers and body:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;    &lt;span class='c1'&gt;# my_rack_app.rb&lt;/span&gt;
+    &lt;span class='k'&gt;class&lt;/span&gt; &lt;span class='nc'&gt;MyRackApp&lt;/span&gt;
+      &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;call&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;env&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+        &lt;span class='o'&gt;[&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;200&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;Content-Type&amp;#39;&lt;/span&gt; &lt;span class='o'&gt;=&amp;gt;&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;text/html&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;},&lt;/span&gt; &lt;span class='o'&gt;[&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;Hello World&amp;#39;&lt;/span&gt;&lt;span class='o'&gt;]]&lt;/span&gt;
+      &lt;span class='k'&gt;end&lt;/span&gt;
+    &lt;span class='k'&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Note how simple this is. This is just a regular old ruby object with a method that returns a triplet. It knows nothing about Rack or anything else that might be using it.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately this does absolutely &lt;em&gt;nothing&lt;/em&gt;, which is pretty boring. To boot this app up, we'll add a &lt;code&gt;config.ru&lt;/code&gt; to the current directory:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;    &lt;span class='c1'&gt;# config.ru&lt;/span&gt;
+    &lt;span class='nb'&gt;require&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;rack&amp;#39;&lt;/span&gt;
+    &lt;span class='n'&gt;require_relative&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;my_rack_app&amp;#39;&lt;/span&gt;
+
+    &lt;span class='n'&gt;run&lt;/span&gt; &lt;span class='no'&gt;MyRackApp&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;new&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We can now run &lt;code&gt;rackup&lt;/code&gt; from our current directory and, navigating to &lt;a href=&quot;http://localhost:9292/&quot;&gt;http://localhost:9292&lt;/a&gt;, we should see our &amp;quot;Hello World&amp;quot; response.&lt;/p&gt;
+
+&lt;p&gt;Getting our Ring app off the ground requires a little bit more setup, but we'll be using &lt;a href=&quot;http://leiningen.org/&quot;&gt;Leiningen&lt;/a&gt; to do most of the trivial stuff for us.&lt;/p&gt;
+
+&lt;p&gt;First let's create a new project with &lt;code&gt;lein new app my-ring-app&lt;/code&gt;. Add &lt;code&gt;[ring &amp;quot;1.3.2&amp;quot;]&lt;/code&gt; to the list of dependencies in &lt;code&gt;project.clj&lt;/code&gt;. You might need to run &lt;code&gt;lein deps&lt;/code&gt; to download the Ring library if you don't already have it.&lt;/p&gt;
+
+&lt;p&gt;Ring is similar to Rack in that we need to give it a function that returns some standard response. Ring expects a map instead of an array:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='clojure'&gt;    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;ns &lt;/span&gt;&lt;span class='nv'&gt;my-ring-app.app&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;defn &lt;/span&gt;&lt;span class='nv'&gt;handler&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;request&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+     &lt;span class='p'&gt;{&lt;/span&gt;&lt;span class='ss'&gt;:status&lt;/span&gt; &lt;span class='mi'&gt;200&lt;/span&gt;
+     &lt;span class='ss'&gt;:headers&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;Content-Type&amp;quot;&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;text/html&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;}&lt;/span&gt;
+     &lt;span class='ss'&gt;:body&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Hello World&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Calling the function &amp;quot;handler&amp;quot; above is simply the convention in Clojure-land. Like the Rack example, we need some way to boot this app up. Some examples will mash this boot process together with the code we wrote above but I prefer to keep this separate. Plus it makes it similar to our Rack example so win-win, right?&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='clojure'&gt;    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;ns &lt;/span&gt;&lt;span class='nv'&gt;my-ring-app.core&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='ss'&gt;:require&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;ring.adapter.jetty&lt;/span&gt; &lt;span class='ss'&gt;:refer&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;run-jetty&lt;/span&gt;&lt;span class='p'&gt;]]&lt;/span&gt;
+                &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;my-ring-app.app&lt;/span&gt; &lt;span class='ss'&gt;:as&lt;/span&gt; &lt;span class='nv'&gt;app&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='ss'&gt;:gen-class&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;defn &lt;/span&gt;&lt;span class='nv'&gt;-main&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='o'&gt;&amp;amp;&lt;/span&gt; &lt;span class='nv'&gt;args&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='nf'&gt;run-jetty&lt;/span&gt; &lt;span class='nv'&gt;app/handler&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt;&lt;span class='ss'&gt;:port&lt;/span&gt; &lt;span class='mi'&gt;3000&lt;/span&gt;&lt;span class='p'&gt;}))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now we can just do &lt;code&gt;lein run&lt;/code&gt; from our project root. Navigating to &lt;a href=&quot;http://localhost:3000/&quot;&gt;http://localhost:3000&lt;/a&gt; should display a very familiar page.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2 id=&quot;middleware&quot;&gt;Middleware&lt;/h2&gt;
+
+&lt;p&gt;Middleware is essentially a series a steps a request has to go through in order to generate a response. Once a response is generated, it will return the response back up through any middleware in reverse order.&lt;/p&gt;
+
+&lt;p&gt;We're going to introduce some middleware to both of our applications that translates &amp;quot;Hello&amp;quot; to it's French counterpart &amp;quot;Bonjour&amp;quot;. Why French? Well I'm Canadian, and if I don't provide some kind of French content, then the CRTC might come and yell at me for not being fair.&lt;/p&gt;
+
+&lt;p&gt;I also don't know how to say &amp;quot;Hello&amp;quot; in any other language off the top of my head and I'm too lazy to do any more research so we are going to stick with &amp;quot;Bonjour&amp;quot;.&lt;/p&gt;
+
+&lt;p&gt;In Rack our middleware is going to be another ruby object, except that we will actually be doing something with that &lt;code&gt;env&lt;/code&gt; parameter we saw in our earlier example. You will notice that our middleware bears some resemblance to our running &lt;code&gt;MyRackApp&lt;/code&gt;&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;    &lt;span class='c1'&gt;# hello_translator.rb&lt;/span&gt;
+    &lt;span class='k'&gt;class&lt;/span&gt; &lt;span class='nc'&gt;HelloTranslator&lt;/span&gt;
+      &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;initialize&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;app&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+        &lt;span class='vi'&gt;@app&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='n'&gt;app&lt;/span&gt;
+      &lt;span class='k'&gt;end&lt;/span&gt;
+
+      &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;translate_hello&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;str&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+        &lt;span class='n'&gt;str&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;gsub&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='sr'&gt;/Hello/&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;Bonjour&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+      &lt;span class='k'&gt;end&lt;/span&gt;
+
+      &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;call&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;env&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+        &lt;span class='n'&gt;status&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;headers&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;body&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='vi'&gt;@app&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;call&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;env&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+        &lt;span class='n'&gt;body&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;map!&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='o'&gt;|&lt;/span&gt;&lt;span class='n'&gt;str&lt;/span&gt;&lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;translate_hello&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;str&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+
+        &lt;span class='o'&gt;[&lt;/span&gt;&lt;span class='n'&gt;status&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;headers&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;body&lt;/span&gt;&lt;span class='o'&gt;]&lt;/span&gt;
+      &lt;span class='k'&gt;end&lt;/span&gt;
+    &lt;span class='k'&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;First we initialize the middleware with our running application. Calling &lt;code&gt;@app.call(env)&lt;/code&gt; simply passes the request down the stack. If there was another piece of middleware beneath us, then it would be the next reciever of our &lt;code&gt;env&lt;/code&gt; parameter. This would keep going until a response is generated, which in our case will be from &lt;code&gt;MyRackApp&lt;/code&gt; that we defined earlier. Our return value needs to be the same status, headers and body array in order for Rack to be able to serve the response.&lt;/p&gt;
+
+&lt;p&gt;If you ran &lt;code&gt;rackup&lt;/code&gt; right now, then you wouldn't see any change. This is because we actually need to &lt;em&gt;tell&lt;/em&gt; Rack about this is middleware. To accomplish this we need to require and &lt;code&gt;use&lt;/code&gt; it in our &lt;code&gt;config.ru&lt;/code&gt;:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;    &lt;span class='c1'&gt;# config.ru&lt;/span&gt;
+    &lt;span class='nb'&gt;require&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;rack&amp;#39;&lt;/span&gt;
+    &lt;span class='n'&gt;require_relative&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;my_rack_app&amp;#39;&lt;/span&gt;
+    &lt;span class='n'&gt;require_relative&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;hello_translator&amp;#39;&lt;/span&gt;
+
+    &lt;span class='n'&gt;use&lt;/span&gt; &lt;span class='no'&gt;HelloTranslator&lt;/span&gt;
+    &lt;span class='n'&gt;run&lt;/span&gt; &lt;span class='no'&gt;MyRackApp&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;new&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Running &lt;code&gt;rackup&lt;/code&gt; and refreshing the previous page will now show a lovely greeting in the famously romantic French language.&lt;/p&gt;
+
+&lt;p&gt;Again Ring is very similar. The biggest difference is that the middleware is just a function instead of an object:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='clojure'&gt;    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;ns &lt;/span&gt;&lt;span class='nv'&gt;my-ring-app.middleware&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='ss'&gt;:require&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;clojure.string&lt;/span&gt; &lt;span class='ss'&gt;:as&lt;/span&gt; &lt;span class='nv'&gt;s&lt;/span&gt;&lt;span class='p'&gt;]))&lt;/span&gt;
+
+    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;defn &lt;/span&gt;&lt;span class='nv'&gt;translate-hello&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;body&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='nf'&gt;s/replace&lt;/span&gt; &lt;span class='nv'&gt;body&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Hello&amp;quot;&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Bonjour&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;))&lt;/span&gt;
+
+    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;defn &lt;/span&gt;&lt;span class='nv'&gt;wrap-hello-translator&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;handler&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='k'&gt;fn &lt;/span&gt;&lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;request&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+          &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='k'&gt;let &lt;/span&gt;&lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;response&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='nf'&gt;handler&lt;/span&gt; &lt;span class='nv'&gt;request&lt;/span&gt;&lt;span class='p'&gt;)]&lt;/span&gt;
+                &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='nf'&gt;update-in&lt;/span&gt; &lt;span class='nv'&gt;response&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='ss'&gt;:body&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt; &lt;span class='nv'&gt;translate-hello&lt;/span&gt;&lt;span class='p'&gt;))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Again, prefixing our middleware with &lt;code&gt;wrap&lt;/code&gt; is convention. As before we will need to require and use this middleware in the namespace responsible for booting the app:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='clojure'&gt;    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;ns &lt;/span&gt;&lt;span class='nv'&gt;my-ring-app.core&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='ss'&gt;:require&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;ring.adapter.jetty&lt;/span&gt; &lt;span class='ss'&gt;:refer&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;run-jetty&lt;/span&gt;&lt;span class='p'&gt;]]&lt;/span&gt;
+                &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;my-ring-app.app&lt;/span&gt; &lt;span class='ss'&gt;:as&lt;/span&gt; &lt;span class='nv'&gt;app&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+                &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;my-ring-app.middleware&lt;/span&gt; &lt;span class='ss'&gt;:refer&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;wrap-hello-translator&lt;/span&gt;&lt;span class='p'&gt;]])&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='ss'&gt;:gen-class&lt;/span&gt;&lt;span class='p'&gt;))&lt;/span&gt;
+
+    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;defn &lt;/span&gt;&lt;span class='nv'&gt;-main&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='o'&gt;&amp;amp;&lt;/span&gt; &lt;span class='nv'&gt;args&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='nf'&gt;run-jetty&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='nb'&gt;-&amp;gt; &lt;/span&gt;&lt;span class='nv'&gt;app/handler&lt;/span&gt;
+                     &lt;span class='nv'&gt;wrap-hello-translator&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt;&lt;span class='ss'&gt;:port&lt;/span&gt; &lt;span class='mi'&gt;3000&lt;/span&gt;&lt;span class='p'&gt;}))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;hr /&gt;
+&lt;h2 id=&quot;dealing_with_query_params&quot;&gt;Dealing With Query Params&lt;/h2&gt;
+
+&lt;p&gt;I was originally going to end the post here with an amazingly concise, beautifully written conclusion to tie a nice little bow over everything. Instead I'm going to take this comparison one step further and really phone in the whole &amp;quot;wrapping things up&amp;quot; section that is structurally necessary.&lt;/p&gt;
+
+&lt;p&gt;I want to show something that is &lt;em&gt;much&lt;/em&gt; more common than our mostly pointless &amp;quot;Hello&amp;quot; to &amp;quot;Bonjour&amp;quot; translation app that we've written. I'm going to show you how Ring and Rack each let you access any query parameters that may have come along with the request.&lt;/p&gt;
+
+&lt;p&gt;Let's say that we want to let the request specify who we want to say &amp;quot;Bonjour&amp;quot; to, and &amp;quot;World&amp;quot; if nothing is provided. The request can tell us what name to use by simply providing a &lt;code&gt;name&lt;/code&gt; parameter.&lt;/p&gt;
+
+&lt;p&gt;With the Rack example, we aren't going to touch anything except for our base application:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;    &lt;span class='c1'&gt;# my_rack_app.rb&lt;/span&gt;
+    &lt;span class='k'&gt;class&lt;/span&gt; &lt;span class='nc'&gt;MyRackApp&lt;/span&gt;
+      &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;call&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;env&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+        &lt;span class='n'&gt;request&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='no'&gt;Rack&lt;/span&gt;&lt;span class='o'&gt;::&lt;/span&gt;&lt;span class='no'&gt;Request&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;new&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;env&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+        &lt;span class='n'&gt;subject&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='n'&gt;request&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;params&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;fetch&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;name&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;World&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+        &lt;span class='n'&gt;body&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='o'&gt;[&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;Hello &lt;/span&gt;&lt;span class='si'&gt;#{&lt;/span&gt;&lt;span class='n'&gt;subject&lt;/span&gt;&lt;span class='si'&gt;}&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;&lt;/span&gt;&lt;span class='o'&gt;]&lt;/span&gt;
+
+        &lt;span class='o'&gt;[&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;200&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;Content-Type&amp;#39;&lt;/span&gt; &lt;span class='o'&gt;=&amp;gt;&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;text/html&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;},&lt;/span&gt; &lt;span class='n'&gt;body&lt;/span&gt;&lt;span class='o'&gt;]&lt;/span&gt;
+      &lt;span class='k'&gt;end&lt;/span&gt;
+    &lt;span class='k'&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The change here is that we wrap the &lt;code&gt;env&lt;/code&gt; parameter in a &lt;code&gt;Rack::Request&lt;/code&gt; object, then attempt to fetch the &lt;code&gt;'name'&lt;/code&gt; parameter. If one isn't provided, then we default to &lt;code&gt;'World'&lt;/code&gt;. Our response is essentially the same.&lt;/p&gt;
+
+&lt;p&gt;Opening &lt;a href=&quot;http://localhost:9292?name=Pierre&quot;&gt;http://localhost:9292?name=Pierre&lt;/a&gt;, we should see &amp;quot;Bonjour Pierre&amp;quot;. If we omit the &lt;code&gt;name&lt;/code&gt; parameter entirely, then we should see &amp;quot;Bonjour World&amp;quot; as before.&lt;/p&gt;
+
+&lt;p&gt;Ring's approach is slightly different. Instead of wrapping the request in another object, there is a set of very common default middleware that we can choose to include. One of these is &lt;code&gt;wrap-params&lt;/code&gt;, which will add a &lt;code&gt;:params&lt;/code&gt; key to the request and take any parameters out of the query string and put into a map at that key.&lt;/p&gt;
+
+&lt;p&gt;I've included full-versions of each file here to keep things easy to follow. Additions to &lt;code&gt;my-ring-app.core&lt;/code&gt; are noted:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='clojure'&gt;    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;ns &lt;/span&gt;&lt;span class='nv'&gt;my-ring-app.core&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='ss'&gt;:require&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;ring.adapter.jetty&lt;/span&gt; &lt;span class='ss'&gt;:refer&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;run-jetty&lt;/span&gt;&lt;span class='p'&gt;]]&lt;/span&gt;
+                &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;ring.middleware.params&lt;/span&gt; &lt;span class='ss'&gt;:refer&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;wrap-params&lt;/span&gt;&lt;span class='p'&gt;]]&lt;/span&gt; &lt;span class='c1'&gt;; NEW&lt;/span&gt;
+                &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;my-ring-app.app&lt;/span&gt; &lt;span class='ss'&gt;:as&lt;/span&gt; &lt;span class='nv'&gt;app&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+                &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;my-ring-app.middleware&lt;/span&gt; &lt;span class='ss'&gt;:refer&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;wrap-hello-translator&lt;/span&gt;&lt;span class='p'&gt;]])&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='ss'&gt;:gen-class&lt;/span&gt;&lt;span class='p'&gt;))&lt;/span&gt;
+
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;defn &lt;/span&gt;&lt;span class='nv'&gt;-main&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='o'&gt;&amp;amp;&lt;/span&gt; &lt;span class='nv'&gt;args&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+       &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='nf'&gt;run-jetty&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='nb'&gt;-&amp;gt; &lt;/span&gt;&lt;span class='nv'&gt;app/handler&lt;/span&gt;
+                      &lt;span class='nv'&gt;wrap-params&lt;/span&gt; &lt;span class='c1'&gt;; NEW&lt;/span&gt;
+                      &lt;span class='nv'&gt;wrap-hello-translator&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt;&lt;span class='ss'&gt;:port&lt;/span&gt; &lt;span class='mi'&gt;3000&lt;/span&gt;&lt;span class='p'&gt;}))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='clojure'&gt;    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;ns &lt;/span&gt;&lt;span class='nv'&gt;my-ring-app.app&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kd'&gt;defn &lt;/span&gt;&lt;span class='nv'&gt;handler&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;request&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+      &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='k'&gt;let &lt;/span&gt;&lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='nv'&gt;subject&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='nf'&gt;get-in&lt;/span&gt; &lt;span class='nv'&gt;request&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='ss'&gt;:params&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;World&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;)]&lt;/span&gt;
+        &lt;span class='p'&gt;{&lt;/span&gt;&lt;span class='ss'&gt;:status&lt;/span&gt; &lt;span class='mi'&gt;200&lt;/span&gt;
+         &lt;span class='ss'&gt;:headers&lt;/span&gt;  &lt;span class='p'&gt;{&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;Content-Type&amp;quot;&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;text/html&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;}&lt;/span&gt;
+         &lt;span class='ss'&gt;:body&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='nf'&gt;format&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Hello %s&amp;quot;&lt;/span&gt; &lt;span class='nv'&gt;subject&lt;/span&gt;&lt;span class='p'&gt;)}))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The difference between the two examples is the fact that the query string processing is handled in middleware with Ring, while with Rack I wrapped it. I tried to find a similar piece of middleware for Rack but after an hour of clicking around I came up short. There is some stuff in &lt;a href=&quot;https://github.com/rack/rack-contrib&quot;&gt;rack-contrib&lt;/a&gt; that comes close, but not close enough. I'm sure one exists and I'll update this post if I can find something analogous to Ring's &lt;code&gt;wrap-params&lt;/code&gt;.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;I hope this been at least a little bit enlightening. I found the basics of Ring and Rack to be &lt;em&gt;so similiar&lt;/em&gt; that I couldn't help but write a post about the two. The differences in application structure and methodologies become more pronounced the more complicated your stack becomes, but this is usually due to stuff built &lt;em&gt;on top&lt;/em&gt; of them.&lt;/p&gt;
+
+&lt;p&gt;In future posts I hope to show something a bit more useful built with Ring.&lt;/p&gt;</content>
+  </entry>
   
   <entry>
     <id>http://mcramm.com/2015/04/11/composing-functions</id>
