@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Site.Params.title }}</title>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/css/main.css">
+    <link href="{{ .Site.BaseUrl }}/index.xml" rel="alternate" type="application/rss+xml" title="{{ .Site.Params.title }}" />
+    <meta name="title" content="{{ .Site.BaseUrl }}">
+    <link rel="canonical" href="{{ .Site.BaseUrl }}">
+    <meta property="og:title" content="{{ .Site.Params.title }}"/>
+    <meta property="og:url" content="{{ .Site.BaseUrl }}"/>
+    <meta property="og:site_name" content="{{ .Site.Params.title }}">
+    <style>
+        .container {
+            max-width:1155px;
+        }
+
+        pre {
+            white-space: pre;
+            overflow: scroll;
+            width:inherit;
+            word-wrap: normal;
+            word-break: normal;
+        }
+
+        article blockquote {
+            background-color: whitesmoke;
+            font-size: 0.85em;
+            border-left: 5px solid #eeeeee;
+            margin: 0 0 20px 0;
+            padding: 10px 20px;
+        }
+
+        article blockquote p {
+            font-size: inherit;
+            line-height: inherit;
+            color: inherit;
+            font-weight: inherit;
+        }
+    </style>
+</head>
+<body>
+    
+<section class="site-nav">
+    <header>
+        <nav id="navigation">
+            <a href="/" class="home">About</a>
+            <a href="/post" class="post">Posts</a>
+        </nav>
+    </header>
+</section>

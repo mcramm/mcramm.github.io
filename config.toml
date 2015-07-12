@@ -1,0 +1,10 @@
+baseurl = "http://mcramm.com/"
+languageCode = "en-us"
+pygmentsuseclasses = true
+[params]
+  title = "mcrammm.com"
+  test = "here"
+  github = "mcramm"
+  twitter = "cramm"
+  sharetwitter = true
+  sharehn = true

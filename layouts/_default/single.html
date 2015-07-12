@@ -1,0 +1,25 @@
+{{ partial "header.html" . }}
+<article>
+    <div class="container">
+        <header>
+            <div class="meta">
+                <time pubdate datetime="{{ .Date.Format "2006-01-02" }}" title="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 02, 2006" }}</time>
+            </div>
+            <h1 class="title">{{ .Title }}</h1>
+            <h2 class="subtitle">{{ .Description }}</h2>
+        </header>
+
+        <section>
+            {{ .Content }}
+            {{ partial "_social.html" . }}
+        </section>
+
+        {{ with .Site.Params.inc.disqus.shortname }}
+        <section>
+            {{ partial "_disqus.html" . }}
+        </section>
+        {{ end }}
+    </div>
+</article>
+
+{{ partial "footer.html" . }}
