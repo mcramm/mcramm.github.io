@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Database on </title>
+    <link>http://mcramm.com/tags/database/</link>
+    <description>Recent content in Database on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 22 Jul 2015 20:10:00 -0600</lastBuildDate>
+    <atom:link href="http://mcramm.com/tags/database/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Datomic Setup</title>
+      <link>http://mcramm.com/post/datomic-setup/</link>
+      <pubDate>Wed, 22 Jul 2015 20:10:00 -0600</pubDate>
+      
+      <guid>http://mcramm.com/post/datomic-setup/</guid>
+      <description>
+
+&lt;p&gt;I&amp;rsquo;ve recently been exploring Datomic more seriously and have found myself
+jumping through the same hoops as I have in the past &lt;em&gt;just to get things up and
+running&lt;/em&gt;. I&amp;rsquo;ve also encountered slight deficiencies in the documentation that
+I&amp;rsquo;ve had to re-investigate since the exploratory project I created was deleted
+quite a while ago.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;m tired of retracing my same steps over and over again so I thought I&amp;rsquo;d create a
+quick post with some of the basic steps to get setup and using Datomic in a
+Clojure application.&lt;/p&gt;
+
+&lt;p&gt;This is just going to cover the basics. Datomic does some crazy things I haven&amp;rsquo;t
+had a chance to try yet, like using &lt;a href=&#34;http://docs.datomic.com/query.html#rules&#34;&gt;rules&lt;/a&gt;, querying the database at a &lt;a href=&#34;http://docs.datomic.com/tutorial.html#working-with-time&#34;&gt;particular
+instant in time&lt;/a&gt;, or &lt;a href=&#34;http://stackoverflow.com/questions/11025434/in-datomic-how-do-i-get-a-timeline-view-of-the-changes-made-to-the-values-of-a&#34;&gt;getting a list of changes to an entity&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;installing-datomic:68b984354b67329dbeb357734c95ec25&#34;&gt;Installing Datomic&lt;/h2&gt;
+
+&lt;p&gt;You do not need to install Datomic to get started, you can use the in-memory
+database.&lt;/p&gt;
+
+&lt;p&gt;Go here: &lt;a href=&#34;https://my.datomic.com/downloads/free&#34;&gt;https://my.datomic.com/downloads/free&lt;/a&gt; and find the latest version.&lt;/p&gt;
+
+&lt;p&gt;Then add &lt;code&gt;[com.datomic/datomic-free &amp;quot;&amp;lt;the-latest-version&amp;gt;&amp;quot;]&lt;/code&gt; to your Leiningen project.&lt;/p&gt;
+
+&lt;h2 id=&#34;component-setup:68b984354b67329dbeb357734c95ec25&#34;&gt;Component Setup&lt;/h2&gt;
+
+&lt;p&gt;This is pretty easy, but you should have something like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.datomic&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;com.stuartsierra.component&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;component&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;datomic.api&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;datomic&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defrecord &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;DatomicComponent&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;uri&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+  &lt;span class=&#34;nv&#34;&gt;component/Lifecycle&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;start&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;if &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:conn&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+      &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;do&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;assoc &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:conn&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/connect&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))))&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;stop&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;assoc &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:conn&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;nil&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;h2 id=&#34;schema:68b984354b67329dbeb357734c95ec25&#34;&gt;Schema&lt;/h2&gt;
+
+&lt;p&gt;Schema should be ideally be kept in an EDN file and loaded on demand:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;schema&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;delay&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;read-string&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;slurp &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;io/resource&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;my_project/schema.edn&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;create-schema&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/transact&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;@&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;schema&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Here is what your schema might look like:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;c1&#34;&gt;; resources/my_project/schema.edn&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/ident&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:cake/name&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/valueType&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.type/string&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/cardinality&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.cardinality/one&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/fulltext&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/doc&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;The name of a cake&amp;quot;&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db.install/_attribute&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.part/db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+  &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/ident&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/valueType&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.type/ref&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/cardinality&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.cardinality/one&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/doc&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;The owner of a cake&amp;quot;&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db.install/_attribute&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.part/db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+  &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/ident&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:user/email&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/unique&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.unique/value&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/valueType&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.type/string&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/cardinality&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.cardinality/one&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/doc&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Email address of a user&amp;quot;&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db.install/_attribute&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.part/db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+  &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/ident&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:user/phone-numbers&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/valueType&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.type/string&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/cardinality&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.cardinality/many&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db/doc&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Contact numbers for a user&amp;quot;&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:db.install/_attribute&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.part/db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Information on defining your schema and all the options available
+is documented &lt;a href=&#34;http://docs.datomic.com/schema.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;seed-data:68b984354b67329dbeb357734c95ec25&#34;&gt;Seed Data&lt;/h2&gt;
+
+&lt;p&gt;Like your schema, any seed data should be kept in a separate file:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;seed-data&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;delay&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;read-string&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;slurp &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;io/resource&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;my_project/seed.edn&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;seed-db&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/transact&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;@&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;seed-data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Here is what your seed data might look like:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;c1&#34;&gt;; resources/my_project/seed.edn&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;
+  &lt;span class=&#34;c1&#34;&gt;;; Users&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/user&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;-1000001&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:user/email&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;sally@test.com&amp;quot;&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:user/password&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;supersecret&amp;quot;&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:user/phones&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;8469481047&amp;quot;&lt;/span&gt;, &lt;span class=&#34;s&#34;&gt;&amp;quot;9471038596&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}&lt;/span&gt;
+
+  &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/user&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;-1000002&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:user/email&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;bob@test.com&amp;quot;&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:user/password&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;secret&amp;quot;&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:user/phones&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;1234567890&amp;quot;&lt;/span&gt;, &lt;span class=&#34;s&#34;&gt;&amp;quot;0987654321&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}&lt;/span&gt;
+
+  &lt;span class=&#34;c1&#34;&gt;;; Cakes&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/user&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/user&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;-1000001&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:cake/name&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Carrot&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/user&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/user&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;-1000001&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:cake/name&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Cheese&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/user&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/user&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;-1000002&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+   &lt;span class=&#34;ss&#34;&gt;:cake/name&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Carrot&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;h2 id=&#34;queries-updates:68b984354b67329dbeb357734c95ec25&#34;&gt;Queries &amp;amp; Updates&lt;/h2&gt;
+
+&lt;p&gt;The operations to be performed on an entity should be confined to it&amp;rsquo;s own namespace:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.users&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;datomic.api&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;datomic&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.component.datomic&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;c1&#34;&gt;; Note the change from using a dash to an underscore&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:import&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my_project.component.datomic&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;DatomicComponent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defprotocol &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;UserOps&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;all&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-email&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;email&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;save!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;user&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;extend-type&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;DatomicComponent&lt;/span&gt;
+  &lt;span class=&#34;nv&#34;&gt;UserOps&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;all&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+                 &lt;span class=&#34;ss&#34;&gt;:where&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:user/email&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
+               &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/db&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:conn&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-email&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;email&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])]&lt;/span&gt;
+                 &lt;span class=&#34;ss&#34;&gt;:in&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?email&lt;/span&gt;
+                 &lt;span class=&#34;ss&#34;&gt;:where&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:user/email&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?email&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
+               &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/db&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:conn&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+               &lt;span class=&#34;nv&#34;&gt;email&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;save!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;user&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/transact&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:conn&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;user&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;[(pull ?user [*]) ...]&lt;/code&gt; is an example of &lt;a href=&#34;http://docs.datomic.com/pull.html&#34;&gt;Datomic&amp;rsquo;s pull syntax&lt;/a&gt;. This basically says &amp;ldquo;after all &lt;code&gt;?user&lt;/code&gt;s, bring in all of their attributes. Be careful when using the wildcard &lt;code&gt;*&lt;/code&gt; as this will recursively pull any component attributes.&lt;/p&gt;
+
+&lt;h2 id=&#34;traversing-refs-forwards-and-backwards:68b984354b67329dbeb357734c95ec25&#34;&gt;Traversing refs forwards and backwards&lt;/h2&gt;
+
+&lt;p&gt;It&amp;rsquo;s possible to pull in &lt;code&gt;refs&lt;/code&gt; by specifying them in the pull pattern. If you wanted cakes with their owners:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?cake&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;* &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}])&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+             &lt;span class=&#34;ss&#34;&gt;:where&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;?cake&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
+           &lt;span class=&#34;nv&#34;&gt;db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;If however you wanted the reverse, users and their cakes:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;* &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:cake/_owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}])&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+             &lt;span class=&#34;ss&#34;&gt;:where&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:user/email&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
+           &lt;span class=&#34;nv&#34;&gt;db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;h2 id=&#34;recursive-graph-queries:68b984354b67329dbeb357734c95ec25&#34;&gt;Recursive (graph) queries&lt;/h2&gt;
+
+&lt;p&gt;This is one I haven&amp;rsquo;t found a good real world use case for yet, but it is possible. Read the following if you&amp;rsquo;re looking at doing these kinds of queries:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://docs.datomic.com/query.html#rules&#34;&gt;http://docs.datomic.com/query.html#rules&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://hashrocket.com/blog/posts/using-datomic-as-a-graph-database&#34;&gt;http://hashrocket.com/blog/posts/using-datomic-as-a-graph-database&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

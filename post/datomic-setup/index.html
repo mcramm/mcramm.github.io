@@ -1,0 +1,321 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mcrammm.com</title>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/css/main.css">
+    <link href="http://mcramm.com//index.xml" rel="alternate" type="application/rss+xml" title="mcrammm.com" />
+    <meta name="title" content="http://mcramm.com/">
+    <link rel="canonical" href="http://mcramm.com/">
+    <meta property="og:title" content="mcrammm.com"/>
+    <meta property="og:url" content="http://mcramm.com/"/>
+    <meta property="og:site_name" content="mcrammm.com">
+    <style>
+        .container {
+            max-width:1155px;
+        }
+
+        pre {
+            white-space: pre;
+            overflow: scroll;
+            width:inherit;
+            word-wrap: normal;
+            word-break: normal;
+        }
+
+        article blockquote {
+            background-color: whitesmoke;
+            font-size: 0.85em;
+            border-left: 5px solid #eeeeee;
+            margin: 0 0 20px 0;
+            padding: 10px 20px;
+        }
+
+        article blockquote p {
+            font-size: inherit;
+            line-height: inherit;
+            color: inherit;
+            font-weight: inherit;
+        }
+    </style>
+</head>
+<body>
+    
+<section class="site-nav">
+    <header>
+        <nav id="navigation">
+            <a href="/" class="home">About</a>
+            <a href="/post" class="post">Posts</a>
+        </nav>
+    </header>
+</section>
+
+<article>
+    <div class="container">
+        <header>
+            <div class="meta">
+                <time pubdate datetime="2015-07-22" title="2015-07-22">July 22, 2015</time>
+            </div>
+            <h1 class="title">Datomic Setup</h1>
+            <h2 class="subtitle"></h2>
+        </header>
+
+        <section>
+            
+
+<p>I&rsquo;ve recently been exploring Datomic more seriously and have found myself
+jumping through the same hoops as I have in the past <em>just to get things up and
+running</em>. I&rsquo;ve also encountered slight deficiencies in the documentation that
+I&rsquo;ve had to re-investigate since the exploratory project I created was deleted
+quite a while ago.</p>
+
+<p>I&rsquo;m tired of retracing my same steps over and over again so I thought I&rsquo;d create a
+quick post with some of the basic steps to get setup and using Datomic in a
+Clojure application.</p>
+
+<p>This is just going to cover the basics. Datomic does some crazy things I haven&rsquo;t
+had a chance to try yet, like using <a href="http://docs.datomic.com/query.html#rules">rules</a>, querying the database at a <a href="http://docs.datomic.com/tutorial.html#working-with-time">particular
+instant in time</a>, or <a href="http://stackoverflow.com/questions/11025434/in-datomic-how-do-i-get-a-timeline-view-of-the-changes-made-to-the-values-of-a">getting a list of changes to an entity</a>.</p>
+
+<h2 id="installing-datomic:68b984354b67329dbeb357734c95ec25">Installing Datomic</h2>
+
+<p>You do not need to install Datomic to get started, you can use the in-memory
+database.</p>
+
+<p>Go here: <a href="https://my.datomic.com/downloads/free">https://my.datomic.com/downloads/free</a> and find the latest version.</p>
+
+<p>Then add <code>[com.datomic/datomic-free &quot;&lt;the-latest-version&gt;&quot;]</code> to your Leiningen project.</p>
+
+<h2 id="component-setup:68b984354b67329dbeb357734c95ec25">Component Setup</h2>
+
+<p>This is pretty easy, but you should have something like this:</p>
+
+<p><div class="highlight"><pre><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.components.datomic</span>
+  <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">com.stuartsierra.component</span> <span class="ss">:as</span> <span class="nv">component</span><span class="p">]</span>
+            <span class="p">[</span><span class="nv">datomic.api</span> <span class="ss">:as</span> <span class="nv">datomic</span><span class="p">]))</span>
+
+<span class="p">(</span><span class="kd">defrecord </span><span class="nv">DatomicComponent</span> <span class="p">[</span><span class="nv">uri</span> <span class="nv">conn</span><span class="p">]</span>
+  <span class="nv">component/Lifecycle</span>
+  <span class="p">(</span><span class="nf">start</span> <span class="p">[</span><span class="nv">this</span><span class="p">]</span>
+    <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="ss">:conn</span> <span class="nv">this</span><span class="p">)</span>
+      <span class="nv">this</span>
+      <span class="p">(</span><span class="nf">do</span>
+        <span class="p">(</span><span class="nb">assoc </span><span class="nv">this</span> <span class="ss">:conn</span> <span class="p">(</span><span class="nf">datomic/connect</span> <span class="nv">uri</span><span class="p">)))))</span>
+  <span class="p">(</span><span class="nf">stop</span> <span class="p">[</span><span class="nv">this</span><span class="p">]</span>
+    <span class="p">(</span><span class="nb">assoc </span><span class="nv">this</span> <span class="ss">:conn</span> <span class="nv">nil</span><span class="p">)))</span>
+</pre></div>
+</p>
+
+<h2 id="schema:68b984354b67329dbeb357734c95ec25">Schema</h2>
+
+<p>Schema should be ideally be kept in an EDN file and loaded on demand:</p>
+
+<p><div class="highlight"><pre><span class="p">(</span><span class="k">def </span><span class="nv">schema</span>
+  <span class="p">(</span><span class="nf">delay</span>
+    <span class="p">(</span><span class="nf">read-string</span>
+      <span class="p">(</span><span class="nb">slurp </span><span class="p">(</span><span class="nf">io/resource</span> <span class="s">&quot;my_project/schema.edn&quot;</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="kd">defn </span><span class="nv">create-schema</span> <span class="p">[</span><span class="nv">conn</span><span class="p">]</span>
+  <span class="p">(</span><span class="nf">datomic/transact</span> <span class="nv">conn</span> <span class="o">@</span><span class="nv">schema</span><span class="p">))</span>
+</pre></div>
+</p>
+
+<p>Here is what your schema might look like:</p>
+
+<p><div class="highlight"><pre><span class="c1">; resources/my_project/schema.edn</span>
+
+<span class="p">[</span>
+  <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/db</span><span class="p">]</span>
+   <span class="ss">:db/ident</span> <span class="ss">:cake/name</span>
+   <span class="ss">:db/valueType</span> <span class="ss">:db.type/string</span>
+   <span class="ss">:db/cardinality</span> <span class="ss">:db.cardinality/one</span>
+   <span class="ss">:db/fulltext</span> <span class="nv">true</span>
+   <span class="ss">:db/doc</span> <span class="s">&quot;The name of a cake&quot;</span>
+   <span class="ss">:db.install/_attribute</span> <span class="ss">:db.part/db</span><span class="p">}</span>
+
+  <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/db</span><span class="p">]</span>
+   <span class="ss">:db/ident</span> <span class="ss">:cake/owner</span>
+   <span class="ss">:db/valueType</span> <span class="ss">:db.type/ref</span>
+   <span class="ss">:db/cardinality</span> <span class="ss">:db.cardinality/one</span>
+   <span class="ss">:db/doc</span> <span class="s">&quot;The owner of a cake&quot;</span>
+   <span class="ss">:db.install/_attribute</span> <span class="ss">:db.part/db</span><span class="p">}</span>
+
+  <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/db</span><span class="p">]</span>
+   <span class="ss">:db/ident</span> <span class="ss">:user/email</span>
+   <span class="ss">:db/unique</span> <span class="ss">:db.unique/value</span>
+   <span class="ss">:db/valueType</span> <span class="ss">:db.type/string</span>
+   <span class="ss">:db/cardinality</span> <span class="ss">:db.cardinality/one</span>
+   <span class="ss">:db/doc</span> <span class="s">&quot;Email address of a user&quot;</span>
+   <span class="ss">:db.install/_attribute</span> <span class="ss">:db.part/db</span><span class="p">}</span>
+
+  <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/db</span><span class="p">]</span>
+   <span class="ss">:db/ident</span> <span class="ss">:user/phone-numbers</span>
+   <span class="ss">:db/valueType</span> <span class="ss">:db.type/string</span>
+   <span class="ss">:db/cardinality</span> <span class="ss">:db.cardinality/many</span>
+   <span class="ss">:db/doc</span> <span class="s">&quot;Contact numbers for a user&quot;</span>
+   <span class="ss">:db.install/_attribute</span> <span class="ss">:db.part/db</span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</p>
+
+<p>Information on defining your schema and all the options available
+is documented <a href="http://docs.datomic.com/schema.html">here</a>.</p>
+
+<h2 id="seed-data:68b984354b67329dbeb357734c95ec25">Seed Data</h2>
+
+<p>Like your schema, any seed data should be kept in a separate file:</p>
+
+<p><div class="highlight"><pre><span class="p">(</span><span class="k">def </span><span class="nv">seed-data</span>
+  <span class="p">(</span><span class="nf">delay</span>
+    <span class="p">(</span><span class="nf">read-string</span>
+      <span class="p">(</span><span class="nb">slurp </span><span class="p">(</span><span class="nf">io/resource</span> <span class="s">&quot;my_project/seed.edn&quot;</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="kd">defn </span><span class="nv">seed-db</span> <span class="p">[</span><span class="nv">conn</span><span class="p">]</span>
+  <span class="p">(</span><span class="nf">datomic/transact</span> <span class="nv">conn</span> <span class="o">@</span><span class="nv">seed-data</span><span class="p">))</span>
+</pre></div>
+</p>
+
+<p>Here is what your seed data might look like:</p>
+
+<p><div class="highlight"><pre><span class="c1">; resources/my_project/seed.edn</span>
+<span class="p">[</span>
+  <span class="c1">;; Users</span>
+  <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/user</span> <span class="mi">-1000001</span><span class="p">]</span>
+   <span class="ss">:user/email</span> <span class="s">&quot;sally@test.com&quot;</span>
+   <span class="ss">:user/password</span> <span class="s">&quot;supersecret&quot;</span>
+   <span class="ss">:user/phones</span> <span class="p">[</span><span class="s">&quot;8469481047&quot;</span>, <span class="s">&quot;9471038596&quot;</span><span class="p">]}</span>
+
+  <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/user</span> <span class="mi">-1000002</span><span class="p">]</span>
+   <span class="ss">:user/email</span> <span class="s">&quot;bob@test.com&quot;</span>
+   <span class="ss">:user/password</span> <span class="s">&quot;secret&quot;</span>
+   <span class="ss">:user/phones</span> <span class="p">[</span><span class="s">&quot;1234567890&quot;</span>, <span class="s">&quot;0987654321&quot;</span><span class="p">]}</span>
+
+  <span class="c1">;; Cakes</span>
+  <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/user</span><span class="p">]</span>
+   <span class="ss">:cake/owner</span> <span class="o">#</span><span class="nv">db/id</span> <span class="p">[</span><span class="ss">:db.part/user</span> <span class="mi">-1000001</span><span class="p">]</span>
+   <span class="ss">:cake/name</span> <span class="s">&quot;Carrot&quot;</span><span class="p">}</span>
+  <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/user</span><span class="p">]</span>
+   <span class="ss">:cake/owner</span> <span class="o">#</span><span class="nv">db/id</span> <span class="p">[</span><span class="ss">:db.part/user</span> <span class="mi">-1000001</span><span class="p">]</span>
+   <span class="ss">:cake/name</span> <span class="s">&quot;Cheese&quot;</span><span class="p">}</span>
+  <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/user</span><span class="p">]</span>
+   <span class="ss">:cake/owner</span> <span class="o">#</span><span class="nv">db/id</span> <span class="p">[</span><span class="ss">:db.part/user</span> <span class="mi">-1000002</span><span class="p">]</span>
+   <span class="ss">:cake/name</span> <span class="s">&quot;Carrot&quot;</span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</p>
+
+<h2 id="queries-updates:68b984354b67329dbeb357734c95ec25">Queries &amp; Updates</h2>
+
+<p>The operations to be performed on an entity should be confined to it&rsquo;s own namespace:</p>
+
+<p><div class="highlight"><pre><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.users</span>
+  <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">datomic.api</span> <span class="ss">:as</span> <span class="nv">datomic</span><span class="p">]</span>
+            <span class="p">[</span><span class="nv">my-project.component.datomic</span><span class="p">])</span>
+  <span class="c1">; Note the change from using a dash to an underscore</span>
+  <span class="p">(</span><span class="ss">:import</span> <span class="p">[</span><span class="nv">my_project.component.datomic</span> <span class="nv">DatomicComponent</span><span class="p">]))</span>
+
+<span class="p">(</span><span class="kd">defprotocol </span><span class="nv">UserOps</span>
+  <span class="p">(</span><span class="nf">all</span> <span class="p">[</span><span class="nv">this</span><span class="p">])</span>
+  <span class="p">(</span><span class="nf">by-email</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">email</span><span class="p">])</span>
+  <span class="p">(</span><span class="nf">save!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">user</span><span class="p">])</span>
+
+<span class="p">(</span><span class="nf">extend-type</span> <span class="nv">DatomicComponent</span>
+  <span class="nv">UserOps</span>
+  <span class="p">(</span><span class="nf">all</span> <span class="p">[</span><span class="nv">this</span><span class="p">]</span>
+    <span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?user</span> <span class="p">[</span><span class="nv">*</span><span class="p">])</span> <span class="nv">...</span><span class="p">]</span>
+                 <span class="ss">:where</span> <span class="p">[</span><span class="nv">?user</span> <span class="ss">:user/email</span><span class="p">]]</span>
+               <span class="p">(</span><span class="nf">datomic/db</span> <span class="p">(</span><span class="ss">:conn</span> <span class="nv">this</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nf">by-email</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">email</span><span class="p">]</span>
+    <span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?user</span> <span class="p">[</span><span class="nv">*</span><span class="p">])]</span>
+                 <span class="ss">:in</span> <span class="nv">$</span> <span class="nv">?email</span>
+                 <span class="ss">:where</span> <span class="p">[</span><span class="nv">?user</span> <span class="ss">:user/email</span> <span class="nv">?email</span><span class="p">]]</span>
+               <span class="p">(</span><span class="nf">datomic/db</span> <span class="p">(</span><span class="ss">:conn</span> <span class="nv">this</span><span class="p">))</span>
+               <span class="nv">email</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">save!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">user</span><span class="p">]</span>
+    <span class="p">(</span><span class="nf">datomic/transact</span> <span class="p">(</span><span class="ss">:conn</span> <span class="nv">this</span><span class="p">)</span> <span class="nv">user</span><span class="p">)</span>
+</pre></div>
+</p>
+
+<p>The <code>[(pull ?user [*]) ...]</code> is an example of <a href="http://docs.datomic.com/pull.html">Datomic&rsquo;s pull syntax</a>. This basically says &ldquo;after all <code>?user</code>s, bring in all of their attributes. Be careful when using the wildcard <code>*</code> as this will recursively pull any component attributes.</p>
+
+<h2 id="traversing-refs-forwards-and-backwards:68b984354b67329dbeb357734c95ec25">Traversing refs forwards and backwards</h2>
+
+<p>It&rsquo;s possible to pull in <code>refs</code> by specifying them in the pull pattern. If you wanted cakes with their owners:</p>
+
+<p><div class="highlight"><pre><span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?cake</span> <span class="p">[</span><span class="nb">* </span><span class="p">{</span><span class="ss">:cake/owner</span> <span class="p">[</span><span class="nv">*</span><span class="p">]}])</span> <span class="nv">...</span><span class="p">]</span>
+             <span class="ss">:where</span> <span class="p">[</span><span class="nv">?cake</span> <span class="ss">:cake/owner</span><span class="p">]]</span>
+           <span class="nv">db</span><span class="p">)</span>
+</pre></div>
+</p>
+
+<p>If however you wanted the reverse, users and their cakes:</p>
+
+<p><div class="highlight"><pre><span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?user</span> <span class="p">[</span><span class="nb">* </span><span class="p">{</span><span class="ss">:cake/_owner</span> <span class="p">[</span><span class="nv">*</span><span class="p">]}])</span> <span class="nv">...</span><span class="p">]</span>
+             <span class="ss">:where</span> <span class="p">[</span><span class="nv">?user</span> <span class="ss">:user/email</span><span class="p">]]</span>
+           <span class="nv">db</span><span class="p">)</span>
+</pre></div>
+</p>
+
+<h2 id="recursive-graph-queries:68b984354b67329dbeb357734c95ec25">Recursive (graph) queries</h2>
+
+<p>This is one I haven&rsquo;t found a good real world use case for yet, but it is possible. Read the following if you&rsquo;re looking at doing these kinds of queries:</p>
+
+<p><a href="http://docs.datomic.com/query.html#rules">http://docs.datomic.com/query.html#rules</a></p>
+
+<p><a href="http://hashrocket.com/blog/posts/using-datomic-as-a-graph-database">http://hashrocket.com/blog/posts/using-datomic-as-a-graph-database</a></p>
+
+            
+
+        </section>
+
+        
+    </div>
+</article>
+
+<footer class="site-footer">
+    <div class="container">
+        <nav>
+            <a href="/" class="home">About</a>
+            <a href="/post" class="post">Posts</a>
+        </nav>
+        
+        <nav class="social">
+            
+            <a href="https://twitter.com/cramm" title="Follow on Twitter" target="_blank"><i class="icon icon-twitter black"></i></a>
+            
+            
+            <a href="https://github.com/mcramm" title="Follow on Github" target="_blank"><i class="icon icon-github black"></i></a>
+            
+            <a href="/index.xml" title="RSS Feed">
+                <i class="icon icon-rss black"></i>
+            </a>
+        </nav>
+    </div>
+</footer>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script type="text/javascript" src="/js/main.js"></script>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+<script>
+    (function(d, t) {
+        var g = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        g.src = '//hnbutton.appspot.com/static/hn.min.js';
+        s.parentNode.insertBefore(g, s);
+    }(document, 'script'));
+</script>
+
+
+
+
+
+
+
+  
+
+</body>
+</html>
+
