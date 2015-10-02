@@ -1130,7 +1130,7 @@ checking out the different &lt;a href=&#34;http://facebook.github.io/react/docs/
 
 &lt;p&gt;In an upcoming post, I&amp;rsquo;ll be creating a similar app in &lt;a href=&#34;https://github.com/swannodette/om&#34;&gt;Om&lt;/a&gt;.&lt;/p&gt;
 
-&lt;script src=&#34;http://fb.me/react-0.8.0.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;https://fb.me/react-0.13.3.min.js&#34;&gt;&lt;/script&gt;
 &lt;script src=&#34;http://mcramm.com/js/react_intro/build/ex1.js&#34;&gt;&lt;/script&gt;
 &lt;script src=&#34;http://mcramm.com/js/react_intro/build/ex2.js&#34;&gt;&lt;/script&gt;
 &lt;script src=&#34;http://mcramm.com/js/react_intro/build/ex3.js&#34;&gt;&lt;/script&gt;
