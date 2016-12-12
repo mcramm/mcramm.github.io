@@ -3,8 +3,12 @@
   
   <url>
     <loc>http://mcramm.com/</loc>
-    <lastmod>2015-07-22T20:10:00-06:00</lastmod>
-    <priority>0</priority>
+    <lastmod>2016-12-12T20:10:00-06:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://mcramm.com/post/off-the-ground-with-clojure-and-postgres/</loc>
+    <lastmod>2016-12-12T20:10:00-06:00</lastmod>
   </url>
   
   <url>

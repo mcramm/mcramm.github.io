@@ -1,13 +1,330 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title></title>
-    <link>http://mcramm.com/</link>
-    <description>Recent content on </description>
+    <title>mcrammm.com</title>
+    <link>http://mcramm.com/index.xml</link>
+    <description>Recent content on mcrammm.com</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 22 Jul 2015 20:10:00 -0600</lastBuildDate>
+    <lastBuildDate>Mon, 12 Dec 2016 20:10:00 -0600</lastBuildDate>
     <atom:link href="http://mcramm.com/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Off the ground with Clojure and Postgres</title>
+      <link>http://mcramm.com/post/off-the-ground-with-clojure-and-postgres/</link>
+      <pubDate>Mon, 12 Dec 2016 20:10:00 -0600</pubDate>
+      
+      <guid>http://mcramm.com/post/off-the-ground-with-clojure-and-postgres/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;ve been writing a few apps in my spare time, most notably
+&lt;a href=&#34;https://mailfeedapp.com&#34;&gt;Mailfeed&lt;/a&gt;, and I&amp;rsquo;ve developed a simple pattern
+whenever I need to pull data out of the database.  This pattern could be be
+applied to any database you&amp;rsquo;re interacting with, but in this case I&amp;rsquo;ll be
+showing how I &lt;em&gt;tend&lt;/em&gt; to do it with Postrges.&lt;/p&gt;
+
+&lt;p&gt;I should say that none of this is groundbreaking stuff.  If you&amp;rsquo;re an
+experienced developer then you&amp;rsquo;ll probably be saying &amp;ldquo;duh&amp;rdquo; a lot, but if your
+playing with Clojure and are struggling to come up with a good structure on how
+to do this kind of thing, then maybe this is something you could apply.&lt;/p&gt;
+
+&lt;p&gt;This is going to be pretty quick. Lets say you&amp;rsquo;re tracking user
+accounts with a status. We&amp;rsquo;d like to be able to do the following:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; nil&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/create!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; #:account{:id 1,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :status &amp;quot;open&amp;quot;,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :created-at &amp;quot;&amp;lt;some-instant-in-time&amp;gt;&amp;quot;,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :updated-at &amp;quot;&amp;lt;some-instant-in-time&amp;gt;&amp;quot;}&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/set-closed!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; #:account{:id 1,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :status &amp;quot;closed&amp;quot;,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :created-at &amp;quot;&amp;lt;some-instant-in-time&amp;gt;&amp;quot;,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :updated-at &amp;quot;&amp;lt;some-instant-in-time&amp;gt;&amp;quot;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Note that the resulting representation of accounts and invoices is a namespaced map, which is new to Clojure 1.9.
+It&amp;rsquo;s exactly the same as:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;
+ &lt;span class=&#34;ss&#34;&gt;:account/status&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;closed&amp;quot;&lt;/span&gt;
+ &lt;span class=&#34;ss&#34;&gt;:account/created-at&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;lt;some-instant-in-time&amp;gt;&amp;quot;&lt;/span&gt;
+ &lt;span class=&#34;ss&#34;&gt;:account/updated-at&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;lt;some-instant-in-time&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Let&amp;rsquo;s tackle this top-down by defining a protocol for the operations we&amp;rsquo;re performing.&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defprotocol &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;AccountOps&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-opened!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-closed!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Okay that was easy, but what the heck is &lt;code&gt;this&lt;/code&gt; going to be in the context of the final implementations of
+these methods? At this point it doesn&amp;rsquo;t &lt;em&gt;really&lt;/em&gt; matter. We could define a new record called &lt;code&gt;AtomStore&lt;/code&gt; and
+extend our protocol over it, but that isn&amp;rsquo;t the point of this post. I&amp;rsquo;ll leave that as an exercise for the
+reader.&lt;/p&gt;
+
+&lt;p&gt;We&amp;rsquo;re going to jump right in and create a &lt;code&gt;Postgres&lt;/code&gt; component that will be passed a connection string to a
+running postgres instance, with a database already created. &lt;a href=&#34;https://github.com/mcramm/postgres-example&#34;&gt;I have a full example here&lt;/a&gt; that
+also sets up &lt;a href=&#34;https://github.com/weavejester/ragtime&#34;&gt;Ragtime&lt;/a&gt; to ensure the necessary schema exists.&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defrecord &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;build&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;-&amp;gt;Postgres&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;At this point we could switch back to our accounts namespace and extend the AccountOps protocol over it, but
+we still need some way of actually querying our database. For that we&amp;rsquo;re going to use &lt;a href=&#34;http://www.hugsql.org&#34;&gt;HugSQL&lt;/a&gt; which will
+will let us define our queries in raw sql.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s start with writing a query to look up an account by an id. Open a new file at &lt;code&gt;resources/sql/accounts.sql&lt;/code&gt;
+and add the following content:
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span class=&#34;c1&#34;&gt;-- :name account-by-id :? :1&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;-- :doc Get an account by id&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;SELECT&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;FROM&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;accounts&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;WHERE&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;id&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;HugSQL will parse this file and define a new function called &lt;code&gt;account-by-id&lt;/code&gt; in whatever namespace we load it
+in. The &lt;code&gt;:?&lt;/code&gt; marks it as a query and the &lt;code&gt;:1&lt;/code&gt; will cause it to only return 1
+result.&lt;/p&gt;
+
+&lt;p&gt;Now we&amp;rsquo;ll create a namespace to define this function in:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;hugsql.core&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;hugsql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;hugsql/def-db-fns&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;sql/accounts.sql&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;After loading this namespace, we&amp;rsquo;ll then have a function we can call to load an account by an id:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;require&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/account-by-id&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;your-database-uri&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;123&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; nil&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Hurray! It worked&amp;hellip; kinda. Let&amp;rsquo;s define a way to create a new account with an
+initial status:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span class=&#34;c1&#34;&gt;-- :name insert-account! :&amp;lt;! :1&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;-- :doc Inserts an account and returns the id&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;INSERT&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;INTO&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;accounts&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;VALUES&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;RETURNING&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;id&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You&amp;rsquo;ll have to reload your REPL if you&amp;rsquo;re following along at one. This will define a new method called
+&lt;code&gt;insert-account!&lt;/code&gt; and return the id of the row that was just inserted. Now you can do the following:
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;require&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/insert-account!&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;your-database-uri&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; {:id 1}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/account-by-id&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;your-database-uri&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; {:id 1, :status &amp;quot;open&amp;quot;, :created_at #inst &amp;quot;2016-12-12T00:00:00.000000000-00:00&amp;quot;, :updated_at #inst &amp;quot;2016-12-12T00:00:00.000000000-00:00&amp;quot;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Your database uri should look something like
+&lt;code&gt;postgresql://postgres_example:secret@localhost:5432/postgres_example&lt;/code&gt;,
+assuming you&amp;rsquo;ve created a user &lt;code&gt;postgres_example&lt;/code&gt; with the password &lt;code&gt;secret&lt;/code&gt;,
+and a dabaase with the same name. This dosen&amp;rsquo;t &lt;em&gt;have&lt;/em&gt; to be a connection
+string, but it&amp;rsquo;s the most straightforward way of specifying the connection
+details that I&amp;rsquo;ve encountered so far.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Switch back to our accounts namespace and use these functions in our AccountOps protocol:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:import&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my_project.components.postgres&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defprotocol &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;AccountOps&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-opened!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-closed!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;extend-protocol&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;AccountOps&lt;/span&gt;
+  &lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/account-by-id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db-spec&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}))&lt;/span&gt;
+
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;result&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/insert-account!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db-spec&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})]&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;result&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Note that I haven&amp;rsquo;t implemented the &lt;code&gt;set-closed!&lt;/code&gt; or &lt;code&gt;set-opened!&lt;/code&gt; protocols
+yet. We&amp;rsquo;ll get to them in a minute.&lt;/p&gt;
+
+&lt;p&gt;Because this example is a little contrived, the solution here seems almost
+too straightforward. The only interesting piece is that &lt;code&gt;create!&lt;/code&gt;
+passes it&amp;rsquo;s result immediately to &lt;code&gt;by-id&lt;/code&gt; for re-fetching. This is a design
+decision I&amp;rsquo;m making; your needs may vary.&lt;/p&gt;
+
+&lt;p&gt;We&amp;rsquo;re missing something though. Remember our example at the beginning of this article returned us a namespaced
+map, but we&amp;rsquo;re getting back just a regular one. To do this we&amp;rsquo;re going to pass
+every result of &lt;code&gt;sql/account-by-id&lt;/code&gt; through a function &lt;code&gt;sql-&amp;gt;account&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:import&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my_project.components.postgres&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defprotocol &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;AccountOps&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-opened!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-closed!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;sql-&amp;gt;account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;when &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt;         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+              &lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt;     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+              &lt;span class=&#34;ss&#34;&gt;:created-at&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:created_at&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+              &lt;span class=&#34;ss&#34;&gt;:updated-at&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:updated_at&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)}))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;extend-protocol&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;AccountOps&lt;/span&gt;
+  &lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;-&amp;gt; &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/account-by-id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db-spec&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;sql-&amp;gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;result&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/insert-account!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db-spec&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})]&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;result&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It&amp;rsquo;s usually a good idea to insulate your code from outside dependencies like
+the database. Here we&amp;rsquo;re taking the raw result returned to us from HugSQL and
+mapping it to our own internal representation of it. This also gives us a place
+to manipulate the data to suite our needs as it comes out of the database.&lt;/p&gt;
+
+&lt;p&gt;There is one more thing I would recommend doing at this point, and it would be
+to require &lt;code&gt;clj-time.jdbc&lt;/code&gt; in our accounts namespace:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;clj-time.jdbc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:import&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my_project.components.postgres&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The &lt;a href=&#34;https://github.com/clj-time/clj-time&#34;&gt;clj-time&lt;/a&gt; library is great on it&amp;rsquo;s
+own, and including this namespace will ensure that as the JDBC library pulls
+dates out of the database, that they&amp;rsquo;re mapped to JodaTime instances.&lt;/p&gt;
+
+&lt;p&gt;Now we&amp;rsquo;re finally ready to give these a try:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; nil&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/create!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; #:account{:id 1,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :status &amp;quot;open&amp;quot;,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :created-at #object[org.joda.time.DateTime 0x17dffb5 &amp;quot;2016-12-12T00:00:00.000Z&amp;quot;],&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :updated-at #object[org.joda.time.DateTime 0x7e0ac645 &amp;quot;2016-12-12T00:00:00.000Z&amp;quot;]}&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; #:account{:id 1,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :status &amp;quot;open&amp;quot;,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :created-at #object[org.joda.time.DateTime 0x17dffb5 &amp;quot;2016-12-12T00:00:00.000Z&amp;quot;],&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :updated-at #object[org.joda.time.DateTime 0x7e0ac645 &amp;quot;2016-12-12T00:00:00.000Z&amp;quot;]}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Success! The last thing we&amp;rsquo;ll do is implement our &lt;code&gt;set-*&lt;/code&gt; functions.&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;c1&#34;&gt;;; ========================================&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;; in my-project.entities.accounts&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;opened-status&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;closed-status&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;closed&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;extend-protocol&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;AccountOps&lt;/span&gt;
+  &lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt;
+  &lt;span class=&#34;c1&#34;&gt;;; ... truncated ...&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-closed!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/update-account!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:uri&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+                                       &lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;closed-status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-open!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/update-account!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:uri&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+                                       &lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;opened-status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span class=&#34;c1&#34;&gt;-- ========================================&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;-- in resources/sql/accounts.sql&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;-- :name update-account! :&amp;lt; :1&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;-- :doc Updates an account by id&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;UPDATE&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;accounts&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;SET&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;status&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;updated_at&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;now&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;WHERE&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;id&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;RETURNING&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;id&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And let&amp;rsquo;s try them out:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;my-account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; &amp;quot;open&amp;quot;&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/set-closed!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;my-account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; #:account{:id 1,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :status &amp;quot;closed&amp;quot;,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :created-at #object[org.joda.time.DateTime 0x17dffb5 &amp;quot;2016-12-12T00:00:00.000Z&amp;quot;],&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :updated-at #object[org.joda.time.DateTime 0x7e0ac645 &amp;quot;2016-12-12T00:00:00.000Z&amp;quot;]}&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;;; Note that `my-account` hasen&amp;#39;t changed&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;my-account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; &amp;quot;open&amp;quot;&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/set-opened!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;my-account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;; =&amp;gt; #:account{:id 1,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :status &amp;quot;open&amp;quot;,&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :created-at #object[org.joda.time.DateTime 0x17dffb5 &amp;quot;2016-12-12T00:00:00.000Z&amp;quot;],&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;;              :updated-at #object[org.joda.time.DateTime 0x7e0ac645 &amp;quot;2016-12-12T00:00:00.000Z&amp;quot;]}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And bam! That&amp;rsquo;s it.&lt;/p&gt;
+
+&lt;p&gt;As I said before, this example is a little small and contrived, but I&amp;rsquo;ve found
+it to be a good jumping off point for most projects to start with.&lt;/p&gt;
+
+&lt;p&gt;If you notice any errors in this post, &lt;a href=&#34;https://twitter.com/cramm&#34;&gt;please let me know&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Datomic Setup</title>
@@ -31,7 +348,7 @@ Clojure application.&lt;/p&gt;
 had a chance to try yet, like using &lt;a href=&#34;http://docs.datomic.com/query.html#rules&#34;&gt;rules&lt;/a&gt;, querying the database at a &lt;a href=&#34;http://docs.datomic.com/tutorial.html#working-with-time&#34;&gt;particular
 instant in time&lt;/a&gt;, or &lt;a href=&#34;http://stackoverflow.com/questions/11025434/in-datomic-how-do-i-get-a-timeline-view-of-the-changes-made-to-the-values-of-a&#34;&gt;getting a list of changes to an entity&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;installing-datomic:68b984354b67329dbeb357734c95ec25&#34;&gt;Installing Datomic&lt;/h2&gt;
+&lt;h2 id=&#34;installing-datomic&#34;&gt;Installing Datomic&lt;/h2&gt;
 
 &lt;p&gt;You do not need to install Datomic to get started, you can use the in-memory
 database.&lt;/p&gt;
@@ -40,11 +357,11 @@ database.&lt;/p&gt;
 
 &lt;p&gt;Then add &lt;code&gt;[com.datomic/datomic-free &amp;quot;&amp;lt;the-latest-version&amp;gt;&amp;quot;]&lt;/code&gt; to your Leiningen project.&lt;/p&gt;
 
-&lt;h2 id=&#34;component-setup:68b984354b67329dbeb357734c95ec25&#34;&gt;Component Setup&lt;/h2&gt;
+&lt;h2 id=&#34;component-setup&#34;&gt;Component Setup&lt;/h2&gt;
 
 &lt;p&gt;This is pretty easy, but you should have something like this:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.datomic&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.datomic&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;com.stuartsierra.component&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;component&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
             &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;datomic.api&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;datomic&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
 
@@ -57,26 +374,26 @@ database.&lt;/p&gt;
         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;assoc &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:conn&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/connect&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))))&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;stop&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;assoc &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:conn&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;nil&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;schema:68b984354b67329dbeb357734c95ec25&#34;&gt;Schema&lt;/h2&gt;
+
+&lt;h2 id=&#34;schema&#34;&gt;Schema&lt;/h2&gt;
 
 &lt;p&gt;Schema should be ideally be kept in an EDN file and loaded on demand:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;schema&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;schema&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;delay&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;read-string&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;slurp &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;io/resource&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;my_project/schema.edn&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
 
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;create-schema&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/transact&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;@&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;schema&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Here is what your schema might look like:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;c1&#34;&gt;; resources/my_project/schema.edn&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;c1&#34;&gt;; resources/my_project/schema.edn&lt;/span&gt;
 
 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
@@ -109,29 +426,29 @@ database.&lt;/p&gt;
    &lt;span class=&#34;ss&#34;&gt;:db/doc&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Contact numbers for a user&amp;quot;&lt;/span&gt;
    &lt;span class=&#34;ss&#34;&gt;:db.install/_attribute&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:db.part/db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Information on defining your schema and all the options available
 is documented &lt;a href=&#34;http://docs.datomic.com/schema.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;seed-data:68b984354b67329dbeb357734c95ec25&#34;&gt;Seed Data&lt;/h2&gt;
+&lt;h2 id=&#34;seed-data&#34;&gt;Seed Data&lt;/h2&gt;
 
 &lt;p&gt;Like your schema, any seed data should be kept in a separate file:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;seed-data&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;seed-data&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;delay&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;read-string&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;slurp &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;io/resource&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;my_project/seed.edn&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
 
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;seed-db&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/transact&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;@&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;seed-data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Here is what your seed data might look like:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;c1&#34;&gt;; resources/my_project/seed.edn&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;c1&#34;&gt;; resources/my_project/seed.edn&lt;/span&gt;
 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;
   &lt;span class=&#34;c1&#34;&gt;;; Users&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/user&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;-1000001&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
@@ -155,14 +472,14 @@ is documented &lt;a href=&#34;http://docs.datomic.com/schema.html&#34;&gt;here&l
    &lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/user&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;-1000002&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
    &lt;span class=&#34;ss&#34;&gt;:cake/name&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Carrot&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;queries-updates:68b984354b67329dbeb357734c95ec25&#34;&gt;Queries &amp;amp; Updates&lt;/h2&gt;
+
+&lt;h2 id=&#34;queries-updates&#34;&gt;Queries &amp;amp; Updates&lt;/h2&gt;
 
 &lt;p&gt;The operations to be performed on an entity should be confined to it&amp;rsquo;s own namespace:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.users&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.users&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;datomic.api&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;datomic&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
             &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.component.datomic&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
   &lt;span class=&#34;c1&#34;&gt;; Note the change from using a dash to an underscore&lt;/span&gt;
@@ -187,30 +504,30 @@ is documented &lt;a href=&#34;http://docs.datomic.com/schema.html&#34;&gt;here&l
                &lt;span class=&#34;nv&#34;&gt;email&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;save!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;user&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/transact&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:conn&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;user&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;The &lt;code&gt;[(pull ?user [*]) ...]&lt;/code&gt; is an example of &lt;a href=&#34;http://docs.datomic.com/pull.html&#34;&gt;Datomic&amp;rsquo;s pull syntax&lt;/a&gt;. This basically says &amp;ldquo;after all &lt;code&gt;?user&lt;/code&gt;s, bring in all of their attributes. Be careful when using the wildcard &lt;code&gt;*&lt;/code&gt; as this will recursively pull any component attributes.&lt;/p&gt;
 
-&lt;h2 id=&#34;traversing-refs-forwards-and-backwards:68b984354b67329dbeb357734c95ec25&#34;&gt;Traversing refs forwards and backwards&lt;/h2&gt;
+&lt;h2 id=&#34;traversing-refs-forwards-and-backwards&#34;&gt;Traversing refs forwards and backwards&lt;/h2&gt;
 
 &lt;p&gt;It&amp;rsquo;s possible to pull in &lt;code&gt;refs&lt;/code&gt; by specifying them in the pull pattern. If you wanted cakes with their owners:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?cake&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;* &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}])&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?cake&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;* &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}])&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
              &lt;span class=&#34;ss&#34;&gt;:where&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;?cake&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
            &lt;span class=&#34;nv&#34;&gt;db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/p&gt;
 
 &lt;p&gt;If however you wanted the reverse, users and their cakes:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;* &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:cake/_owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}])&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;* &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:cake/_owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}])&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
              &lt;span class=&#34;ss&#34;&gt;:where&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:user/email&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
            &lt;span class=&#34;nv&#34;&gt;db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;recursive-graph-queries:68b984354b67329dbeb357734c95ec25&#34;&gt;Recursive (graph) queries&lt;/h2&gt;
+
+&lt;h2 id=&#34;recursive-graph-queries&#34;&gt;Recursive (graph) queries&lt;/h2&gt;
 
 &lt;p&gt;This is one I haven&amp;rsquo;t found a good real world use case for yet, but it is possible. Read the following if you&amp;rsquo;re looking at doing these kinds of queries:&lt;/p&gt;
 
@@ -253,7 +570,7 @@ please click:&lt;/p&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/mcramm/ring-basics&#34;&gt;Here for the Ring example&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;the-minimal-first-step:55955117cf2de0d1e8d1354891ca366d&#34;&gt;The Minimal First Step&lt;/h2&gt;
+&lt;h2 id=&#34;the-minimal-first-step&#34;&gt;The Minimal First Step&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s start with Rack, since it&amp;rsquo;s obviously the more popular of the two.
 I&amp;rsquo;m going to assume that you can
@@ -267,14 +584,14 @@ entry point. In the case of Rack this is will be an object with a &lt;code&gt;ca
 method. This method needs to return the basic structure required for a Rack
 response, which is an array containing the response status, headers and body:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;c1&#34;&gt;# my_rack_app.rb&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;# my_rack_app.rb&lt;/span&gt;
     &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;MyRackApp&lt;/span&gt;
       &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;call&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;env&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
         &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;200&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;Content-Type&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;text/html&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;},&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;Hello World&amp;#39;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;]]&lt;/span&gt;
       &lt;span class=&#34;k&#34;&gt;end&lt;/span&gt;
     &lt;span class=&#34;k&#34;&gt;end&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Note how simple this is. This is just a regular old ruby object with a method
 that returns a triplet. It knows nothing about Rack or anything else that might
@@ -282,13 +599,13 @@ be using it.&lt;/p&gt;
 
 &lt;p&gt;Unfortunately this does absolutely &lt;em&gt;nothing&lt;/em&gt;, which is pretty boring.  To boot this app up, we&amp;rsquo;ll add a &lt;code&gt;config.ru&lt;/code&gt; to the current directory:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;span class=&#34;c1&#34;&gt;# config.ru&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# config.ru&lt;/span&gt;
 &lt;span class=&#34;nb&#34;&gt;require&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;rack&amp;#39;&lt;/span&gt;
 &lt;span class=&#34;n&#34;&gt;require_relative&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;my_rack_app&amp;#39;&lt;/span&gt;
 
 &lt;span class=&#34;n&#34;&gt;run&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;MyRackApp&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;new&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;We can now run &lt;code&gt;rackup&lt;/code&gt; from our current directory and, navigating to
 &lt;a href=&#34;http://localhost:9292/&#34;&gt;http://localhost:9292&lt;/a&gt;, we should see our &amp;ldquo;Hello World&amp;rdquo;
@@ -304,14 +621,14 @@ You might need to run &lt;code&gt;lein deps&lt;/code&gt; to download the Ring li
 &lt;p&gt;Ring is similar to Rack in that we need to give it a function that returns
 some standard response. Ring expects a map instead of an array:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;handler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;200&lt;/span&gt;
        &lt;span class=&#34;ss&#34;&gt;:headers&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;Content-Type&amp;quot;&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;text/html&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
        &lt;span class=&#34;ss&#34;&gt;:body&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Hello World&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Calling the function &amp;ldquo;handler&amp;rdquo; above is simply the convention in Clojure-land.
 Like the Rack example, we need some way to boot this app up. Some examples will
@@ -319,20 +636,20 @@ mash this boot process together with the code we wrote above but I prefer to
 keep this separate. Plus it makes it similar to our Rack example so win-win,
      right?&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.core&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.core&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;ring.adapter.jetty&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;run-jetty&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
                 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.app&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:gen-class&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
 
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;-main&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;args&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;run-jetty&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app/handler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:port&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3000&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Now we can just do &lt;code&gt;lein run&lt;/code&gt; from our project root. Navigating to
  &lt;a href=&#34;http://localhost:3000/&#34;&gt;http://localhost:3000&lt;/a&gt; should display a very familiar page.&lt;/p&gt;
 
-&lt;h2 id=&#34;middleware:55955117cf2de0d1e8d1354891ca366d&#34;&gt;Middleware&lt;/h2&gt;
+&lt;h2 id=&#34;middleware&#34;&gt;Middleware&lt;/h2&gt;
 
 &lt;p&gt;Middleware is essentially a series a steps a request has to go through in order
  to generate a response. Once a response is generated, it will return the
@@ -352,7 +669,7 @@ be doing something with that &lt;code&gt;env&lt;/code&gt; parameter we saw in ou
 will notice that our middleware bears some resemblance to our running
 &lt;code&gt;MyRackApp&lt;/code&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;c1&#34;&gt;# hello_translator.rb&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;# hello_translator.rb&lt;/span&gt;
     &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HelloTranslator&lt;/span&gt;
       &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;initialize&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
         &lt;span class=&#34;vi&#34;&gt;@app&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;app&lt;/span&gt;
@@ -368,8 +685,8 @@ will notice that our middleware bears some resemblance to our running
         &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;headers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;k&#34;&gt;end&lt;/span&gt;
     &lt;span class=&#34;k&#34;&gt;end&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;First we initialize the middleware with our running application. Calling
 &lt;code&gt;@app.call(env)&lt;/code&gt; simply passes the request down the stack. If there was
@@ -383,15 +700,15 @@ to serve the response.&lt;/p&gt;
 we actually need to &lt;em&gt;tell&lt;/em&gt; Rack about this is middleware. To accomplish this we
 need to require and &lt;code&gt;use&lt;/code&gt; it in our &lt;code&gt;config.ru&lt;/code&gt;:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;c1&#34;&gt;# config.ru&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;# config.ru&lt;/span&gt;
     &lt;span class=&#34;nb&#34;&gt;require&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;rack&amp;#39;&lt;/span&gt;
     &lt;span class=&#34;n&#34;&gt;require_relative&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;my_rack_app&amp;#39;&lt;/span&gt;
     &lt;span class=&#34;n&#34;&gt;require_relative&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;hello_translator&amp;#39;&lt;/span&gt;
 
     &lt;span class=&#34;n&#34;&gt;use&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;HelloTranslator&lt;/span&gt;
     &lt;span class=&#34;n&#34;&gt;run&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;MyRackApp&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;new&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Running &lt;code&gt;rackup&lt;/code&gt; and refreshing the previous page will now show a lovely
 greeting in the famously romantic French language.&lt;/p&gt;
@@ -399,7 +716,7 @@ greeting in the famously romantic French language.&lt;/p&gt;
 &lt;p&gt;Again Ring is very similar. The biggest difference is that the middleware is
 just a function instead of an object:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.middleware&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.middleware&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;clojure.string&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;s&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
 
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;translate-hello&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
@@ -409,13 +726,13 @@ just a function instead of an object:&lt;/p&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;fn &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;response&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;handler&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
           &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;update-in&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;response&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;translate-hello&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Again, prefixing our middleware with &lt;code&gt;wrap&lt;/code&gt; is convention.  As before we will need to require and use
 this middleware in the namespace responsible for booting the app:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.core&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.core&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;ring.adapter.jetty&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;run-jetty&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
                 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.app&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
                 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.middleware&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;wrap-hello-translator&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]])&lt;/span&gt;
@@ -425,10 +742,10 @@ this middleware in the namespace responsible for booting the app:&lt;/p&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;run-jetty&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;-&amp;gt; &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;app/handler&lt;/span&gt;
                      &lt;span class=&#34;nv&#34;&gt;wrap-hello-translator&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
                  &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:port&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3000&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;dealing-with-query-params:55955117cf2de0d1e8d1354891ca366d&#34;&gt;Dealing With Query Params&lt;/h2&gt;
+
+&lt;h2 id=&#34;dealing-with-query-params&#34;&gt;Dealing With Query Params&lt;/h2&gt;
 
 &lt;p&gt;I was originally going to end the post here with an amazingly concise, beautifully
 written conclusion to tie a nice little bow over everything. Instead I&amp;rsquo;m going to
@@ -447,7 +764,7 @@ name to use by simply providing a &lt;code&gt;name&lt;/code&gt; parameter.&lt;/p
 &lt;p&gt;With the Rack example, we aren&amp;rsquo;t going to touch anything except for our base
 application:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;c1&#34;&gt;# my_rack_app.rb&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;# my_rack_app.rb&lt;/span&gt;
     &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;MyRackApp&lt;/span&gt;
       &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;call&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;env&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
         &lt;span class=&#34;n&#34;&gt;request&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;Rack&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;no&#34;&gt;Request&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;new&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;env&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
@@ -457,8 +774,8 @@ application:&lt;/p&gt;
         &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;200&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;Content-Type&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;text/html&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;},&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;k&#34;&gt;end&lt;/span&gt;
     &lt;span class=&#34;k&#34;&gt;end&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;The change here is that we wrap the &lt;code&gt;env&lt;/code&gt; parameter in a &lt;code&gt;Rack::Request&lt;/code&gt;
 object, then attempt to fetch the &lt;code&gt;&#39;name&#39;&lt;/code&gt; parameter. If one isn&amp;rsquo;t provided,
@@ -476,7 +793,7 @@ map at that key.&lt;/p&gt;
 &lt;p&gt;I&amp;rsquo;ve included full-versions of each file here to keep things easy to follow.
 Additions to &lt;code&gt;my-ring-app.core&lt;/code&gt; are noted:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.core&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.core&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;ring.adapter.jetty&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;run-jetty&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
                 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;ring.middleware.params&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;wrap-params&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;; NEW&lt;/span&gt;
                 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.app&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
@@ -487,18 +804,18 @@ Additions to &lt;code&gt;my-ring-app.core&lt;/code&gt; are noted:&lt;/p&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;run-jetty&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;-&amp;gt; &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;app/handler&lt;/span&gt;
                      &lt;span class=&#34;nv&#34;&gt;wrap-params&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;; NEW&lt;/span&gt;
                      &lt;span class=&#34;nv&#34;&gt;wrap-hello-translator&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:port&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3000&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-ring-app.app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;handler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;subject&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;get-in&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;request&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:params&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;World&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
         &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;200&lt;/span&gt;
          &lt;span class=&#34;ss&#34;&gt;:headers&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;Content-Type&amp;quot;&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;text/html&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
          &lt;span class=&#34;ss&#34;&gt;:body&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;format&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Hello %s&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;subject&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)}))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;The difference between the two examples is the fact that the
 query string processing is handled in middleware with Ring, while with Rack I
@@ -526,17 +843,17 @@ the  more complicated your stack becomes, but this is usually due to stuff built
       <pubDate>Sat, 11 Apr 2015 18:04:47 -0600</pubDate>
       
       <guid>http://mcramm.com/post/composing-functions/</guid>
-      <description>
-
-&lt;p&gt;Let&amp;rsquo;s look at the different flavors of function composition
+      <description>&lt;p&gt;Let&amp;rsquo;s look at the different flavors of function composition
 in Clojure.&lt;/p&gt;
 
-&lt;h2 id=&#34;comp:2c7fb5d67b91634a44ae1b2c122034ce&#34;&gt;Comp&lt;/h2&gt;
+&lt;p&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;comp&#34;&gt;Comp&lt;/h2&gt;
 
 &lt;p&gt;There is a function in clojure.core called &lt;code&gt;comp&lt;/code&gt; that takes a set of
 functions and returns a function that is a composition of those functions:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;* &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
 
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;incrementer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
@@ -545,8 +862,8 @@ functions and returns a function that is a composition of those functions:&lt;/p
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;doubler-and-incrementer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;comp &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;incrementer&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
 
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;doubler-and-incrementer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;; =&amp;gt; [3 5 7 9]&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;blockquote&gt;
 &lt;p&gt;&lt;code&gt;clojure.core/inc&lt;/code&gt; exists, but I recreate it here to be explicit&lt;/p&gt;
@@ -555,32 +872,32 @@ functions and returns a function that is a composition of those functions:&lt;/p
 &lt;p&gt;Note that when composing functions with comp, they are applied right to left to
 their arguments:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;incrementer-and-doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;comp &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;incrementer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;incrementer-and-doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;comp &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;incrementer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
 
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;incrementer-and-doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;; =&amp;gt; [4 6 8 10]&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;partial:2c7fb5d67b91634a44ae1b2c122034ce&#34;&gt;Partial&lt;/h2&gt;
+
+&lt;h2 id=&#34;partial&#34;&gt;Partial&lt;/h2&gt;
 
 &lt;p&gt;Another function in clojure.core is &lt;code&gt;partial&lt;/code&gt; that takes a function and some
 arguments to that function and returns a new function that will accept the
 remaining number of arguments. This can be useful when combined with comp and
 writing a custom reducer:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;incrementer-and-doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;comp &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;partial map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;incrementer-and-doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;comp &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;partial map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
                                        &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;partial map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;incrementer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
 
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;incrementer-and-doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;; =&amp;gt; [4 6 8 10]&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;blockquote&gt;
 &lt;p&gt;Clojure 1.7 will introduce transducers, which will likely become the idiomatic
 way of accomplishing this same task.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;h2 id=&#34;threading-macros:2c7fb5d67b91634a44ae1b2c122034ce&#34;&gt;Threading Macros&lt;/h2&gt;
+&lt;h2 id=&#34;threading-macros&#34;&gt;Threading Macros&lt;/h2&gt;
 
 &lt;p&gt;A more popular method of composition are the thread-first and
 thread-last macros.&lt;/p&gt;
@@ -591,31 +908,29 @@ argument of the next form and so on.&lt;/p&gt;
 
 &lt;p&gt;In other words, this:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;incrementer&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;incrementer&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Is the same as this:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;-&amp;gt; &lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;incrementer&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;-&amp;gt; &lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;incrementer&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Thread-last works the same way, but it passes the result of each expression into
 the last element of each successive form.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;-&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;-&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
          &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;incrementer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
          &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Is the same as:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;incrementer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
-</description>
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;doubler&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;incrementer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     
     <item>
@@ -630,14 +945,16 @@ As promised, I&amp;rsquo;ve built the same widget in
 &lt;a href=&#34;https://github.com/swannodette/om&#34;&gt;Om&lt;/a&gt;, a ClojureScript library that
 sits on top of React.&lt;/p&gt;
 
+&lt;p&gt;&lt;/p&gt;
+
 &lt;p&gt;If you want to follow along, you&amp;rsquo;ll need to install Leiningen and run:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    lein new mies-om om-intro
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;    lein new mies-om om-intro
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;&lt;code&gt;cd&lt;/code&gt; into the new directory and make your &lt;code&gt;project.clj&lt;/code&gt; look like the following:
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defproject &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om-intro&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;0.1.0-SNAPSHOT&amp;quot;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defproject &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om-intro&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;0.1.0-SNAPSHOT&amp;quot;&lt;/span&gt;
       &lt;span class=&#34;ss&#34;&gt;:description&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;FIXME: write this!&amp;quot;&lt;/span&gt;
       &lt;span class=&#34;ss&#34;&gt;:url&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;http://example.com/FIXME&amp;quot;&lt;/span&gt;
 
@@ -659,12 +976,12 @@ sits on top of React.&lt;/p&gt;
                     &lt;span class=&#34;ss&#34;&gt;:output-dir&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;out&amp;quot;&lt;/span&gt;
                     &lt;span class=&#34;ss&#34;&gt;:optimizations&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:none&lt;/span&gt;
                     &lt;span class=&#34;ss&#34;&gt;:source-map&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}]})&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/p&gt;
 
 &lt;p&gt;You will also want to update your &lt;code&gt;index.html&lt;/code&gt; look like this:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
         &lt;span class=&#34;nt&#34;&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
             &lt;span class=&#34;nt&#34;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;id=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;app&amp;quot;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
             &lt;span class=&#34;nt&#34;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#34;na&#34;&gt;src=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;http://fb.me/react-0.8.0.js&amp;quot;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
@@ -673,8 +990,8 @@ sits on top of React.&lt;/p&gt;
             &lt;span class=&#34;nt&#34;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#34;na&#34;&gt;type=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;goog&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;require&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;quot;om_intro.core&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
         &lt;span class=&#34;nt&#34;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
     &lt;span class=&#34;nt&#34;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Get any missing dependencies with &lt;code&gt;lein deps&lt;/code&gt;, then build the project with &lt;code&gt;lein
 cljsbuild once dev&lt;/code&gt;. Open &lt;code&gt;index.html&lt;/code&gt; in a browser and you should see the
@@ -690,7 +1007,7 @@ single JavaScript file.&lt;/p&gt;
 
 &lt;p&gt;With the setup out of the way we can start rebuilding this widget.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om-intro.core&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om-intro.core&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om.core&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;om&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:include-macros&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
                 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om.dom&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;dom&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:include-macros&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
 
@@ -706,8 +1023,8 @@ single JavaScript file.&lt;/p&gt;
       &lt;span class=&#34;nv&#34;&gt;app-state&lt;/span&gt;
       &lt;span class=&#34;nv&#34;&gt;my-widget&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;. &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;js/document&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;getElementById&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;app&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;This is analogous to the first example in the React version; all we&amp;rsquo;re doing is
 defining a component that renders a &lt;code&gt;div&lt;/code&gt; containing the value of &lt;code&gt;:text&lt;/code&gt; from
@@ -734,18 +1051,18 @@ various &lt;code&gt;input&lt;/code&gt;s we&amp;rsquo;ll eventually have.&lt;/p&g
 
 &lt;p&gt;Change the namespace declaration to the following:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om-intro.core&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om-intro.core&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require-macros&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;cljs.core.async.macros&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;go&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]])&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om.core&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;om&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:include-macros&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
                 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om.dom&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;dom&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:include-macros&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
                 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;cljs.core.async&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;put!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;chan&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;&amp;lt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Then we&amp;rsquo;ll update the widget. We&amp;rsquo;re going to walk through this step-by-step in
 a minute, but here is what it should look like:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-widget&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;owner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-widget&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;owner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;reify&lt;/span&gt;
         &lt;span class=&#34;nv&#34;&gt;om/IInitState&lt;/span&gt;
         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;init-state&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
@@ -770,8 +1087,8 @@ a minute, but here is what it should look like:&lt;/p&gt;
                                                     &lt;span class=&#34;nv&#34;&gt;.-value&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))})&lt;/span&gt;
 
                    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/div&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;nil&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:text&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;We&amp;rsquo;ve changed our widget to satisfy a few more Om interfaces that take
 advantage of the &lt;a href=&#34;http://facebook.github.io/react/docs/component-specs.html&#34;&gt;React life cycles&lt;/a&gt;.&lt;/p&gt;
@@ -806,15 +1123,15 @@ need it so that we can have access to the channel we created earlier.&lt;/p&gt;
 
 &lt;p&gt;Finally we create the &lt;code&gt;input&lt;/code&gt;:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/input&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;js&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:type&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;text&amp;quot;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/input&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;js&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:type&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;text&amp;quot;&lt;/span&gt;
                     &lt;span class=&#34;ss&#34;&gt;:ref&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;text&amp;quot;&lt;/span&gt;
                     &lt;span class=&#34;ss&#34;&gt;:value&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:text&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
                     &lt;span class=&#34;ss&#34;&gt;:onChange&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;put!&lt;/span&gt;
                                 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:string&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;comm&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
                                 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;-&amp;gt; &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;om/get-node&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;owner&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;text&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
                                     &lt;span class=&#34;nv&#34;&gt;.-value&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))})&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;The element is actually only taking a single argument, though it looks like two.
 &lt;code&gt;#js&lt;/code&gt; is a reader literal for Clojurscript that transforms the following object
@@ -834,24 +1151,24 @@ attractive. All it does is take the value of the &lt;code&gt;text&lt;/code&gt; n
 &lt;p&gt;The next step is to add in the text-size slider. First, let&amp;rsquo;s add the size to
 our application state:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;app-state&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;atom&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:text&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Some Text&amp;quot;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;app-state&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;atom&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:text&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Some Text&amp;quot;&lt;/span&gt;
                           &lt;span class=&#34;ss&#34;&gt;:size&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;15&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Next we&amp;rsquo;ll create another channel for manipulating this size:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;nv&#34;&gt;om/IInitState&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;nv&#34;&gt;om/IInitState&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;init-state&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:comm&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:string&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;chan&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
               &lt;span class=&#34;ss&#34;&gt;:size&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;chan&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)}})&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;We&amp;rsquo;ll create another go block to update &lt;code&gt;:size&lt;/code&gt; whenever we get a value off of
 this channel:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;nv&#34;&gt;om/IWillMount&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;nv&#34;&gt;om/IWillMount&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;will-mount&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:keys&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;string&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;size&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;comm&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;om/get-state&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;owner&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:comm&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;go&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;
@@ -860,20 +1177,20 @@ this channel:&lt;/p&gt;
         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;go&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;
               &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;value&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;&amp;lt;!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;size&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
                 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;om/transact!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:size&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;fn &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;_&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;value&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))))))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;And then we&amp;rsquo;ll add the input. Since we&amp;rsquo;re getting the value off in the input
 in a similar way as before, I created a small helper to do this. I would place
 this function at the top of your source file, underneath the atom:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;get-value&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;owner&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;ref&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;get-value&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;owner&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;ref&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;-&amp;gt; &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;om/get-node&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;owner&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;ref&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
           &lt;span class=&#34;nv&#34;&gt;.-value&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/div&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;nil&lt;/span&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/div&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;nil&lt;/span&gt;
             &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/input&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;js&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:type&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;range&amp;quot;&lt;/span&gt;
                             &lt;span class=&#34;ss&#34;&gt;:min&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;10&lt;/span&gt;
                             &lt;span class=&#34;ss&#34;&gt;:max&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;50&lt;/span&gt;
@@ -884,24 +1201,24 @@ this function at the top of your source file, underneath the atom:&lt;/p&gt;
                                         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:size&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;comm&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
                                         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;get-value&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;owner&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))})&lt;/span&gt;
             &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/label&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;nil&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:size&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;px&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Note that you may want to update the text input as well.&lt;/p&gt;
 
 &lt;p&gt;Finally, we want to modify our &lt;code&gt;div&lt;/code&gt; to have it&amp;rsquo;s font-size restyled whenever
 this changes. Right now it looks like this:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/div&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;nil&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:text&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/div&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;nil&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:text&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Change it to this:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/div&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;js&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:style&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;js&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:font-size&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:size&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;px&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)}}&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/div&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;js&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:style&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;js&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:font-size&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:size&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;px&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)}}&lt;/span&gt;
           &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:text&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Again, &lt;code&gt;#js&lt;/code&gt; turns the following object into a JavaScript object. It&amp;rsquo;s shallow,
 so we need to do it twice to set &lt;code&gt;:style&lt;/code&gt; correctly.&lt;/p&gt;
@@ -912,17 +1229,17 @@ so we need to do it twice to set &lt;code&gt;:style&lt;/code&gt; correctly.&lt;/
 
 &lt;p&gt;Now for the color sliders. First, we&amp;rsquo;ll add in the new state:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;app-state&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;atom&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:text&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Some Text&amp;quot;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;app-state&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;atom&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:text&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Some Text&amp;quot;&lt;/span&gt;
                           &lt;span class=&#34;ss&#34;&gt;:size&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;15&lt;/span&gt;
                           &lt;span class=&#34;ss&#34;&gt;:colors&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:red&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;
                                    &lt;span class=&#34;ss&#34;&gt;:green&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;
                                    &lt;span class=&#34;ss&#34;&gt;:blue&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;As in the React widget, we&amp;rsquo;ll create a more general &lt;code&gt;color-slider&lt;/code&gt;:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;color-slider&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;colors&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:keys&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;label&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;onChange&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;color-key&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}]&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;color-slider&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;colors&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:keys&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;label&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;onChange&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;color-key&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;reify&lt;/span&gt;
         &lt;span class=&#34;nv&#34;&gt;om/IRenderState&lt;/span&gt;
         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render-state&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:keys&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;comm&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}]&lt;/span&gt;
@@ -935,8 +1252,8 @@ so we need to do it twice to set &lt;code&gt;:style&lt;/code&gt; correctly.&lt;/
                                    &lt;span class=&#34;ss&#34;&gt;:value&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;color-key&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;colors&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
                                    &lt;span class=&#34;ss&#34;&gt;:onChange&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;onChange&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;color-key&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;owner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)})&lt;/span&gt;
                    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/label&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;nil&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;label&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;: &amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;color-key&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;colors&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))))))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;The important bit here is extra map of attributes we&amp;rsquo;ll be passing to this
 component. We&amp;rsquo;re going to give it a label, a color key to pull from the
@@ -944,25 +1261,25 @@ application state, and an onChange function.&lt;/p&gt;
 
 &lt;p&gt;Next we&amp;rsquo;ll create a channel for the changing colors:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;nv&#34;&gt;om/IInitState&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;nv&#34;&gt;om/IInitState&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;init-state&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:comm&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:string&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;chan&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
               &lt;span class=&#34;ss&#34;&gt;:size&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;chan&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
               &lt;span class=&#34;ss&#34;&gt;:colors&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;chan&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)}})&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;And a go block:
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;go&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;go&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;
           &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;c&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;value&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;&amp;lt;!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;colors&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
             &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;om/update!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;assoc-in&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:colors&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;c&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;value&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/p&gt;
 
 &lt;p&gt;This looks slightly different than the previous go blocks because we&amp;rsquo;re dealing
 with a map of colors in the application state instead of a straight value.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;putfn&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;fn &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;k&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;o&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;putfn&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;fn &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;k&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;o&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
                  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;put!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:colors&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;comm&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;k&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;get-value&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;o&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]))]&lt;/span&gt;
         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;apply &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;dom/div&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;nil&lt;/span&gt;
              &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;map &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;fn &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;label&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;color-key&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
@@ -972,22 +1289,22 @@ with a map of colors in the application state instead of a straight value.&lt;/p
                                       &lt;span class=&#34;ss&#34;&gt;:color-key&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;color-key&lt;/span&gt;
                                       &lt;span class=&#34;ss&#34;&gt;:onChange&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;putfn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}))&lt;/span&gt;
                   &lt;span class=&#34;p&#34;&gt;[[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;Red&amp;quot;&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:red&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;Green&amp;quot;&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:green&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;Blue&amp;quot;&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:blue&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]])))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Next we&amp;rsquo;ll add the inputs right below the text size slider. We use some
 high level functions here to avoid having to write three calls to &lt;code&gt;om/build&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;Finally we can modify the &lt;code&gt;div&lt;/code&gt; to re-color our text:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;size&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:size&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;size&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:size&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
           &lt;span class=&#34;nv&#34;&gt;text&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:text&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
           &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:keys&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;red&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;green&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;blue&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:colors&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;dom/div&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;js&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:style&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;js&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:font-size&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;size&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;px&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
                                &lt;span class=&#34;ss&#34;&gt;:color&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str &lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;rgb(&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;red&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;,&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;green&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;,&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;blue&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;)&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)}}&lt;/span&gt;
               &lt;span class=&#34;nv&#34;&gt;text&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Here is the final product, for the second time:
 &lt;div class=&#39;highlight example&#39; id=&#34;final&#34;&gt; &lt;/div&gt;&lt;/p&gt;
@@ -998,8 +1315,7 @@ high level functions here to avoid having to write three calls to &lt;code&gt;om
 recommend running through the
 &lt;a href=&#34;https://github.com/swannodette/om/wiki/Tutorial&#34;&gt;Tutorial&lt;/a&gt; in LightTable.&lt;/p&gt;
 
-&lt;script src=&#34;http://mcramm.com/js/om-intro.js&#34; type=&#34;text/javascript&#34;&gt;&lt;/script&gt;
-</description>
+&lt;script src=&#34;http://mcramm.com/js/om-intro.js&#34; type=&#34;text/javascript&#34;&gt;&lt;/script&gt;</description>
     </item>
     
     <item>
@@ -1018,7 +1334,7 @@ it with the same example in Om.&lt;/p&gt;
 container for the React root component, which we&amp;rsquo;ll give the id &lt;code&gt;app&lt;/code&gt;, and we&amp;rsquo;ll
 include the React library and the JSX transformer.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
         &lt;span class=&#34;nt&#34;&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
             &lt;span class=&#34;nt&#34;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;id=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#39;app&amp;#39;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
             &lt;span class=&#34;nt&#34;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#34;na&#34;&gt;src=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;http://fb.me/react-0.8.0.js&amp;quot;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
@@ -1031,22 +1347,22 @@ include the React library and the JSX transformer.&lt;/p&gt;
             &lt;span class=&#34;nt&#34;&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
         &lt;span class=&#34;nt&#34;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
     &lt;span class=&#34;nt&#34;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Note the &lt;code&gt;@jsx React.DOM&lt;/code&gt; in the block comment at the top of the script tag
 where our code will go. This is required for the JSX transformer to be able to
 process elements in our components from this:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;http://google.com&amp;quot;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&lt;/span&gt;Click Me&lt;span class=&#34;nt&#34;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;http://google.com&amp;quot;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&lt;/span&gt;Click Me&lt;span class=&#34;nt&#34;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Into this:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    React.DOM.a( {href:&amp;quot;http://google.com&amp;quot;}, &amp;quot;Click Me&amp;quot;)
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    React.DOM.a( {href:&amp;quot;http://google.com&amp;quot;}, &amp;quot;Click Me&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;JSX is completely optional, but it is a little bit easier to visualize the
 arrangement of nodes, so I&amp;rsquo;ll be using it for this example.&lt;/p&gt;
@@ -1056,7 +1372,7 @@ where any entered text is rendered out to some node.&lt;/p&gt;
 
 &lt;p&gt;First we&amp;rsquo;ll create our root component and pass it some initial state:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    var VariableText = React.createClass({
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    var VariableText = React.createClass({
         render: function() {
             return (
                 &lt;span class=&#34;nt&#34;&gt;&amp;lt;p&amp;gt;&lt;/span&gt;{this.props.defaultText}&lt;span class=&#34;nt&#34;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
@@ -1067,8 +1383,8 @@ where any entered text is rendered out to some node.&lt;/p&gt;
         &lt;span class=&#34;nt&#34;&gt;&amp;lt;VariableText&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;defaultText=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;Some text&amp;quot;&lt;/span&gt; &lt;span class=&#34;nt&#34;&gt;/&amp;gt;&lt;/span&gt;,
         document.getElementById(&amp;#39;app&amp;#39;)
     );
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;What we&amp;rsquo;re doing here is create a component called &lt;code&gt;VariableText&lt;/code&gt; that knows how
 to render itself. &lt;code&gt;render&lt;/code&gt; simply creates a &lt;code&gt;&amp;lt;p&amp;gt;&lt;/code&gt; tag and inserts
@@ -1081,7 +1397,7 @@ little bit bigger, but all we really want to do is create a &lt;code&gt;TextInpu
 component that renders an &lt;code&gt;input&lt;/code&gt; tag and responds to changes. We&amp;rsquo;ll also want
 to pass it our default text to set the input&amp;rsquo;s initial value.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    var TextInput = React.createClass({
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    var TextInput = React.createClass({
         handleChange: function() {
             var text = this.refs.text.getDOMNode().value;
             this.props.onTextChanged(text);
@@ -1122,8 +1438,8 @@ to pass it our default text to set the input&amp;rsquo;s initial value.&lt;/p&gt
             );
         }
     });
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;We&amp;rsquo;ve had to change our &lt;code&gt;VariableText&lt;/code&gt; component since we&amp;rsquo;ll need to introduce
 some mutable state, the value of the text input, into our app. The
@@ -1147,7 +1463,7 @@ throughout the rest of the example.&lt;/p&gt;
 
 &lt;p&gt;Now let&amp;rsquo;s introduce a slider to change the font size of our output text. We&amp;rsquo;ll
 create a &lt;code&gt;FontSizeSlider&lt;/code&gt; component that again renders an &lt;code&gt;input&lt;/code&gt; tag.
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    var FontSizeSlider = React.createClass({
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    var FontSizeSlider = React.createClass({
         handleChange: function() {
             var value = this.refs.slider.getDOMNode().value;
             this.props.onSliderChanged(value);
@@ -1170,12 +1486,12 @@ create a &lt;code&gt;FontSizeSlider&lt;/code&gt; component that again renders an
             );
         }
     });
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 This should look very similar to the &lt;code&gt;TextInput&lt;/code&gt; component. Here is what changed
 on &lt;code&gt;VariableText&lt;/code&gt;:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    getInitialState: function() {
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    getInitialState: function() {
         return {
             size: this.props.defaultSize,
             text: this.props.defaultText,
@@ -1200,14 +1516,14 @@ on &lt;code&gt;VariableText&lt;/code&gt;:&lt;/p&gt;
             &lt;span class=&#34;nt&#34;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
         );
     }
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 Again this should look similar to the previous change. All we&amp;rsquo;ve done is add
 another child component and react to it changing it the same way as &lt;code&gt;TextInput&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;The &lt;code&gt;defaultSize&lt;/code&gt; prop will also need to be passed into the root component:
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;VariableText&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;defaultText=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;Some text&amp;quot;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;defaultSize=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;{15}/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&lt;/span&gt;,
-&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;VariableText&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;defaultText=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;Some text&amp;quot;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;defaultSize=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;{15}/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&lt;/span&gt;,
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/p&gt;
 
 &lt;p&gt;You should now see something like the following:
@@ -1220,21 +1536,21 @@ and blue levels of our output text.&lt;/p&gt;
 &lt;p&gt;Since these sliders will respond to change similarly to our &lt;code&gt;FontSizeSlider&lt;/code&gt;
 component, we&amp;rsquo;ll create a mixin:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    var HandleSliderChangeMixin = {
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    var HandleSliderChangeMixin = {
         handleChange: function() {
             var value = this.refs.slider.getDOMNode().value;
             this.props.onSliderChanged(value);
             return false;
         }
     };
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Each of these color sliders will be pretty similar. They will all range from 0
 to 255, and have a label to display its value. Let&amp;rsquo;s create a generic component
 first:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    var FontColorSlider = React.createClass({
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    var FontColorSlider = React.createClass({
         mixins: [HandleSliderChangeMixin],
         render: function() {
             return (
@@ -1253,8 +1569,8 @@ first:&lt;/p&gt;
             );
         }
     });
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Note that we use the &lt;code&gt;HandleSliderChangeMixin&lt;/code&gt; here. We&amp;rsquo;ll also want to update
 &lt;code&gt;FontSizeSlider&lt;/code&gt; to use this mixin.&lt;/p&gt;
@@ -1262,7 +1578,7 @@ first:&lt;/p&gt;
 &lt;p&gt;Next we&amp;rsquo;ll create a component that will create a &lt;code&gt;FontColorSlider&lt;/code&gt; for each
 color value and communicate to our root component with the new values.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    var FontColorSliders = React.createClass({
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    var FontColorSliders = React.createClass({
         handleChange: function(r, g, b) {
             this.props.onColorsChanged({r: r, g: g, b: b});
         },
@@ -1297,11 +1613,11 @@ color value and communicate to our root component with the new values.&lt;/p&gt;
             );
         }
     });
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Here are the changes to &lt;code&gt;VariableText&lt;/code&gt; that we&amp;rsquo;ll need to make:
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    getInitialState: function() {
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    getInitialState: function() {
         return {
             size: this.props.defaultSize,
             text: this.props.defaultText,
@@ -1315,15 +1631,15 @@ color value and communicate to our root component with the new values.&lt;/p&gt;
         this.setState({colors: colors});
         this.refs.outputText.getDOMNode().style.color = this.colorsToRGB(colors);
     }
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/p&gt;
 
 &lt;p&gt;Don&amp;rsquo;t forget to add our new component to the &lt;code&gt;render&lt;/code&gt; method:
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;FontColorSliders&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;FontColorSliders&lt;/span&gt;
         &lt;span class=&#34;na&#34;&gt;onColorsChanged=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;{this.handleColorsChange}&lt;/span&gt;
         &lt;span class=&#34;na&#34;&gt;colors=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;{this.state.colors}&lt;/span&gt;
     &lt;span class=&#34;nt&#34;&gt;/&amp;gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/p&gt;
 
 &lt;p&gt;Here is the final product:
@@ -1374,9 +1690,9 @@ through the &lt;code&gt;new&lt;/code&gt; task: &lt;code&gt;lein new &amp;lt;temp
 &lt;p&gt;Let&amp;rsquo;s create one together. Since we&amp;rsquo;re creating one for the Om library, we&amp;rsquo;ll
 call it &amp;lsquo;Hum&amp;rsquo;:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    lein new template hum
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;    lein new template hum
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;To install this template locally, &lt;code&gt;cd&lt;/code&gt; into it and run &lt;code&gt;lein install&lt;/code&gt;. Let&amp;rsquo;s see
 what a project based off this bare template looks like. Run &lt;code&gt;lein new hum my-app&lt;/code&gt;.
@@ -1387,7 +1703,7 @@ You should get a directory tree with one file like this:
 
 &lt;p&gt;Open up &lt;code&gt;src/leiningen/new/hum.clj&lt;/code&gt; and look at the &lt;code&gt;hum&lt;/code&gt; function:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;hum&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;hum&lt;/span&gt;
       &lt;span class=&#34;s&#34;&gt;&amp;quot;FIXME: write documentation&amp;quot;&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:name&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;
@@ -1395,8 +1711,8 @@ You should get a directory tree with one file like this:
         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;main/info&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Generating fresh &amp;#39;lein new&amp;#39; hum project.&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;-&amp;gt;files&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;
                  &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)])))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Let&amp;rsquo;s go through this line by line.  This function takes a name then creates a
 map, &lt;code&gt;data&lt;/code&gt;, that contains this name and a sanitized version of it.  &lt;code&gt;name-to-path&lt;/code&gt;
@@ -1414,9 +1730,9 @@ content for that file.&lt;/p&gt;
 &lt;p&gt;To understand the &lt;code&gt;render&lt;/code&gt; call a little better, we need to look at the
 definition right above this function:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;renderer&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;hum&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;renderer&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;hum&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;All this does is create a renderer that will process one of our templates and
 replace the appropriate variables. This templating is based off of mustache
@@ -1426,23 +1742,23 @@ areas that we specify with our supplied &lt;code&gt;data&lt;/code&gt;. If we don
 then the file remains unchanged.&lt;/p&gt;
 
 &lt;p&gt;Keeping with our example, using this line:
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/p&gt;
 
 &lt;p&gt;Will create a file at &lt;code&gt;src/hum/foo.clj&lt;/code&gt; with the content of the file &lt;code&gt;foo.clj&lt;/code&gt;.
 Let&amp;rsquo;s open that file up and see this templating in action:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.lcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.rcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:foo&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.lcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.rcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:foo&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Remember that the &lt;code&gt;:name&lt;/code&gt; key in &lt;code&gt;data&lt;/code&gt; is set the unsanitized value we supply.&lt;/p&gt;
 
 &lt;p&gt;Now lets start making some changes. Create a file at
 &lt;code&gt;src/leiningen/new/hum/project.clj&lt;/code&gt; and give it the following content:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defproject &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.lcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.rcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;0.1.0-SNAPSHOT&amp;quot;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defproject &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.lcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.rcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;0.1.0-SNAPSHOT&amp;quot;&lt;/span&gt;
       &lt;span class=&#34;ss&#34;&gt;:description&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;FIXME: write this!&amp;quot;&lt;/span&gt;
       &lt;span class=&#34;ss&#34;&gt;:url&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;http://example.com/FIXME&amp;quot;&lt;/span&gt;
 
@@ -1461,17 +1777,17 @@ Let&amp;rsquo;s open that file up and see this templating in action:&lt;/p&gt;
                     &lt;span class=&#34;ss&#34;&gt;:optimizations&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:none&lt;/span&gt;
                     &lt;span class=&#34;ss&#34;&gt;:source-map&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;
                     &lt;span class=&#34;ss&#34;&gt;:externs&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;om/externs/react.js&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}}]})&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;This is doing a bunch of stuff, but is a reasonably standard starting point. The
 main differences is that I&amp;rsquo;ve included the Om library as a dependency.&lt;/p&gt;
 
 &lt;p&gt;Now add this to the list of processed files in &lt;code&gt;hum.clj&lt;/code&gt;:
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;-&amp;gt;files&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;-&amp;gt;files&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;
              &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
              &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;foo.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)])))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/p&gt;
 
 &lt;p&gt;To test it out, run &lt;code&gt;lein new hum my-app&lt;/code&gt;. Remember to remove the previous test
@@ -1482,7 +1798,7 @@ first, and make sure you are in the root of the template project. Open up
 of &lt;code&gt;foo.clj&lt;/code&gt; by renaming it to a Clojurescript file, like &lt;code&gt;core.cljs&lt;/code&gt;.
 Change the content of the file to this:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.lcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.rcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;.core&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.lcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;site.rcbs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;.core&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om.core&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;om&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:include-macros&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
                 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;om.dom&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;dom&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:include-macros&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
 
@@ -1506,8 +1822,8 @@ Change the content of the file to this:&lt;/p&gt;
           &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;om/build&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;button&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{}))))&lt;/span&gt;
 
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;om/root&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;app-state&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;my-app&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;js/document.body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Again the intent here is not to introduce you to Om, or Clojurescript. All
 you need to know for now is that this creates a button and counter that tracks how
@@ -1515,14 +1831,14 @@ many times the button has been clicked.&lt;/p&gt;
 
 &lt;p&gt;Your list of processed files should look something like this:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Let&amp;rsquo;s add in one more file, &lt;code&gt;index.html&lt;/code&gt;:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
         &lt;span class=&#34;nt&#34;&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
             &lt;span class=&#34;nt&#34;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#34;na&#34;&gt;src=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;http://fb.me/react-0.8.0.js&amp;quot;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
             &lt;span class=&#34;nt&#34;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#34;na&#34;&gt;src=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;out/goog/base.js&amp;quot;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;type=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
@@ -1530,20 +1846,20 @@ many times the button has been clicked.&lt;/p&gt;
             &lt;span class=&#34;nt&#34;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#34;na&#34;&gt;type=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;goog&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;require&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;quot;{{site.lcbs}}sanitized{{site.rcbs}}.core&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
         &lt;span class=&#34;nt&#34;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
     &lt;span class=&#34;nt&#34;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;And to the list of processed files:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;The full &lt;code&gt;hum&lt;/code&gt; function should look similar to this:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;hum&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;hum&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:name&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;
                   &lt;span class=&#34;ss&#34;&gt;:sanitized&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;name-to-path&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)}]&lt;/span&gt;
         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;main/info&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Generating a new Om project using the Hum template&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
@@ -1551,8 +1867,8 @@ many times the button has been clicked.&lt;/p&gt;
                  &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
                  &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;project.clj&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
                  &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;render&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;core.cljs&amp;quot;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)])))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;Now we&amp;rsquo;re done. Run &lt;code&gt;lein new hum my-app&lt;/code&gt; again and &lt;code&gt;cd&lt;/code&gt; into it. Run &lt;code&gt;lein deps&lt;/code&gt;
 to get any dependencies, then &lt;code&gt;lein cljsbuild once dev&lt;/code&gt;. Open up &lt;code&gt;index.html&lt;/code&gt;
@@ -1583,7 +1899,9 @@ docs&lt;/a&gt;.&lt;/p&gt;
 macro &lt;code&gt;specify&lt;/code&gt;. This means we can now have instance-level implementations of
 protocols on specific values:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;example1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;p&gt;&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;example1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;enable-console-print!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defprotocol &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;Listable&lt;/span&gt;
@@ -1615,8 +1933,8 @@ protocols on specific values:&lt;/p&gt;
     &lt;span class=&#34;c1&#34;&gt;; true&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;println &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;identical? &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;elements&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;one&amp;quot;&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;two&amp;quot;&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;three&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
     &lt;span class=&#34;c1&#34;&gt;; false&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;This is pretty important feature for Clojurescript. &lt;code&gt;extend-type&lt;/code&gt; is still
 powerful, but there is the odd time where you want to make a specific value
@@ -1625,8 +1943,7 @@ modularity without a huge performance cost.&lt;/p&gt;
 
 &lt;p&gt;Note that this relies on version &lt;code&gt;0.0-2138&lt;/code&gt; of Clojurescript.&lt;/p&gt;
 
-&lt;p&gt;This change was authored by the indomitable &lt;a href=&#34;http://swannodette.github.io/&#34;&gt;David Nolen&lt;/a&gt; whose &lt;a href=&#34;https://github.com/swannodette/om&#34;&gt;latest open source offering&lt;/a&gt; in a Clojurescript interface over Facebook&amp;rsquo;s &lt;a href=&#34;http://facebook.github.io/react/&#34;&gt;React&lt;/a&gt;.&lt;/p&gt;
-</description>
+&lt;p&gt;This change was authored by the indomitable &lt;a href=&#34;http://swannodette.github.io/&#34;&gt;David Nolen&lt;/a&gt; whose &lt;a href=&#34;https://github.com/swannodette/om&#34;&gt;latest open source offering&lt;/a&gt; in a Clojurescript interface over Facebook&amp;rsquo;s &lt;a href=&#34;http://facebook.github.io/react/&#34;&gt;React&lt;/a&gt;.&lt;/p&gt;</description>
     </item>
     
   </channel>

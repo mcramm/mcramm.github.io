@@ -63,17 +63,17 @@
         </header>
 
         <section>
-            
-
-<p>Let&rsquo;s look at the different flavors of function composition
+            <p>Let&rsquo;s look at the different flavors of function composition
 in Clojure.</p>
 
-<h2 id="comp:2c7fb5d67b91634a44ae1b2c122034ce">Comp</h2>
+<p></p>
+
+<h2 id="comp">Comp</h2>
 
 <p>There is a function in clojure.core called <code>comp</code> that takes a set of
 functions and returns a function that is a composition of those functions:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">defn </span><span class="nv">doubler</span> <span class="p">[</span><span class="nv">x</span><span class="p">]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">defn </span><span class="nv">doubler</span> <span class="p">[</span><span class="nv">x</span><span class="p">]</span>
       <span class="p">(</span><span class="nb">* </span><span class="nv">x</span> <span class="mi">2</span><span class="p">))</span>
 
     <span class="p">(</span><span class="kd">defn </span><span class="nv">incrementer</span> <span class="p">[</span><span class="nv">x</span><span class="p">]</span>
@@ -82,8 +82,8 @@ functions and returns a function that is a composition of those functions:</p>
     <span class="p">(</span><span class="k">def </span><span class="nv">doubler-and-incrementer</span> <span class="p">(</span><span class="nb">comp </span><span class="nv">incrementer</span> <span class="nv">doubler</span><span class="p">))</span>
 
     <span class="p">(</span><span class="nb">map </span><span class="nv">doubler-and-incrementer</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">])</span> <span class="c1">; =&gt; [3 5 7 9]</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <blockquote>
 <p><code>clojure.core/inc</code> exists, but I recreate it here to be explicit</p>
@@ -92,32 +92,32 @@ functions and returns a function that is a composition of those functions:</p>
 <p>Note that when composing functions with comp, they are applied right to left to
 their arguments:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="k">def </span><span class="nv">incrementer-and-doubler</span> <span class="p">(</span><span class="nb">comp </span><span class="nv">doubler</span> <span class="nv">incrementer</span><span class="p">))</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="k">def </span><span class="nv">incrementer-and-doubler</span> <span class="p">(</span><span class="nb">comp </span><span class="nv">doubler</span> <span class="nv">incrementer</span><span class="p">))</span>
 
     <span class="p">(</span><span class="nb">map </span><span class="nv">incrementer-and-doubler</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">])</span> <span class="c1">; =&gt; [4 6 8 10]</span>
-</pre></div>
-</p>
+</code></pre></div>
 
-<h2 id="partial:2c7fb5d67b91634a44ae1b2c122034ce">Partial</h2>
+
+<h2 id="partial">Partial</h2>
 
 <p>Another function in clojure.core is <code>partial</code> that takes a function and some
 arguments to that function and returns a new function that will accept the
 remaining number of arguments. This can be useful when combined with comp and
 writing a custom reducer:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="k">def </span><span class="nv">incrementer-and-doubler</span> <span class="p">(</span><span class="nb">comp </span><span class="p">(</span><span class="nb">partial map </span><span class="nv">doubler</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="k">def </span><span class="nv">incrementer-and-doubler</span> <span class="p">(</span><span class="nb">comp </span><span class="p">(</span><span class="nb">partial map </span><span class="nv">doubler</span><span class="p">)</span>
                                        <span class="p">(</span><span class="nb">partial map </span><span class="nv">incrementer</span><span class="p">)))</span>
 
     <span class="p">(</span><span class="nf">incrementer-and-doubler</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">])</span> <span class="c1">; =&gt; [4 6 8 10]</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <blockquote>
 <p>Clojure 1.7 will introduce transducers, which will likely become the idiomatic
 way of accomplishing this same task.</p>
 </blockquote>
 
-<h2 id="threading-macros:2c7fb5d67b91634a44ae1b2c122034ce">Threading Macros</h2>
+<h2 id="threading-macros">Threading Macros</h2>
 
 <p>A more popular method of composition are the thread-first and
 thread-last macros.</p>
@@ -128,31 +128,29 @@ argument of the next form and so on.</p>
 
 <p>In other words, this:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="nf">doubler</span> <span class="p">(</span><span class="nf">incrementer</span> <span class="mi">2</span><span class="p">))</span>
-</pre></div>
-</p>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nf">doubler</span> <span class="p">(</span><span class="nf">incrementer</span> <span class="mi">2</span><span class="p">))</span>
+</code></pre></div>
+
 
 <p>Is the same as this:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="nb">-&gt; </span><span class="mi">2</span> <span class="nv">incrementer</span> <span class="nv">doubler</span><span class="p">)</span>
-</pre></div>
-</p>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nb">-&gt; </span><span class="mi">2</span> <span class="nv">incrementer</span> <span class="nv">doubler</span><span class="p">)</span>
+</code></pre></div>
+
 
 <p>Thread-last works the same way, but it passes the result of each expression into
 the last element of each successive form.</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="nf">-&gt;&gt;</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nf">-&gt;&gt;</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
          <span class="p">(</span><span class="nb">map </span><span class="nv">incrementer</span><span class="p">)</span>
          <span class="p">(</span><span class="nb">map </span><span class="nv">doubler</span><span class="p">))</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Is the same as:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="nb">map </span><span class="nv">doubler</span> <span class="p">(</span><span class="nb">map </span><span class="nv">incrementer</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]))</span>
-</pre></div>
-</p>
-
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nb">map </span><span class="nv">doubler</span> <span class="p">(</span><span class="nb">map </span><span class="nv">incrementer</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]))</span>
+</code></pre></div>
             
 
         </section>

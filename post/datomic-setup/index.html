@@ -79,7 +79,7 @@ Clojure application.</p>
 had a chance to try yet, like using <a href="http://docs.datomic.com/query.html#rules">rules</a>, querying the database at a <a href="http://docs.datomic.com/tutorial.html#working-with-time">particular
 instant in time</a>, or <a href="http://stackoverflow.com/questions/11025434/in-datomic-how-do-i-get-a-timeline-view-of-the-changes-made-to-the-values-of-a">getting a list of changes to an entity</a>.</p>
 
-<h2 id="installing-datomic:68b984354b67329dbeb357734c95ec25">Installing Datomic</h2>
+<h2 id="installing-datomic">Installing Datomic</h2>
 
 <p>You do not need to install Datomic to get started, you can use the in-memory
 database.</p>
@@ -88,11 +88,11 @@ database.</p>
 
 <p>Then add <code>[com.datomic/datomic-free &quot;&lt;the-latest-version&gt;&quot;]</code> to your Leiningen project.</p>
 
-<h2 id="component-setup:68b984354b67329dbeb357734c95ec25">Component Setup</h2>
+<h2 id="component-setup">Component Setup</h2>
 
 <p>This is pretty easy, but you should have something like this:</p>
 
-<p><div class="highlight"><pre><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.components.datomic</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.components.datomic</span>
   <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">com.stuartsierra.component</span> <span class="ss">:as</span> <span class="nv">component</span><span class="p">]</span>
             <span class="p">[</span><span class="nv">datomic.api</span> <span class="ss">:as</span> <span class="nv">datomic</span><span class="p">]))</span>
 
@@ -105,26 +105,26 @@ database.</p>
         <span class="p">(</span><span class="nb">assoc </span><span class="nv">this</span> <span class="ss">:conn</span> <span class="p">(</span><span class="nf">datomic/connect</span> <span class="nv">uri</span><span class="p">)))))</span>
   <span class="p">(</span><span class="nf">stop</span> <span class="p">[</span><span class="nv">this</span><span class="p">]</span>
     <span class="p">(</span><span class="nb">assoc </span><span class="nv">this</span> <span class="ss">:conn</span> <span class="nv">nil</span><span class="p">)))</span>
-</pre></div>
-</p>
+</code></pre></div>
 
-<h2 id="schema:68b984354b67329dbeb357734c95ec25">Schema</h2>
+
+<h2 id="schema">Schema</h2>
 
 <p>Schema should be ideally be kept in an EDN file and loaded on demand:</p>
 
-<p><div class="highlight"><pre><span class="p">(</span><span class="k">def </span><span class="nv">schema</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="k">def </span><span class="nv">schema</span>
   <span class="p">(</span><span class="nf">delay</span>
     <span class="p">(</span><span class="nf">read-string</span>
       <span class="p">(</span><span class="nb">slurp </span><span class="p">(</span><span class="nf">io/resource</span> <span class="s">&quot;my_project/schema.edn&quot;</span><span class="p">))))</span>
 
 <span class="p">(</span><span class="kd">defn </span><span class="nv">create-schema</span> <span class="p">[</span><span class="nv">conn</span><span class="p">]</span>
   <span class="p">(</span><span class="nf">datomic/transact</span> <span class="nv">conn</span> <span class="o">@</span><span class="nv">schema</span><span class="p">))</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Here is what your schema might look like:</p>
 
-<p><div class="highlight"><pre><span class="c1">; resources/my_project/schema.edn</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="c1">; resources/my_project/schema.edn</span>
 
 <span class="p">[</span>
   <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/db</span><span class="p">]</span>
@@ -157,29 +157,29 @@ database.</p>
    <span class="ss">:db/doc</span> <span class="s">&quot;Contact numbers for a user&quot;</span>
    <span class="ss">:db.install/_attribute</span> <span class="ss">:db.part/db</span><span class="p">}</span>
 <span class="p">]</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Information on defining your schema and all the options available
 is documented <a href="http://docs.datomic.com/schema.html">here</a>.</p>
 
-<h2 id="seed-data:68b984354b67329dbeb357734c95ec25">Seed Data</h2>
+<h2 id="seed-data">Seed Data</h2>
 
 <p>Like your schema, any seed data should be kept in a separate file:</p>
 
-<p><div class="highlight"><pre><span class="p">(</span><span class="k">def </span><span class="nv">seed-data</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="k">def </span><span class="nv">seed-data</span>
   <span class="p">(</span><span class="nf">delay</span>
     <span class="p">(</span><span class="nf">read-string</span>
       <span class="p">(</span><span class="nb">slurp </span><span class="p">(</span><span class="nf">io/resource</span> <span class="s">&quot;my_project/seed.edn&quot;</span><span class="p">))))</span>
 
 <span class="p">(</span><span class="kd">defn </span><span class="nv">seed-db</span> <span class="p">[</span><span class="nv">conn</span><span class="p">]</span>
   <span class="p">(</span><span class="nf">datomic/transact</span> <span class="nv">conn</span> <span class="o">@</span><span class="nv">seed-data</span><span class="p">))</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Here is what your seed data might look like:</p>
 
-<p><div class="highlight"><pre><span class="c1">; resources/my_project/seed.edn</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="c1">; resources/my_project/seed.edn</span>
 <span class="p">[</span>
   <span class="c1">;; Users</span>
   <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/user</span> <span class="mi">-1000001</span><span class="p">]</span>
@@ -203,14 +203,14 @@ is documented <a href="http://docs.datomic.com/schema.html">here</a>.</p>
    <span class="ss">:cake/owner</span> <span class="o">#</span><span class="nv">db/id</span> <span class="p">[</span><span class="ss">:db.part/user</span> <span class="mi">-1000002</span><span class="p">]</span>
    <span class="ss">:cake/name</span> <span class="s">&quot;Carrot&quot;</span><span class="p">}</span>
 <span class="p">]</span>
-</pre></div>
-</p>
+</code></pre></div>
 
-<h2 id="queries-updates:68b984354b67329dbeb357734c95ec25">Queries &amp; Updates</h2>
+
+<h2 id="queries-updates">Queries &amp; Updates</h2>
 
 <p>The operations to be performed on an entity should be confined to it&rsquo;s own namespace:</p>
 
-<p><div class="highlight"><pre><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.users</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.users</span>
   <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">datomic.api</span> <span class="ss">:as</span> <span class="nv">datomic</span><span class="p">]</span>
             <span class="p">[</span><span class="nv">my-project.component.datomic</span><span class="p">])</span>
   <span class="c1">; Note the change from using a dash to an underscore</span>
@@ -235,30 +235,30 @@ is documented <a href="http://docs.datomic.com/schema.html">here</a>.</p>
                <span class="nv">email</span><span class="p">))</span>
   <span class="p">(</span><span class="nf">save!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">user</span><span class="p">]</span>
     <span class="p">(</span><span class="nf">datomic/transact</span> <span class="p">(</span><span class="ss">:conn</span> <span class="nv">this</span><span class="p">)</span> <span class="nv">user</span><span class="p">)</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>The <code>[(pull ?user [*]) ...]</code> is an example of <a href="http://docs.datomic.com/pull.html">Datomic&rsquo;s pull syntax</a>. This basically says &ldquo;after all <code>?user</code>s, bring in all of their attributes. Be careful when using the wildcard <code>*</code> as this will recursively pull any component attributes.</p>
 
-<h2 id="traversing-refs-forwards-and-backwards:68b984354b67329dbeb357734c95ec25">Traversing refs forwards and backwards</h2>
+<h2 id="traversing-refs-forwards-and-backwards">Traversing refs forwards and backwards</h2>
 
 <p>It&rsquo;s possible to pull in <code>refs</code> by specifying them in the pull pattern. If you wanted cakes with their owners:</p>
 
-<p><div class="highlight"><pre><span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?cake</span> <span class="p">[</span><span class="nb">* </span><span class="p">{</span><span class="ss">:cake/owner</span> <span class="p">[</span><span class="nv">*</span><span class="p">]}])</span> <span class="nv">...</span><span class="p">]</span>
+<p><div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?cake</span> <span class="p">[</span><span class="nb">* </span><span class="p">{</span><span class="ss">:cake/owner</span> <span class="p">[</span><span class="nv">*</span><span class="p">]}])</span> <span class="nv">...</span><span class="p">]</span>
              <span class="ss">:where</span> <span class="p">[</span><span class="nv">?cake</span> <span class="ss">:cake/owner</span><span class="p">]]</span>
            <span class="nv">db</span><span class="p">)</span>
-</pre></div>
+</code></pre></div>
 </p>
 
 <p>If however you wanted the reverse, users and their cakes:</p>
 
-<p><div class="highlight"><pre><span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?user</span> <span class="p">[</span><span class="nb">* </span><span class="p">{</span><span class="ss">:cake/_owner</span> <span class="p">[</span><span class="nv">*</span><span class="p">]}])</span> <span class="nv">...</span><span class="p">]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?user</span> <span class="p">[</span><span class="nb">* </span><span class="p">{</span><span class="ss">:cake/_owner</span> <span class="p">[</span><span class="nv">*</span><span class="p">]}])</span> <span class="nv">...</span><span class="p">]</span>
              <span class="ss">:where</span> <span class="p">[</span><span class="nv">?user</span> <span class="ss">:user/email</span><span class="p">]]</span>
            <span class="nv">db</span><span class="p">)</span>
-</pre></div>
-</p>
+</code></pre></div>
 
-<h2 id="recursive-graph-queries:68b984354b67329dbeb357734c95ec25">Recursive (graph) queries</h2>
+
+<h2 id="recursive-graph-queries">Recursive (graph) queries</h2>
 
 <p>This is one I haven&rsquo;t found a good real world use case for yet, but it is possible. Read the following if you&rsquo;re looking at doing these kinds of queries:</p>
 

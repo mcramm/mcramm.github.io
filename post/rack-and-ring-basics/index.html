@@ -90,7 +90,7 @@ please click:</p>
 <li><a href="https://github.com/mcramm/ring-basics">Here for the Ring example</a></li>
 </ul>
 
-<h2 id="the-minimal-first-step:55955117cf2de0d1e8d1354891ca366d">The Minimal First Step</h2>
+<h2 id="the-minimal-first-step">The Minimal First Step</h2>
 
 <p>Let&rsquo;s start with Rack, since it&rsquo;s obviously the more popular of the two.
 I&rsquo;m going to assume that you can
@@ -104,14 +104,14 @@ entry point. In the case of Rack this is will be an object with a <code>call</co
 method. This method needs to return the basic structure required for a Rack
 response, which is an array containing the response status, headers and body:</p>
 
-<p><div class="highlight"><pre>    <span class="c1"># my_rack_app.rb</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby">    <span class="c1"># my_rack_app.rb</span>
     <span class="k">class</span> <span class="nc">MyRackApp</span>
       <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
         <span class="o">[</span><span class="s1">&#39;200&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;text/html&#39;</span><span class="p">},</span> <span class="o">[</span><span class="s1">&#39;Hello World&#39;</span><span class="o">]]</span>
       <span class="k">end</span>
     <span class="k">end</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Note how simple this is. This is just a regular old ruby object with a method
 that returns a triplet. It knows nothing about Rack or anything else that might
@@ -119,13 +119,13 @@ be using it.</p>
 
 <p>Unfortunately this does absolutely <em>nothing</em>, which is pretty boring.  To boot this app up, we&rsquo;ll add a <code>config.ru</code> to the current directory:</p>
 
-<p><div class="highlight"><pre><span class="c1"># config.ru</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1"># config.ru</span>
 <span class="nb">require</span> <span class="s1">&#39;rack&#39;</span>
 <span class="n">require_relative</span> <span class="s1">&#39;my_rack_app&#39;</span>
 
 <span class="n">run</span> <span class="no">MyRackApp</span><span class="o">.</span><span class="n">new</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>We can now run <code>rackup</code> from our current directory and, navigating to
 <a href="http://localhost:9292/">http://localhost:9292</a>, we should see our &ldquo;Hello World&rdquo;
@@ -141,14 +141,14 @@ You might need to run <code>lein deps</code> to download the Ring library if you
 <p>Ring is similar to Rack in that we need to give it a function that returns
 some standard response. Ring expects a map instead of an array:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.app</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.app</span><span class="p">)</span>
 
     <span class="p">(</span><span class="kd">defn </span><span class="nv">handler</span> <span class="p">[</span><span class="nv">request</span><span class="p">]</span>
       <span class="p">{</span><span class="ss">:status</span> <span class="mi">200</span>
        <span class="ss">:headers</span> <span class="p">{</span><span class="s">&quot;Content-Type&quot;</span> <span class="s">&quot;text/html&quot;</span><span class="p">}</span>
        <span class="ss">:body</span> <span class="s">&quot;Hello World&quot;</span><span class="p">})</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Calling the function &ldquo;handler&rdquo; above is simply the convention in Clojure-land.
 Like the Rack example, we need some way to boot this app up. Some examples will
@@ -156,20 +156,20 @@ mash this boot process together with the code we wrote above but I prefer to
 keep this separate. Plus it makes it similar to our Rack example so win-win,
      right?</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.core</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.core</span>
       <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">ring.adapter.jetty</span> <span class="ss">:refer</span> <span class="p">[</span><span class="nv">run-jetty</span><span class="p">]]</span>
                 <span class="p">[</span><span class="nv">my-ring-app.app</span> <span class="ss">:as</span> <span class="nv">app</span><span class="p">)</span>
       <span class="p">(</span><span class="ss">:gen-class</span><span class="p">))</span>
 
     <span class="p">(</span><span class="kd">defn </span><span class="nv">-main</span> <span class="p">[</span><span class="o">&amp;</span> <span class="nv">args</span><span class="p">]</span>
       <span class="p">(</span><span class="nf">run-jetty</span> <span class="nv">app/handler</span> <span class="p">{</span><span class="ss">:port</span> <span class="mi">3000</span><span class="p">}))</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Now we can just do <code>lein run</code> from our project root. Navigating to
  <a href="http://localhost:3000/">http://localhost:3000</a> should display a very familiar page.</p>
 
-<h2 id="middleware:55955117cf2de0d1e8d1354891ca366d">Middleware</h2>
+<h2 id="middleware">Middleware</h2>
 
 <p>Middleware is essentially a series a steps a request has to go through in order
  to generate a response. Once a response is generated, it will return the
@@ -189,7 +189,7 @@ be doing something with that <code>env</code> parameter we saw in our earlier ex
 will notice that our middleware bears some resemblance to our running
 <code>MyRackApp</code></p>
 
-<p><div class="highlight"><pre>    <span class="c1"># hello_translator.rb</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby">    <span class="c1"># hello_translator.rb</span>
     <span class="k">class</span> <span class="nc">HelloTranslator</span>
       <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
         <span class="vi">@app</span> <span class="o">=</span> <span class="n">app</span>
@@ -205,8 +205,8 @@ will notice that our middleware bears some resemblance to our running
         <span class="o">[</span><span class="n">status</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">body</span><span class="o">]</span>
       <span class="k">end</span>
     <span class="k">end</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>First we initialize the middleware with our running application. Calling
 <code>@app.call(env)</code> simply passes the request down the stack. If there was
@@ -220,15 +220,15 @@ to serve the response.</p>
 we actually need to <em>tell</em> Rack about this is middleware. To accomplish this we
 need to require and <code>use</code> it in our <code>config.ru</code>:</p>
 
-<p><div class="highlight"><pre>    <span class="c1"># config.ru</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby">    <span class="c1"># config.ru</span>
     <span class="nb">require</span> <span class="s1">&#39;rack&#39;</span>
     <span class="n">require_relative</span> <span class="s1">&#39;my_rack_app&#39;</span>
     <span class="n">require_relative</span> <span class="s1">&#39;hello_translator&#39;</span>
 
     <span class="n">use</span> <span class="no">HelloTranslator</span>
     <span class="n">run</span> <span class="no">MyRackApp</span><span class="o">.</span><span class="n">new</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Running <code>rackup</code> and refreshing the previous page will now show a lovely
 greeting in the famously romantic French language.</p>
@@ -236,7 +236,7 @@ greeting in the famously romantic French language.</p>
 <p>Again Ring is very similar. The biggest difference is that the middleware is
 just a function instead of an object:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.middleware</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.middleware</span>
       <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">clojure.string</span> <span class="ss">:as</span> <span class="nv">s</span><span class="p">]))</span>
 
     <span class="p">(</span><span class="kd">defn </span><span class="nv">translate-hello</span> <span class="p">[</span><span class="nv">body</span><span class="p">]</span>
@@ -246,13 +246,13 @@ just a function instead of an object:</p>
       <span class="p">(</span><span class="k">fn </span><span class="p">[</span><span class="nv">request</span><span class="p">]</span>
         <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">response</span> <span class="p">(</span><span class="nf">handler</span> <span class="nv">request</span><span class="p">)]</span>
           <span class="p">(</span><span class="nf">update-in</span> <span class="nv">response</span> <span class="p">[</span><span class="ss">:body</span><span class="p">]</span> <span class="nv">translate-hello</span><span class="p">))))</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Again, prefixing our middleware with <code>wrap</code> is convention.  As before we will need to require and use
 this middleware in the namespace responsible for booting the app:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.core</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.core</span>
       <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">ring.adapter.jetty</span> <span class="ss">:refer</span> <span class="p">[</span><span class="nv">run-jetty</span><span class="p">]]</span>
                 <span class="p">[</span><span class="nv">my-ring-app.app</span> <span class="ss">:as</span> <span class="nv">app</span><span class="p">]</span>
                 <span class="p">[</span><span class="nv">my-ring-app.middleware</span> <span class="ss">:refer</span> <span class="p">[</span><span class="nv">wrap-hello-translator</span><span class="p">]])</span>
@@ -262,10 +262,10 @@ this middleware in the namespace responsible for booting the app:</p>
       <span class="p">(</span><span class="nf">run-jetty</span> <span class="p">(</span><span class="nb">-&gt; </span><span class="nv">app/handler</span>
                      <span class="nv">wrap-hello-translator</span><span class="p">)</span>
                  <span class="p">{</span><span class="ss">:port</span> <span class="mi">3000</span><span class="p">}))</span>
-</pre></div>
-</p>
+</code></pre></div>
 
-<h2 id="dealing-with-query-params:55955117cf2de0d1e8d1354891ca366d">Dealing With Query Params</h2>
+
+<h2 id="dealing-with-query-params">Dealing With Query Params</h2>
 
 <p>I was originally going to end the post here with an amazingly concise, beautifully
 written conclusion to tie a nice little bow over everything. Instead I&rsquo;m going to
@@ -284,7 +284,7 @@ name to use by simply providing a <code>name</code> parameter.</p>
 <p>With the Rack example, we aren&rsquo;t going to touch anything except for our base
 application:</p>
 
-<p><div class="highlight"><pre>    <span class="c1"># my_rack_app.rb</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby">    <span class="c1"># my_rack_app.rb</span>
     <span class="k">class</span> <span class="nc">MyRackApp</span>
       <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="no">Rack</span><span class="o">::</span><span class="no">Request</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
@@ -294,8 +294,8 @@ application:</p>
         <span class="o">[</span><span class="s1">&#39;200&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;text/html&#39;</span><span class="p">},</span> <span class="n">body</span><span class="o">]</span>
       <span class="k">end</span>
     <span class="k">end</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>The change here is that we wrap the <code>env</code> parameter in a <code>Rack::Request</code>
 object, then attempt to fetch the <code>'name'</code> parameter. If one isn&rsquo;t provided,
@@ -313,7 +313,7 @@ map at that key.</p>
 <p>I&rsquo;ve included full-versions of each file here to keep things easy to follow.
 Additions to <code>my-ring-app.core</code> are noted:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.core</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.core</span>
       <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">ring.adapter.jetty</span> <span class="ss">:refer</span> <span class="p">[</span><span class="nv">run-jetty</span><span class="p">]]</span>
                 <span class="p">[</span><span class="nv">ring.middleware.params</span> <span class="ss">:refer</span> <span class="p">[</span><span class="nv">wrap-params</span><span class="p">]]</span> <span class="c1">; NEW</span>
                 <span class="p">[</span><span class="nv">my-ring-app.app</span> <span class="ss">:as</span> <span class="nv">app</span><span class="p">]</span>
@@ -324,18 +324,18 @@ Additions to <code>my-ring-app.core</code> are noted:</p>
       <span class="p">(</span><span class="nf">run-jetty</span> <span class="p">(</span><span class="nb">-&gt; </span><span class="nv">app/handler</span>
                      <span class="nv">wrap-params</span> <span class="c1">; NEW</span>
                      <span class="nv">wrap-hello-translator</span><span class="p">)</span> <span class="p">{</span><span class="ss">:port</span> <span class="mi">3000</span><span class="p">}))</span>
-</pre></div>
-</p>
+</code></pre></div>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.app</span><span class="p">)</span>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">ns </span><span class="nv">my-ring-app.app</span><span class="p">)</span>
 
     <span class="p">(</span><span class="kd">defn </span><span class="nv">handler</span> <span class="p">[</span><span class="nv">request</span><span class="p">]</span>
       <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">subject</span> <span class="p">(</span><span class="nf">get-in</span> <span class="nv">request</span> <span class="p">[</span><span class="ss">:params</span> <span class="s">&quot;name&quot;</span><span class="p">]</span> <span class="s">&quot;World&quot;</span><span class="p">)]</span>
         <span class="p">{</span><span class="ss">:status</span> <span class="mi">200</span>
          <span class="ss">:headers</span>  <span class="p">{</span><span class="s">&quot;Content-Type&quot;</span> <span class="s">&quot;text/html&quot;</span><span class="p">}</span>
          <span class="ss">:body</span> <span class="p">(</span><span class="nf">format</span> <span class="s">&quot;Hello %s&quot;</span> <span class="nv">subject</span><span class="p">)}))</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>The difference between the two examples is the fact that the
 query string processing is handled in middleware with Ring, while with Rack I

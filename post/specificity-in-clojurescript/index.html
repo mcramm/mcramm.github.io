@@ -67,7 +67,9 @@
 macro <code>specify</code>. This means we can now have instance-level implementations of
 protocols on specific values:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">ns </span><span class="nv">example1</span><span class="p">)</span>
+<p></p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">ns </span><span class="nv">example1</span><span class="p">)</span>
     <span class="p">(</span><span class="nf">enable-console-print!</span><span class="p">)</span>
 
     <span class="p">(</span><span class="kd">defprotocol </span><span class="nv">Listable</span>
@@ -99,8 +101,8 @@ protocols on specific values:</p>
     <span class="c1">; true</span>
     <span class="p">(</span><span class="nb">println </span><span class="p">(</span><span class="nb">identical? </span><span class="nv">elements</span> <span class="p">[</span><span class="s">&quot;one&quot;</span> <span class="s">&quot;two&quot;</span> <span class="s">&quot;three&quot;</span><span class="p">]))</span>
     <span class="c1">; false</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>This is pretty important feature for Clojurescript. <code>extend-type</code> is still
 powerful, but there is the odd time where you want to make a specific value
@@ -110,7 +112,6 @@ modularity without a huge performance cost.</p>
 <p>Note that this relies on version <code>0.0-2138</code> of Clojurescript.</p>
 
 <p>This change was authored by the indomitable <a href="http://swannodette.github.io/">David Nolen</a> whose <a href="https://github.com/swannodette/om">latest open source offering</a> in a Clojurescript interface over Facebook&rsquo;s <a href="http://facebook.github.io/react/">React</a>.</p>
-
             
 
         </section>

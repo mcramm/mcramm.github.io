@@ -1,0 +1,427 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mcrammm.com</title>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/css/main.css">
+    <link href="http://mcramm.com//index.xml" rel="alternate" type="application/rss+xml" title="mcrammm.com" />
+    <meta name="title" content="http://mcramm.com/">
+    <link rel="canonical" href="http://mcramm.com/">
+    <meta property="og:title" content="mcrammm.com"/>
+    <meta property="og:url" content="http://mcramm.com/"/>
+    <meta property="og:site_name" content="mcrammm.com">
+    <style>
+        .container {
+            max-width:1155px;
+        }
+
+        pre {
+            white-space: pre;
+            overflow: scroll;
+            width:inherit;
+            word-wrap: normal;
+            word-break: normal;
+        }
+
+        article blockquote {
+            background-color: whitesmoke;
+            font-size: 0.85em;
+            border-left: 5px solid #eeeeee;
+            margin: 0 0 20px 0;
+            padding: 10px 20px;
+        }
+
+        article blockquote p {
+            font-size: inherit;
+            line-height: inherit;
+            color: inherit;
+            font-weight: inherit;
+        }
+    </style>
+</head>
+<body>
+    
+<section class="site-nav">
+    <header>
+        <nav id="navigation">
+            <a href="/" class="home">About</a>
+            <a href="/post" class="post">Posts</a>
+        </nav>
+    </header>
+</section>
+
+<article>
+    <div class="container">
+        <header>
+            <div class="meta">
+                <time pubdate datetime="2016-12-12" title="2016-12-12">December 12, 2016</time>
+            </div>
+            <h1 class="title">Off the ground with Clojure and Postgres</h1>
+            <h2 class="subtitle"></h2>
+        </header>
+
+        <section>
+            <p>I&rsquo;ve been writing a few apps in my spare time, most notably
+<a href="https://mailfeedapp.com">Mailfeed</a>, and I&rsquo;ve developed a simple pattern
+whenever I need to pull data out of the database.  This pattern could be be
+applied to any database you&rsquo;re interacting with, but in this case I&rsquo;ll be
+showing how I <em>tend</em> to do it with Postrges.</p>
+
+<p>I should say that none of this is groundbreaking stuff.  If you&rsquo;re an
+experienced developer then you&rsquo;ll probably be saying &ldquo;duh&rdquo; a lot, but if your
+playing with Clojure and are struggling to come up with a good structure on how
+to do this kind of thing, then maybe this is something you could apply.</p>
+
+<p>This is going to be pretty quick. Lets say you&rsquo;re tracking user
+accounts with a status. We&rsquo;d like to be able to do the following:</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">accounts/by-id</span> <span class="nv">store</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1">; =&gt; nil</span>
+
+<span class="p">(</span><span class="nf">accounts/create!</span> <span class="nv">store</span> <span class="s">&quot;open&quot;</span><span class="p">)</span>
+<span class="c1">; =&gt; #:account{:id 1,</span>
+<span class="c1">;              :status &quot;open&quot;,</span>
+<span class="c1">;              :created-at &quot;&lt;some-instant-in-time&gt;&quot;,</span>
+<span class="c1">;              :updated-at &quot;&lt;some-instant-in-time&gt;&quot;}</span>
+
+<span class="p">(</span><span class="nf">accounts/set-closed!</span> <span class="nv">store</span> <span class="p">(</span><span class="nf">accounts/by-id</span> <span class="nv">store</span> <span class="mi">1</span><span class="p">))</span>
+<span class="c1">; =&gt; #:account{:id 1,</span>
+<span class="c1">;              :status &quot;closed&quot;,</span>
+<span class="c1">;              :created-at &quot;&lt;some-instant-in-time&gt;&quot;,</span>
+<span class="c1">;              :updated-at &quot;&lt;some-instant-in-time&gt;&quot;}</span>
+</code></pre></div>
+
+
+<p>Note that the resulting representation of accounts and invoices is a namespaced map, which is new to Clojure 1.9.
+It&rsquo;s exactly the same as:</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">{</span><span class="ss">:account/id</span> <span class="mi">1</span>
+ <span class="ss">:account/status</span> <span class="s">&quot;closed&quot;</span>
+ <span class="ss">:account/created-at</span> <span class="s">&quot;&lt;some-instant-in-time&gt;&quot;</span>
+ <span class="ss">:account/updated-at</span> <span class="s">&quot;&lt;some-instant-in-time&gt;&quot;</span><span class="p">}</span>
+</code></pre></div>
+
+
+<p>Let&rsquo;s tackle this top-down by defining a protocol for the operations we&rsquo;re performing.</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span><span class="p">)</span>
+
+<span class="p">(</span><span class="kd">defprotocol </span><span class="nv">AccountOps</span>
+  <span class="p">(</span><span class="nf">by-id</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">id</span><span class="p">])</span>
+  <span class="p">(</span><span class="nf">create!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">status</span><span class="p">])</span>
+  <span class="p">(</span><span class="nf">set-opened!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">account</span><span class="p">])</span>
+  <span class="p">(</span><span class="nf">set-closed!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">account</span><span class="p">]))</span>
+</code></pre></div>
+
+
+<p>Okay that was easy, but what the heck is <code>this</code> going to be in the context of the final implementations of
+these methods? At this point it doesn&rsquo;t <em>really</em> matter. We could define a new record called <code>AtomStore</code> and
+extend our protocol over it, but that isn&rsquo;t the point of this post. I&rsquo;ll leave that as an exercise for the
+reader.</p>
+
+<p>We&rsquo;re going to jump right in and create a <code>Postgres</code> component that will be passed a connection string to a
+running postgres instance, with a database already created. <a href="https://github.com/mcramm/postgres-example">I have a full example here</a> that
+also sets up <a href="https://github.com/weavejester/ragtime">Ragtime</a> to ensure the necessary schema exists.</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.components.postgres</span><span class="p">)</span>
+
+<span class="p">(</span><span class="kd">defrecord </span><span class="nv">Postgres</span> <span class="p">[</span><span class="nv">uri</span><span class="p">])</span>
+
+<span class="p">(</span><span class="kd">defn </span><span class="nv">build</span> <span class="p">[</span><span class="nv">uri</span><span class="p">]</span>
+  <span class="p">(</span><span class="nf">-&gt;Postgres</span> <span class="nv">uri</span><span class="p">))</span>
+</code></pre></div>
+
+
+<p>At this point we could switch back to our accounts namespace and extend the AccountOps protocol over it, but
+we still need some way of actually querying our database. For that we&rsquo;re going to use <a href="http://www.hugsql.org">HugSQL</a> which will
+will let us define our queries in raw sql.</p>
+
+<p>Let&rsquo;s start with writing a query to look up an account by an id. Open a new file at <code>resources/sql/accounts.sql</code>
+and add the following content:
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="c1">-- :name account-by-id :? :1</span>
+<span class="c1">-- :doc Get an account by id</span>
+<span class="k">SELECT</span> <span class="o">*</span>
+<span class="k">FROM</span> <span class="n">accounts</span>
+<span class="k">WHERE</span> <span class="n">id</span> <span class="o">=</span> <span class="p">:</span><span class="n">id</span>
+</code></pre></div>
+</p>
+
+<p>HugSQL will parse this file and define a new function called <code>account-by-id</code> in whatever namespace we load it
+in. The <code>:?</code> marks it as a query and the <code>:1</code> will cause it to only return 1
+result.</p>
+
+<p>Now we&rsquo;ll create a namespace to define this function in:</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.sql</span>
+  <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">hugsql.core</span> <span class="ss">:as</span> <span class="nv">hugsql</span><span class="p">]))</span>
+
+<span class="p">(</span><span class="nf">hugsql/def-db-fns</span> <span class="s">&quot;sql/accounts.sql&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>After loading this namespace, we&rsquo;ll then have a function we can call to load an account by an id:</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">require</span> <span class="o">&#39;</span><span class="p">[</span><span class="nv">my-project.sql</span> <span class="ss">:as</span> <span class="nv">sql</span><span class="p">])</span>
+<span class="p">(</span><span class="nf">sql/account-by-id</span> <span class="s">&quot;your-database-uri&quot;</span> <span class="p">{</span><span class="ss">:id</span> <span class="mi">123</span><span class="p">})</span>
+<span class="c1">; =&gt; nil</span>
+</code></pre></div>
+
+
+<p>Hurray! It worked&hellip; kinda. Let&rsquo;s define a way to create a new account with an
+initial status:</p>
+
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="c1">-- :name insert-account! :&lt;! :1</span>
+<span class="c1">-- :doc Inserts an account and returns the id</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">accounts</span> <span class="p">(</span><span class="n">status</span><span class="p">)</span>
+<span class="k">VALUES</span> <span class="p">(:</span><span class="n">status</span><span class="p">)</span>
+<span class="n">RETURNING</span> <span class="n">id</span>
+</code></pre></div>
+
+
+<p>You&rsquo;ll have to reload your REPL if you&rsquo;re following along at one. This will define a new method called
+<code>insert-account!</code> and return the id of the row that was just inserted. Now you can do the following:
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">require</span> <span class="o">&#39;</span><span class="p">[</span><span class="nv">my-project.sql</span> <span class="ss">:as</span> <span class="nv">sql</span><span class="p">])</span>
+<span class="p">(</span><span class="nf">sql/insert-account!</span> <span class="s">&quot;your-database-uri&quot;</span> <span class="p">{</span><span class="ss">:status</span> <span class="s">&quot;open&quot;</span><span class="p">})</span>
+<span class="c1">; =&gt; {:id 1}</span>
+<span class="p">(</span><span class="nf">sql/account-by-id</span> <span class="s">&quot;your-database-uri&quot;</span> <span class="p">{</span><span class="ss">:id</span> <span class="mi">1</span><span class="p">})</span>
+<span class="c1">; =&gt; {:id 1, :status &quot;open&quot;, :created_at #inst &quot;2016-12-12T00:00:00.000000000-00:00&quot;, :updated_at #inst &quot;2016-12-12T00:00:00.000000000-00:00&quot;}</span>
+</code></pre></div>
+</p>
+
+<blockquote>
+<p>Your database uri should look something like
+<code>postgresql://postgres_example:secret@localhost:5432/postgres_example</code>,
+assuming you&rsquo;ve created a user <code>postgres_example</code> with the password <code>secret</code>,
+and a dabaase with the same name. This dosen&rsquo;t <em>have</em> to be a connection
+string, but it&rsquo;s the most straightforward way of specifying the connection
+details that I&rsquo;ve encountered so far.</p>
+</blockquote>
+
+<p>Switch back to our accounts namespace and use these functions in our AccountOps protocol:</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span>
+  <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">my-project.components.postgres</span><span class="p">]</span>
+            <span class="p">[</span><span class="nv">my-project.sql</span> <span class="ss">:as</span> <span class="nv">sql</span><span class="p">])</span>
+  <span class="p">(</span><span class="ss">:import</span> <span class="p">[</span><span class="nv">my_project.components.postgres</span> <span class="nv">Postgres</span><span class="p">]))</span>
+
+<span class="p">(</span><span class="kd">defprotocol </span><span class="nv">AccountOps</span>
+  <span class="p">(</span><span class="nf">by-id</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">id</span><span class="p">])</span>
+  <span class="p">(</span><span class="nf">create!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">status</span><span class="p">])</span>
+  <span class="p">(</span><span class="nf">set-opened!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">account</span><span class="p">])</span>
+  <span class="p">(</span><span class="nf">set-closed!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">account</span><span class="p">]))</span>
+
+<span class="p">(</span><span class="nf">extend-protocol</span> <span class="nv">AccountOps</span>
+  <span class="nv">Postgres</span>
+  <span class="p">(</span><span class="nf">by-id</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">id</span><span class="p">]</span>
+    <span class="p">(</span><span class="nf">sql/account-by-id</span> <span class="p">(</span><span class="ss">:db-spec</span> <span class="nv">this</span><span class="p">)</span> <span class="p">{</span><span class="ss">:id</span> <span class="nv">id</span><span class="p">}))</span>
+
+  <span class="p">(</span><span class="nf">create!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">status</span><span class="p">]</span>
+    <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">result</span> <span class="p">(</span><span class="nf">sql/insert-account!</span> <span class="p">(</span><span class="ss">:db-spec</span> <span class="nv">this</span><span class="p">)</span> <span class="p">{</span><span class="ss">:status</span> <span class="nv">status</span><span class="p">})]</span>
+      <span class="p">(</span><span class="nf">by-id</span> <span class="nv">this</span> <span class="p">(</span><span class="ss">:id</span> <span class="nv">result</span><span class="p">)))))</span>
+</code></pre></div>
+
+
+<p>Note that I haven&rsquo;t implemented the <code>set-closed!</code> or <code>set-opened!</code> protocols
+yet. We&rsquo;ll get to them in a minute.</p>
+
+<p>Because this example is a little contrived, the solution here seems almost
+too straightforward. The only interesting piece is that <code>create!</code>
+passes it&rsquo;s result immediately to <code>by-id</code> for re-fetching. This is a design
+decision I&rsquo;m making; your needs may vary.</p>
+
+<p>We&rsquo;re missing something though. Remember our example at the beginning of this article returned us a namespaced
+map, but we&rsquo;re getting back just a regular one. To do this we&rsquo;re going to pass
+every result of <code>sql/account-by-id</code> through a function <code>sql-&gt;account</code>:</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span>
+  <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">my-project.components.postgres</span><span class="p">]</span>
+            <span class="p">[</span><span class="nv">my-project.sql</span> <span class="ss">:as</span> <span class="nv">sql</span><span class="p">])</span>
+  <span class="p">(</span><span class="ss">:import</span> <span class="p">[</span><span class="nv">my_project.components.postgres</span> <span class="nv">Postgres</span><span class="p">]))</span>
+
+<span class="p">(</span><span class="kd">defprotocol </span><span class="nv">AccountOps</span>
+  <span class="p">(</span><span class="nf">by-id</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">id</span><span class="p">])</span>
+  <span class="p">(</span><span class="nf">create!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">status</span><span class="p">])</span>
+  <span class="p">(</span><span class="nf">set-opened!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">account</span><span class="p">])</span>
+  <span class="p">(</span><span class="nf">set-closed!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">account</span><span class="p">]))</span>
+
+<span class="p">(</span><span class="kd">defn </span><span class="nv">sql-&gt;account</span> <span class="p">[</span><span class="nv">sql-entity</span><span class="p">]</span>
+  <span class="p">(</span><span class="nb">when </span><span class="p">(</span><span class="ss">:id</span> <span class="nv">sql-entity</span><span class="p">)</span>
+    <span class="o">#</span><span class="ss">:account</span><span class="p">{</span><span class="ss">:id</span>         <span class="p">(</span><span class="ss">:id</span> <span class="nv">sql-entity</span><span class="p">)</span>
+              <span class="ss">:status</span>     <span class="p">(</span><span class="ss">:status</span> <span class="nv">sql-entity</span><span class="p">)</span>
+              <span class="ss">:created-at</span> <span class="p">(</span><span class="ss">:created_at</span> <span class="nv">sql-entity</span><span class="p">)</span>
+              <span class="ss">:updated-at</span> <span class="p">(</span><span class="ss">:updated_at</span> <span class="nv">sql-entity</span><span class="p">)}))</span>
+
+<span class="p">(</span><span class="nf">extend-protocol</span> <span class="nv">AccountOps</span>
+  <span class="nv">Postgres</span>
+  <span class="p">(</span><span class="nf">by-id</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">id</span><span class="p">]</span>
+    <span class="p">(</span><span class="nb">-&gt; </span><span class="p">(</span><span class="nf">sql/account-by-id</span> <span class="p">(</span><span class="ss">:db-spec</span> <span class="nv">this</span><span class="p">)</span> <span class="p">{</span><span class="ss">:id</span> <span class="nv">id</span><span class="p">})</span>
+        <span class="nv">sql-&gt;account</span><span class="p">))</span>
+
+  <span class="p">(</span><span class="nf">create!</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">status</span><span class="p">]</span>
+    <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">result</span> <span class="p">(</span><span class="nf">sql/insert-account!</span> <span class="p">(</span><span class="ss">:db-spec</span> <span class="nv">this</span><span class="p">)</span> <span class="p">{</span><span class="ss">:status</span> <span class="nv">status</span><span class="p">})]</span>
+      <span class="p">(</span><span class="nf">by-id</span> <span class="nv">this</span> <span class="p">(</span><span class="ss">:id</span> <span class="nv">result</span><span class="p">)))))</span>
+</code></pre></div>
+
+
+<p>It&rsquo;s usually a good idea to insulate your code from outside dependencies like
+the database. Here we&rsquo;re taking the raw result returned to us from HugSQL and
+mapping it to our own internal representation of it. This also gives us a place
+to manipulate the data to suite our needs as it comes out of the database.</p>
+
+<p>There is one more thing I would recommend doing at this point, and it would be
+to require <code>clj-time.jdbc</code> in our accounts namespace:</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span>
+  <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">clj-time.jdbc</span><span class="p">]</span>
+
+            <span class="p">[</span><span class="nv">my-project.components.postgres</span><span class="p">]</span>
+            <span class="p">[</span><span class="nv">my-project.sql</span> <span class="ss">:as</span> <span class="nv">sql</span><span class="p">])</span>
+  <span class="p">(</span><span class="ss">:import</span> <span class="p">[</span><span class="nv">my_project.components.postgres</span> <span class="nv">Postgres</span><span class="p">]))</span>
+</code></pre></div>
+
+
+<p>The <a href="https://github.com/clj-time/clj-time">clj-time</a> library is great on it&rsquo;s
+own, and including this namespace will ensure that as the JDBC library pulls
+dates out of the database, that they&rsquo;re mapped to JodaTime instances.</p>
+
+<p>Now we&rsquo;re finally ready to give these a try:</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">accounts/by-id</span> <span class="nv">store</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1">; =&gt; nil</span>
+
+<span class="p">(</span><span class="nf">accounts/create!</span> <span class="nv">store</span> <span class="s">&quot;open&quot;</span><span class="p">)</span>
+<span class="c1">; =&gt; #:account{:id 1,</span>
+<span class="c1">;              :status &quot;open&quot;,</span>
+<span class="c1">;              :created-at #object[org.joda.time.DateTime 0x17dffb5 &quot;2016-12-12T00:00:00.000Z&quot;],</span>
+<span class="c1">;              :updated-at #object[org.joda.time.DateTime 0x7e0ac645 &quot;2016-12-12T00:00:00.000Z&quot;]}</span>
+
+<span class="p">(</span><span class="nf">accounts/by-id</span> <span class="nv">store</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1">; =&gt; #:account{:id 1,</span>
+<span class="c1">;              :status &quot;open&quot;,</span>
+<span class="c1">;              :created-at #object[org.joda.time.DateTime 0x17dffb5 &quot;2016-12-12T00:00:00.000Z&quot;],</span>
+<span class="c1">;              :updated-at #object[org.joda.time.DateTime 0x7e0ac645 &quot;2016-12-12T00:00:00.000Z&quot;]}</span>
+</code></pre></div>
+
+
+<p>Success! The last thing we&rsquo;ll do is implement our <code>set-*</code> functions.</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="c1">;; ========================================</span>
+<span class="c1">;; in my-project.entities.accounts</span>
+
+<span class="p">(</span><span class="k">def </span><span class="nv">opened-status</span> <span class="s">&quot;open&quot;</span><span class="p">)</span>
+<span class="p">(</span><span class="k">def </span><span class="nv">closed-status</span> <span class="s">&quot;closed&quot;</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">extend-protocol</span> <span class="nv">AccountOps</span>
+  <span class="nv">Postgres</span>
+  <span class="c1">;; ... truncated ...</span>
+  <span class="p">(</span><span class="nf">set-closed!</span> <span class="p">[</span><span class="nv">store</span> <span class="nv">account</span><span class="p">]</span>
+    <span class="p">(</span><span class="nf">sql/update-account!</span> <span class="p">(</span><span class="ss">:uri</span> <span class="nv">store</span><span class="p">)</span> <span class="p">{</span><span class="ss">:id</span> <span class="p">(</span><span class="ss">:account/id</span> <span class="nv">account</span><span class="p">)</span>
+                                       <span class="ss">:status</span> <span class="nv">closed-status</span><span class="p">})</span>
+    <span class="p">(</span><span class="nf">by-id</span> <span class="nv">store</span> <span class="p">(</span><span class="ss">:account/id</span> <span class="nv">account</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nf">set-open!</span> <span class="p">[</span><span class="nv">store</span> <span class="nv">account</span><span class="p">]</span>
+    <span class="p">(</span><span class="nf">sql/update-account!</span> <span class="p">(</span><span class="ss">:uri</span> <span class="nv">store</span><span class="p">)</span> <span class="p">{</span><span class="ss">:id</span> <span class="p">(</span><span class="ss">:account/id</span> <span class="nv">account</span><span class="p">)</span>
+                                       <span class="ss">:status</span> <span class="nv">opened-status</span><span class="p">})</span>
+    <span class="p">(</span><span class="nf">by-id</span> <span class="nv">store</span> <span class="p">(</span><span class="ss">:account/id</span> <span class="nv">account</span><span class="p">))))</span>
+</code></pre></div>
+
+
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="c1">-- ========================================</span>
+<span class="c1">-- in resources/sql/accounts.sql</span>
+
+<span class="c1">-- :name update-account! :&lt; :1</span>
+<span class="c1">-- :doc Updates an account by id</span>
+<span class="k">UPDATE</span> <span class="n">accounts</span>
+<span class="k">SET</span> <span class="n">status</span> <span class="o">=</span> <span class="p">:</span><span class="n">status</span><span class="p">,</span>
+    <span class="n">updated_at</span> <span class="o">=</span> <span class="n">now</span><span class="p">()</span>
+<span class="k">WHERE</span> <span class="n">id</span> <span class="o">=</span> <span class="p">:</span><span class="n">id</span>
+<span class="n">RETURNING</span> <span class="n">id</span>
+</code></pre></div>
+
+
+<p>And let&rsquo;s try them out:</p>
+
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="k">def </span><span class="nv">my-account</span> <span class="p">(</span><span class="nf">accounts/by-id</span> <span class="nv">store</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="p">(</span><span class="ss">:account/status</span> <span class="nv">my-account</span><span class="p">)</span>
+<span class="c1">; =&gt; &quot;open&quot;</span>
+
+<span class="p">(</span><span class="nf">accounts/set-closed!</span> <span class="nv">store</span> <span class="nv">my-account</span><span class="p">)</span>
+<span class="c1">; =&gt; #:account{:id 1,</span>
+<span class="c1">;              :status &quot;closed&quot;,</span>
+<span class="c1">;              :created-at #object[org.joda.time.DateTime 0x17dffb5 &quot;2016-12-12T00:00:00.000Z&quot;],</span>
+<span class="c1">;              :updated-at #object[org.joda.time.DateTime 0x7e0ac645 &quot;2016-12-12T00:00:00.000Z&quot;]}</span>
+
+<span class="c1">;; Note that `my-account` hasen&#39;t changed</span>
+<span class="p">(</span><span class="ss">:account/status</span> <span class="nv">my-account</span><span class="p">)</span>
+<span class="c1">; =&gt; &quot;open&quot;</span>
+
+<span class="p">(</span><span class="nf">accounts/set-opened!</span> <span class="nv">store</span> <span class="nv">my-account</span><span class="p">)</span>
+<span class="c1">; =&gt; #:account{:id 1,</span>
+<span class="c1">;              :status &quot;open&quot;,</span>
+<span class="c1">;              :created-at #object[org.joda.time.DateTime 0x17dffb5 &quot;2016-12-12T00:00:00.000Z&quot;],</span>
+<span class="c1">;              :updated-at #object[org.joda.time.DateTime 0x7e0ac645 &quot;2016-12-12T00:00:00.000Z&quot;]}</span>
+</code></pre></div>
+
+
+<p>And bam! That&rsquo;s it.</p>
+
+<p>As I said before, this example is a little small and contrived, but I&rsquo;ve found
+it to be a good jumping off point for most projects to start with.</p>
+
+<p>If you notice any errors in this post, <a href="https://twitter.com/cramm">please let me know</a>.</p>
+
+            
+
+        </section>
+
+        
+    </div>
+</article>
+
+<footer class="site-footer">
+    <div class="container">
+        <nav>
+            <a href="/" class="home">About</a>
+            <a href="/post" class="post">Posts</a>
+        </nav>
+        
+        <nav class="social">
+            
+            <a href="https://twitter.com/cramm" title="Follow on Twitter" target="_blank"><i class="icon icon-twitter black"></i></a>
+            
+            
+            <a href="https://github.com/mcramm" title="Follow on Github" target="_blank"><i class="icon icon-github black"></i></a>
+            
+            <a href="/index.xml" title="RSS Feed">
+                <i class="icon icon-rss black"></i>
+            </a>
+        </nav>
+    </div>
+</footer>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script type="text/javascript" src="/js/main.js"></script>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+<script>
+    (function(d, t) {
+        var g = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        g.src = '//hnbutton.appspot.com/static/hn.min.js';
+        s.parentNode.insertBefore(g, s);
+    }(document, 'script'));
+</script>
+
+
+
+
+
+
+
+  
+
+</body>
+</html>
+

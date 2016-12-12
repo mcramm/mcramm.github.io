@@ -83,9 +83,9 @@ through the <code>new</code> task: <code>lein new &lt;template&gt; &lt;name&gt;<
 <p>Let&rsquo;s create one together. Since we&rsquo;re creating one for the Om library, we&rsquo;ll
 call it &lsquo;Hum&rsquo;:</p>
 
-<p><div class="highlight"><pre>    lein new template hum
-</pre></div>
-</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">    lein new template hum
+</code></pre></div>
+
 
 <p>To install this template locally, <code>cd</code> into it and run <code>lein install</code>. Let&rsquo;s see
 what a project based off this bare template looks like. Run <code>lein new hum my-app</code>.
@@ -96,7 +96,7 @@ You should get a directory tree with one file like this:
 
 <p>Open up <code>src/leiningen/new/hum.clj</code> and look at the <code>hum</code> function:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">defn </span><span class="nv">hum</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">defn </span><span class="nv">hum</span>
       <span class="s">&quot;FIXME: write documentation&quot;</span>
       <span class="p">[</span><span class="nv">name</span><span class="p">]</span>
       <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">data</span> <span class="p">{</span><span class="ss">:name</span> <span class="nv">name</span>
@@ -104,8 +104,8 @@ You should get a directory tree with one file like this:
         <span class="p">(</span><span class="nf">main/info</span> <span class="s">&quot;Generating fresh &#39;lein new&#39; hum project.&quot;</span><span class="p">)</span>
         <span class="p">(</span><span class="nf">-&gt;files</span> <span class="nv">data</span>
                  <span class="p">[</span><span class="s">&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/foo.clj&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;foo.clj&quot;</span> <span class="nv">data</span><span class="p">)])))</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Let&rsquo;s go through this line by line.  This function takes a name then creates a
 map, <code>data</code>, that contains this name and a sanitized version of it.  <code>name-to-path</code>
@@ -123,9 +123,9 @@ content for that file.</p>
 <p>To understand the <code>render</code> call a little better, we need to look at the
 definition right above this function:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="k">def </span><span class="nv">render</span> <span class="p">(</span><span class="nf">renderer</span> <span class="s">&quot;hum&quot;</span><span class="p">))</span>
-</pre></div>
-</p>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="k">def </span><span class="nv">render</span> <span class="p">(</span><span class="nf">renderer</span> <span class="s">&quot;hum&quot;</span><span class="p">))</span>
+</code></pre></div>
+
 
 <p>All this does is create a renderer that will process one of our templates and
 replace the appropriate variables. This templating is based off of mustache
@@ -135,23 +135,23 @@ areas that we specify with our supplied <code>data</code>. If we don&rsquo;t sup
 then the file remains unchanged.</p>
 
 <p>Keeping with our example, using this line:
-<div class="highlight"><pre>    <span class="p">[</span><span class="s">&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/foo.clj&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;foo.clj&quot;</span> <span class="nv">data</span><span class="p">)]</span>
-</pre></div>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">[</span><span class="s">&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/foo.clj&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;foo.clj&quot;</span> <span class="nv">data</span><span class="p">)]</span>
+</code></pre></div>
 </p>
 
 <p>Will create a file at <code>src/hum/foo.clj</code> with the content of the file <code>foo.clj</code>.
 Let&rsquo;s open that file up and see this templating in action:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="k">def </span><span class="p">{{</span><span class="nv">site.lcbs</span><span class="p">}}</span><span class="nv">name</span><span class="p">{{</span><span class="nv">site.rcbs</span><span class="p">}}</span> <span class="ss">:foo</span><span class="p">)</span>
-</pre></div>
-</p>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="k">def </span><span class="p">{{</span><span class="nv">site.lcbs</span><span class="p">}}</span><span class="nv">name</span><span class="p">{{</span><span class="nv">site.rcbs</span><span class="p">}}</span> <span class="ss">:foo</span><span class="p">)</span>
+</code></pre></div>
+
 
 <p>Remember that the <code>:name</code> key in <code>data</code> is set the unsanitized value we supply.</p>
 
 <p>Now lets start making some changes. Create a file at
 <code>src/leiningen/new/hum/project.clj</code> and give it the following content:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">defproject </span><span class="p">{{</span><span class="nv">site.lcbs</span><span class="p">}}</span><span class="nv">name</span><span class="p">{{</span><span class="nv">site.rcbs</span><span class="p">}}</span> <span class="s">&quot;0.1.0-SNAPSHOT&quot;</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">defproject </span><span class="p">{{</span><span class="nv">site.lcbs</span><span class="p">}}</span><span class="nv">name</span><span class="p">{{</span><span class="nv">site.rcbs</span><span class="p">}}</span> <span class="s">&quot;0.1.0-SNAPSHOT&quot;</span>
       <span class="ss">:description</span> <span class="s">&quot;FIXME: write this!&quot;</span>
       <span class="ss">:url</span> <span class="s">&quot;http://example.com/FIXME&quot;</span>
 
@@ -170,17 +170,17 @@ Let&rsquo;s open that file up and see this templating in action:</p>
                     <span class="ss">:optimizations</span> <span class="ss">:none</span>
                     <span class="ss">:source-map</span> <span class="nv">true</span>
                     <span class="ss">:externs</span> <span class="p">[</span><span class="s">&quot;om/externs/react.js&quot;</span><span class="p">]}}]})</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>This is doing a bunch of stuff, but is a reasonably standard starting point. The
 main differences is that I&rsquo;ve included the Om library as a dependency.</p>
 
 <p>Now add this to the list of processed files in <code>hum.clj</code>:
-<div class="highlight"><pre>    <span class="p">(</span><span class="nf">-&gt;files</span> <span class="nv">data</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nf">-&gt;files</span> <span class="nv">data</span>
              <span class="p">[</span><span class="s">&quot;project.clj&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;project.clj&quot;</span> <span class="nv">data</span><span class="p">)]</span>
              <span class="p">[</span><span class="s">&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/foo.clj&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;foo.clj&quot;</span> <span class="nv">data</span><span class="p">)])))</span>
-</pre></div>
+</code></pre></div>
 </p>
 
 <p>To test it out, run <code>lein new hum my-app</code>. Remember to remove the previous test
@@ -191,7 +191,7 @@ first, and make sure you are in the root of the template project. Open up
 of <code>foo.clj</code> by renaming it to a Clojurescript file, like <code>core.cljs</code>.
 Change the content of the file to this:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">ns </span><span class="p">{{</span><span class="nv">site.lcbs</span><span class="p">}}</span><span class="nv">name</span><span class="p">{{</span><span class="nv">site.rcbs</span><span class="p">}}</span><span class="nv">.core</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">ns </span><span class="p">{{</span><span class="nv">site.lcbs</span><span class="p">}}</span><span class="nv">name</span><span class="p">{{</span><span class="nv">site.rcbs</span><span class="p">}}</span><span class="nv">.core</span>
       <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">om.core</span> <span class="ss">:as</span> <span class="nv">om</span> <span class="ss">:include-macros</span> <span class="nv">true</span><span class="p">]</span>
                 <span class="p">[</span><span class="nv">om.dom</span> <span class="ss">:as</span> <span class="nv">dom</span> <span class="ss">:include-macros</span> <span class="nv">true</span><span class="p">]))</span>
 
@@ -215,8 +215,8 @@ Change the content of the file to this:</p>
           <span class="p">(</span><span class="nf">om/build</span> <span class="nv">button</span> <span class="nv">app</span> <span class="p">{}))))</span>
 
     <span class="p">(</span><span class="nf">om/root</span> <span class="nv">app-state</span> <span class="nv">my-app</span> <span class="nv">js/document.body</span><span class="p">)</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Again the intent here is not to introduce you to Om, or Clojurescript. All
 you need to know for now is that this creates a button and counter that tracks how
@@ -224,14 +224,14 @@ many times the button has been clicked.</p>
 
 <p>Your list of processed files should look something like this:</p>
 
-<p><div class="highlight"><pre>    <span class="p">[</span><span class="s">&quot;project.clj&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;project.clj&quot;</span> <span class="nv">data</span><span class="p">)]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">[</span><span class="s">&quot;project.clj&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;project.clj&quot;</span> <span class="nv">data</span><span class="p">)]</span>
     <span class="p">[</span><span class="s">&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/core.cljs&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;core.cljs&quot;</span> <span class="nv">data</span><span class="p">)]</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Let&rsquo;s add in one more file, <code>index.html</code>:</p>
 
-<p><div class="highlight"><pre>    <span class="nt">&lt;html&gt;</span>
+<div class="highlight"><pre><code class="language-html" data-lang="html">    <span class="nt">&lt;html&gt;</span>
         <span class="nt">&lt;body&gt;</span>
             <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;http://fb.me/react-0.8.0.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
             <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;out/goog/base.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
@@ -239,20 +239,20 @@ many times the button has been clicked.</p>
             <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span><span class="nx">goog</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">&quot;{{site.lcbs}}sanitized{{site.rcbs}}.core&quot;</span><span class="p">);</span><span class="nt">&lt;/script&gt;</span>
         <span class="nt">&lt;/body&gt;</span>
     <span class="nt">&lt;/html&gt;</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>And to the list of processed files:</p>
 
-<p><div class="highlight"><pre>    <span class="p">[</span><span class="s">&quot;index.html&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;index.html&quot;</span> <span class="nv">data</span><span class="p">)]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">[</span><span class="s">&quot;index.html&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;index.html&quot;</span> <span class="nv">data</span><span class="p">)]</span>
     <span class="p">[</span><span class="s">&quot;project.clj&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;project.clj&quot;</span> <span class="nv">data</span><span class="p">)]</span>
     <span class="p">[</span><span class="s">&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/core.cljs&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;core.cljs&quot;</span> <span class="nv">data</span><span class="p">)]</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>The full <code>hum</code> function should look similar to this:</p>
 
-<p><div class="highlight"><pre>    <span class="p">(</span><span class="kd">defn </span><span class="nv">hum</span> <span class="p">[</span><span class="nv">name</span><span class="p">]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">defn </span><span class="nv">hum</span> <span class="p">[</span><span class="nv">name</span><span class="p">]</span>
       <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">data</span> <span class="p">{</span><span class="ss">:name</span> <span class="nv">name</span>
                   <span class="ss">:sanitized</span> <span class="p">(</span><span class="nf">name-to-path</span> <span class="nv">name</span><span class="p">)}]</span>
         <span class="p">(</span><span class="nf">main/info</span> <span class="s">&quot;Generating a new Om project using the Hum template&quot;</span><span class="p">)</span>
@@ -260,8 +260,8 @@ many times the button has been clicked.</p>
                  <span class="p">[</span><span class="s">&quot;index.html&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;index.html&quot;</span> <span class="nv">data</span><span class="p">)]</span>
                  <span class="p">[</span><span class="s">&quot;project.clj&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;project.clj&quot;</span> <span class="nv">data</span><span class="p">)]</span>
                  <span class="p">[</span><span class="s">&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/core.cljs&quot;</span> <span class="p">(</span><span class="nf">render</span> <span class="s">&quot;core.cljs&quot;</span> <span class="nv">data</span><span class="p">)])))</span>
-</pre></div>
-</p>
+</code></pre></div>
+
 
 <p>Now we&rsquo;re done. Run <code>lein new hum my-app</code> again and <code>cd</code> into it. Run <code>lein deps</code>
 to get any dependencies, then <code>lein cljsbuild once dev</code>. Open up <code>index.html</code>
