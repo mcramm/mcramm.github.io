@@ -39,15 +39,35 @@
             color: inherit;
             font-weight: inherit;
         }
+
+        section.projects {
+          display: flex;
+        }
+
+        section.projects .project {
+          padding: 3em;
+          text-align: center;
+          display: block;
+          color: black;
+          text-decoration: none;
+        }
+
+        section.projects .project:hover {
+          cursor: pointer;
+          color: black;
+          text-decoration: none;
+          background-color: #F3F3F3;
+        }
     </style>
 </head>
 <body>
-    
+
 <section class="site-nav">
     <header>
         <nav id="navigation">
             <a href="/" class="home">About</a>
             <a href="/post" class="post">Posts</a>
+            <a href="/projects" class="projects">Projects</a>
         </nav>
     </header>
 </section>
@@ -125,6 +145,7 @@ modularity without a huge performance cost.</p>
         <nav>
             <a href="/" class="home">About</a>
             <a href="/post" class="post">Posts</a>
+            <a href="/projects" class="projects">Projects</a>
         </nav>
         
         <nav class="social">
