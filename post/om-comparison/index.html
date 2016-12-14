@@ -59,6 +59,19 @@
           background-color: #F3F3F3;
         }
 
+        section.personal-ad {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        section.personal-ad a {
+          text-align: center;
+          display: block;
+          color: black;
+          text-decoration: none;
+        }
+
         .intro {
           margin: 0 2em;
         }
@@ -97,12 +110,12 @@ sits on top of React.</p>
 
 <p>If you want to follow along, you&rsquo;ll need to install Leiningen and run:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">    lein new mies-om om-intro
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span>    lein new mies-om om-intro
 </code></pre></div>
 
 
 <p><code>cd</code> into the new directory and make your <code>project.clj</code> look like the following:
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">defproject </span><span class="nv">om-intro</span> <span class="s">&quot;0.1.0-SNAPSHOT&quot;</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="kd">defproject </span><span class="nv">om-intro</span> <span class="s">&quot;0.1.0-SNAPSHOT&quot;</span>
       <span class="ss">:description</span> <span class="s">&quot;FIXME: write this!&quot;</span>
       <span class="ss">:url</span> <span class="s">&quot;http://example.com/FIXME&quot;</span>
 
@@ -129,15 +142,15 @@ sits on top of React.</p>
 
 <p>You will also want to update your <code>index.html</code> look like this:</p>
 
-<div class="highlight"><pre><code class="language-html" data-lang="html">    <span class="nt">&lt;html&gt;</span>
-        <span class="nt">&lt;body&gt;</span>
-            <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;app&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
-            <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;http://fb.me/react-0.8.0.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-            <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;out/goog/base.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-            <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;om_intro.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-            <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span><span class="nx">goog</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">&quot;om_intro.core&quot;</span><span class="p">);</span><span class="nt">&lt;/script&gt;</span>
-        <span class="nt">&lt;/body&gt;</span>
-    <span class="nt">&lt;/html&gt;</span>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    <span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;app&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;http://fb.me/react-0.8.0.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;out/goog/base.js&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;om_intro.js&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span><span class="p">&gt;</span><span class="nx">goog</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">&quot;om_intro.core&quot;</span><span class="p">);&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
 </code></pre></div>
 
 
@@ -155,7 +168,7 @@ single JavaScript file.</p>
 
 <p>With the setup out of the way we can start rebuilding this widget.</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">ns </span><span class="nv">om-intro.core</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="kd">ns </span><span class="nv">om-intro.core</span>
       <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">om.core</span> <span class="ss">:as</span> <span class="nv">om</span> <span class="ss">:include-macros</span> <span class="nv">true</span><span class="p">]</span>
                 <span class="p">[</span><span class="nv">om.dom</span> <span class="ss">:as</span> <span class="nv">dom</span> <span class="ss">:include-macros</span> <span class="nv">true</span><span class="p">]))</span>
 
@@ -199,7 +212,7 @@ various <code>input</code>s we&rsquo;ll eventually have.</p>
 
 <p>Change the namespace declaration to the following:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">ns </span><span class="nv">om-intro.core</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="kd">ns </span><span class="nv">om-intro.core</span>
       <span class="p">(</span><span class="ss">:require-macros</span> <span class="p">[</span><span class="nv">cljs.core.async.macros</span> <span class="ss">:refer</span> <span class="p">[</span><span class="nv">go</span><span class="p">]])</span>
       <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">om.core</span> <span class="ss">:as</span> <span class="nv">om</span> <span class="ss">:include-macros</span> <span class="nv">true</span><span class="p">]</span>
                 <span class="p">[</span><span class="nv">om.dom</span> <span class="ss">:as</span> <span class="nv">dom</span> <span class="ss">:include-macros</span> <span class="nv">true</span><span class="p">]</span>
@@ -210,7 +223,7 @@ various <code>input</code>s we&rsquo;ll eventually have.</p>
 <p>Then we&rsquo;ll update the widget. We&rsquo;re going to walk through this step-by-step in
 a minute, but here is what it should look like:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">defn </span><span class="nv">my-widget</span> <span class="p">[</span><span class="nv">app</span> <span class="nv">owner</span><span class="p">]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="kd">defn </span><span class="nv">my-widget</span> <span class="p">[</span><span class="nv">app</span> <span class="nv">owner</span><span class="p">]</span>
       <span class="p">(</span><span class="nf">reify</span>
         <span class="nv">om/IInitState</span>
         <span class="p">(</span><span class="nf">init-state</span> <span class="p">[</span><span class="nv">this</span><span class="p">]</span>
@@ -271,7 +284,7 @@ need it so that we can have access to the channel we created earlier.</p>
 
 <p>Finally we create the <code>input</code>:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nf">dom/input</span> <span class="o">#</span><span class="nv">js</span> <span class="p">{</span><span class="ss">:type</span> <span class="s">&quot;text&quot;</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="nf">dom/input</span> <span class="o">#</span><span class="nv">js</span> <span class="p">{</span><span class="ss">:type</span> <span class="s">&quot;text&quot;</span>
                     <span class="ss">:ref</span> <span class="s">&quot;text&quot;</span>
                     <span class="ss">:value</span> <span class="p">(</span><span class="ss">:text</span> <span class="nv">app</span><span class="p">)</span>
                     <span class="ss">:onChange</span> <span class="o">#</span><span class="p">(</span><span class="nf">put!</span>
@@ -299,14 +312,14 @@ attractive. All it does is take the value of the <code>text</code> node and put 
 <p>The next step is to add in the text-size slider. First, let&rsquo;s add the size to
 our application state:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="k">def </span><span class="nv">app-state</span> <span class="p">(</span><span class="nf">atom</span> <span class="p">{</span><span class="ss">:text</span> <span class="s">&quot;Some Text&quot;</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="k">def </span><span class="nv">app-state</span> <span class="p">(</span><span class="nf">atom</span> <span class="p">{</span><span class="ss">:text</span> <span class="s">&quot;Some Text&quot;</span>
                           <span class="ss">:size</span> <span class="mi">15</span><span class="p">}))</span>
 </code></pre></div>
 
 
 <p>Next we&rsquo;ll create another channel for manipulating this size:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="nv">om/IInitState</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="nv">om/IInitState</span>
     <span class="p">(</span><span class="nf">init-state</span> <span class="p">[</span><span class="nv">this</span><span class="p">]</span>
       <span class="p">{</span><span class="ss">:comm</span> <span class="p">{</span><span class="ss">:string</span> <span class="p">(</span><span class="nf">chan</span><span class="p">)</span>
               <span class="ss">:size</span> <span class="p">(</span><span class="nf">chan</span><span class="p">)}})</span>
@@ -316,7 +329,7 @@ our application state:</p>
 <p>We&rsquo;ll create another go block to update <code>:size</code> whenever we get a value off of
 this channel:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="nv">om/IWillMount</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="nv">om/IWillMount</span>
     <span class="p">(</span><span class="nf">will-mount</span> <span class="p">[</span><span class="nv">this</span><span class="p">]</span>
       <span class="p">(</span><span class="k">let </span><span class="p">[{</span><span class="ss">:keys</span> <span class="p">[</span><span class="nv">string</span> <span class="nv">size</span><span class="p">]</span> <span class="ss">:as</span> <span class="nv">comm</span><span class="p">}</span> <span class="p">(</span><span class="nf">om/get-state</span> <span class="nv">owner</span> <span class="ss">:comm</span><span class="p">)]</span>
         <span class="p">(</span><span class="nf">go</span> <span class="p">(</span><span class="nf">while</span> <span class="nv">true</span>
@@ -332,13 +345,13 @@ this channel:</p>
 in a similar way as before, I created a small helper to do this. I would place
 this function at the top of your source file, underneath the atom:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">defn </span><span class="nv">get-value</span> <span class="p">[</span><span class="nv">owner</span> <span class="nv">ref</span><span class="p">]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="kd">defn </span><span class="nv">get-value</span> <span class="p">[</span><span class="nv">owner</span> <span class="nv">ref</span><span class="p">]</span>
       <span class="p">(</span><span class="nb">-&gt; </span><span class="p">(</span><span class="nf">om/get-node</span> <span class="nv">owner</span> <span class="nv">ref</span><span class="p">)</span>
           <span class="nv">.-value</span><span class="p">))</span>
 </code></pre></div>
 
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nf">dom/div</span> <span class="nv">nil</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="nf">dom/div</span> <span class="nv">nil</span>
             <span class="p">(</span><span class="nf">dom/input</span> <span class="o">#</span><span class="nv">js</span> <span class="p">{</span><span class="ss">:type</span> <span class="s">&quot;range&quot;</span>
                             <span class="ss">:min</span> <span class="mi">10</span>
                             <span class="ss">:max</span> <span class="mi">50</span>
@@ -357,13 +370,13 @@ this function at the top of your source file, underneath the atom:</p>
 <p>Finally, we want to modify our <code>div</code> to have it&rsquo;s font-size restyled whenever
 this changes. Right now it looks like this:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nf">dom/div</span> <span class="nv">nil</span> <span class="p">(</span><span class="ss">:text</span> <span class="nv">app</span><span class="p">))</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="nf">dom/div</span> <span class="nv">nil</span> <span class="p">(</span><span class="ss">:text</span> <span class="nv">app</span><span class="p">))</span>
 </code></pre></div>
 
 
 <p>Change it to this:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nf">dom/div</span> <span class="o">#</span><span class="nv">js</span> <span class="p">{</span><span class="ss">:style</span> <span class="o">#</span><span class="nv">js</span> <span class="p">{</span><span class="ss">:font-size</span> <span class="p">(</span><span class="nb">str </span><span class="p">(</span><span class="ss">:size</span> <span class="nv">app</span><span class="p">)</span> <span class="s">&quot;px&quot;</span><span class="p">)}}</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="nf">dom/div</span> <span class="o">#</span><span class="nv">js</span> <span class="p">{</span><span class="ss">:style</span> <span class="o">#</span><span class="nv">js</span> <span class="p">{</span><span class="ss">:font-size</span> <span class="p">(</span><span class="nb">str </span><span class="p">(</span><span class="ss">:size</span> <span class="nv">app</span><span class="p">)</span> <span class="s">&quot;px&quot;</span><span class="p">)}}</span>
           <span class="p">(</span><span class="ss">:text</span> <span class="nv">app</span><span class="p">))</span>
 </code></pre></div>
 
@@ -377,7 +390,7 @@ so we need to do it twice to set <code>:style</code> correctly.</p>
 
 <p>Now for the color sliders. First, we&rsquo;ll add in the new state:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="k">def </span><span class="nv">app-state</span> <span class="p">(</span><span class="nf">atom</span> <span class="p">{</span><span class="ss">:text</span> <span class="s">&quot;Some Text&quot;</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="k">def </span><span class="nv">app-state</span> <span class="p">(</span><span class="nf">atom</span> <span class="p">{</span><span class="ss">:text</span> <span class="s">&quot;Some Text&quot;</span>
                           <span class="ss">:size</span> <span class="mi">15</span>
                           <span class="ss">:colors</span> <span class="p">{</span><span class="ss">:red</span> <span class="mi">0</span>
                                    <span class="ss">:green</span> <span class="mi">0</span>
@@ -387,7 +400,7 @@ so we need to do it twice to set <code>:style</code> correctly.</p>
 
 <p>As in the React widget, we&rsquo;ll create a more general <code>color-slider</code>:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">defn </span><span class="nv">color-slider</span> <span class="p">[</span><span class="nv">colors</span> <span class="nv">owner</span> <span class="p">{</span><span class="ss">:keys</span> <span class="p">[</span><span class="nv">label</span> <span class="nv">onChange</span> <span class="nv">color-key</span><span class="p">]}]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="kd">defn </span><span class="nv">color-slider</span> <span class="p">[</span><span class="nv">colors</span> <span class="nv">owner</span> <span class="p">{</span><span class="ss">:keys</span> <span class="p">[</span><span class="nv">label</span> <span class="nv">onChange</span> <span class="nv">color-key</span><span class="p">]}]</span>
       <span class="p">(</span><span class="nf">reify</span>
         <span class="nv">om/IRenderState</span>
         <span class="p">(</span><span class="nf">render-state</span> <span class="p">[</span><span class="nv">this</span> <span class="p">{</span><span class="ss">:keys</span> <span class="p">[</span><span class="nv">comm</span><span class="p">]}]</span>
@@ -409,7 +422,7 @@ application state, and an onChange function.</p>
 
 <p>Next we&rsquo;ll create a channel for the changing colors:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="nv">om/IInitState</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="nv">om/IInitState</span>
     <span class="p">(</span><span class="nf">init-state</span> <span class="p">[</span><span class="nv">this</span><span class="p">]</span>
       <span class="p">{</span><span class="ss">:comm</span> <span class="p">{</span><span class="ss">:string</span> <span class="p">(</span><span class="nf">chan</span><span class="p">)</span>
               <span class="ss">:size</span> <span class="p">(</span><span class="nf">chan</span><span class="p">)</span>
@@ -418,7 +431,7 @@ application state, and an onChange function.</p>
 
 
 <p>And a go block:
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nf">go</span> <span class="p">(</span><span class="nf">while</span> <span class="nv">true</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="nf">go</span> <span class="p">(</span><span class="nf">while</span> <span class="nv">true</span>
           <span class="p">(</span><span class="k">let </span><span class="p">[[</span><span class="nv">c</span> <span class="nv">value</span><span class="p">]</span> <span class="p">(</span><span class="nf">&lt;!</span> <span class="nv">colors</span><span class="p">)]</span>
             <span class="p">(</span><span class="nf">om/update!</span> <span class="nv">app</span> <span class="nv">assoc-in</span> <span class="p">[</span><span class="ss">:colors</span> <span class="nv">c</span><span class="p">]</span> <span class="nv">value</span><span class="p">))))))</span>
 </code></pre></div>
@@ -427,7 +440,7 @@ application state, and an onChange function.</p>
 <p>This looks slightly different than the previous go blocks because we&rsquo;re dealing
 with a map of colors in the application state instead of a straight value.</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">putfn</span> <span class="p">(</span><span class="k">fn </span><span class="p">[</span><span class="nv">k</span> <span class="nv">o</span><span class="p">]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">putfn</span> <span class="p">(</span><span class="k">fn </span><span class="p">[</span><span class="nv">k</span> <span class="nv">o</span><span class="p">]</span>
                  <span class="p">(</span><span class="nf">put!</span> <span class="p">(</span><span class="ss">:colors</span> <span class="nv">comm</span><span class="p">)</span> <span class="p">[</span><span class="nv">k</span> <span class="p">(</span><span class="nf">get-value</span> <span class="nv">o</span> <span class="s">&quot;color&quot;</span><span class="p">)]))]</span>
         <span class="p">(</span><span class="nb">apply </span><span class="nv">dom/div</span> <span class="nv">nil</span>
              <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">fn </span><span class="p">[[</span><span class="nv">label</span> <span class="nv">color-key</span><span class="p">]]</span>
@@ -445,7 +458,7 @@ high level functions here to avoid having to write three calls to <code>om/build
 
 <p>Finally we can modify the <code>div</code> to re-color our text:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">size</span> <span class="p">(</span><span class="ss">:size</span> <span class="nv">app</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">size</span> <span class="p">(</span><span class="ss">:size</span> <span class="nv">app</span><span class="p">)</span>
           <span class="nv">text</span> <span class="p">(</span><span class="ss">:text</span> <span class="nv">app</span><span class="p">)</span>
           <span class="p">{</span><span class="ss">:keys</span> <span class="p">[</span><span class="nv">red</span> <span class="nv">green</span> <span class="nv">blue</span><span class="p">]}</span> <span class="p">(</span><span class="ss">:colors</span> <span class="nv">app</span><span class="p">)]</span>
      <span class="p">(</span><span class="nf">dom/div</span> <span class="o">#</span><span class="nv">js</span> <span class="p">{</span><span class="ss">:style</span> <span class="o">#</span><span class="nv">js</span> <span class="p">{</span><span class="ss">:font-size</span> <span class="p">(</span><span class="nb">str </span><span class="nv">size</span> <span class="s">&quot;px&quot;</span><span class="p">)</span>
@@ -466,6 +479,16 @@ recommend running through the
 <script src="/js/om-intro.js" type="text/javascript"></script>
             
 
+        </section>
+
+        <hr />
+
+        <section class='personal-ad'>
+          <a class='project' href='https://mailfeedapp.com' target='_blank' rel='noopener' >
+            <img src="/images/mailfeed-logo.png" />
+            <h2> Mailfeed </h2>
+            <p> Have the RSS feeds you care delivered directly to your inbox.</p>
+          </a>
         </section>
 
         

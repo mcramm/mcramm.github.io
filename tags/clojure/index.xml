@@ -9,6 +9,279 @@
     <atom:link href="http://mcramm.com/tags/clojure/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>Integration Testing with Clojure and Postgres</title>
+      <link>http://mcramm.com/post/integration-tests-for-clojure-and-postgres/</link>
+      <pubDate>Wed, 14 Dec 2016 14:33:00 -0600</pubDate>
+      
+      <guid>http://mcramm.com/post/integration-tests-for-clojure-and-postgres/</guid>
+      <description>&lt;p&gt;If you&amp;rsquo;re writing a non-trivial application that will run in production, it&amp;rsquo;s usually a good idea
+to have some automated way to make sure that all the pieces are working together
+correctly. On a lot of projects this is going to mean integration tests. How
+granular these tests become will depend on your level of paranoia and &lt;em&gt;how&lt;/em&gt;
+critical those integration points are to your application as a whole.&lt;/p&gt;
+
+&lt;p&gt;In this post I&amp;rsquo;m going to use an example &lt;a href=&#34;http://mcramm.com/post/off-the-ground-with-clojure-and-postgres/&#34;&gt;from a previous
+article&lt;/a&gt; and add
+some integration tests to ensure that we&amp;rsquo;re creating and updating accounts
+correctly.&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s worth noting that my opinion on integration tests is that they should act as &lt;em&gt;smoke&lt;/em&gt;
+tests, except in some extreme cases. If you find yourself testing complex
+business logic and needing to integrate with the database to do so, then chances
+are you&amp;rsquo;re doing something wrong. Integration tests should not be a replacement
+for QA or to compensate for bad design. But the world isn&amp;rsquo;t perfect, and sometimes
+a convoluted, slow running set of integration tests is the best you can do.&lt;/p&gt;
+
+&lt;p&gt;Alright, enough postulating. Let&amp;rsquo;s move on.  Here is the namespace that we&amp;rsquo;ll be
+targeting for our tests:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.entities.accounts&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;clj-time.jdbc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.components.postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:import&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres_example.components.postgres&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defprotocol &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;AccountOps&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-opened!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-closed!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;sql-&amp;gt;account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;when &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+               &lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+               &lt;span class=&#34;ss&#34;&gt;:created-at&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:created_at&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+               &lt;span class=&#34;ss&#34;&gt;:updated-at&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:updated_at&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql-entity&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)}))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;opened-status&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;closed-status&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;closed&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;extend-protocol&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;AccountOps&lt;/span&gt;
+  &lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;-&amp;gt; &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/account-by-id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:uri&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;sql-&amp;gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;result&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/insert-account!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:uri&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})]&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;result&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-opened!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/update-account!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:uri&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+                                       &lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;opened-status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
+
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-closed!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/update-account!&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:uri&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+                                       &lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;closed-status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This namespace&amp;rsquo;s sole responsibility is to provide a touchpoint for the rest of
+our app to &lt;em&gt;where&lt;/em&gt; we&amp;rsquo;re storing our accounts data. This is where we go when we
+need to fetch or update something in our database. The reason we defined the
+&lt;code&gt;AccountOps&lt;/code&gt; protocol is that we may want to extend these operations over a
+different store, like an AtomStore, when we move on to writing tests for other
+pieces of the system.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;I think it&amp;rsquo;s worth mentioning that I feel like there could be a good fit
+for &lt;a href=&#34;http://clojure.org/about/spec&#34;&gt;clojure.spec&lt;/a&gt; here. I&amp;rsquo;ll probably explore
+this in a future post.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;To start we&amp;rsquo;ll need some way to actually run our tests, both from the REPL and
+outside if it. For outside the REPL, we can just use &lt;code&gt;lein test&lt;/code&gt;. For inside
+though, we&amp;rsquo;re going to add a &lt;code&gt;test&lt;/code&gt; method to &lt;code&gt;dev/user.clj&lt;/code&gt; that uses the
+awesome &lt;a href=&#34;https://github.com/weavejester/eftest&#34;&gt;Eftest&lt;/a&gt; to find and run our
+tests.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;; ... truncated ...&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;test &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[]&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;path &lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;test/postgres_example/integration&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;eftest/run-tests&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;eftest/find-tests&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;path&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Note that I had to make some other changes here as well to ensure that we have a
+separate test database loaded up and migrated to the same version we&amp;rsquo;re
+developing against. For the full list of changes to this file, see &lt;a href=&#34;https://github.com/mcramm/postgres-example/commit/0c1fbe527b442ebdbc342385cc75b0beef2171fc#diff-f83d20da641ba06134b62eab278aa907&#34;&gt;this
+commit&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s make sure this is working with a dummy test. Create a file at
+&lt;code&gt;test/postgres_example/integration/entities/accounts.clj&lt;/code&gt; and add the following
+content:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.integration.entities.accounts&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;clojure.test&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:all&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;deftest&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;foo-test&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;testing&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;our setup&amp;quot;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;is&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;= &lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Running &lt;code&gt;(test)&lt;/code&gt; at the REPL should display a failure. If it didn&amp;rsquo;t, then you
+should stop here and figure out why. If the test failed successfully,
+we can move on to writing something a little more useful. We&amp;rsquo;re going to write this
+test &lt;em&gt;first&lt;/em&gt;, then figure out some of the missing pieces in a minute.&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.integration.entities.accounts&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;clojure.test&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:all&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.entities.accounts&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:all&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;deftest&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;create!-test&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;testing&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;create! creates and returns an account&amp;quot;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;is&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;not &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;nil? &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;is&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;= &lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Pretty easy right? All we&amp;rsquo;re doing with this test is ensuring that the result
+of calling &lt;code&gt;create!&lt;/code&gt; returns a map that has an &lt;code&gt;:account/id&lt;/code&gt; set, and was assigned
+the correct status. But as I said, we&amp;rsquo;re missing a couple of things. First, we
+haven&amp;rsquo;t defined what &lt;code&gt;store&lt;/code&gt; is in this context. Second, we should be cleaning up
+any data we create once the test is completed.&lt;/p&gt;
+
+&lt;p&gt;To handle both of these problem we&amp;rsquo;re going to create a &lt;code&gt;test-helpers&lt;/code&gt; namespace that
+our tests can reference to get a copy of the &lt;code&gt;store&lt;/code&gt; (that we&amp;rsquo;ll point at our
+test database), and we&amp;rsquo;ll create a
+&lt;a href=&#34;https://clojuredocs.org/clojure.test/use-fixtures&#34;&gt;fixture&lt;/a&gt; that will execute some code
+to clean up any test data:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.test-helpers&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;clojure.java.jdbc&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;jdbc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;environ.core&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;env&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.components.postgres&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;o&#34;&gt;^&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:dynamic&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;nil&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;test-db-uri&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:database-url&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;env&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;_test&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defn &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db-transaction-fixture&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;jdbc/with-db-transaction&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;test-db-uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;jdbc/db-set-rollback-only!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;binding &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;postgres/build&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;conn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;From the top down, we create a dynamic var for &lt;code&gt;store&lt;/code&gt; that we&amp;rsquo;ll re-bind to a
+new connection for every test. That connection will happen to be a database
+transaction that we&amp;rsquo;ll instruct to rollback when it&amp;rsquo;s complete, instead of
+simply comitting.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Credit to &lt;a href=&#34;http://www.lispcast.com/clojure-database-test-faster&#34;&gt;this post by Eric
+Normand&lt;/a&gt;. Prior to this I
+had been using an &lt;code&gt;atom&lt;/code&gt; instead of a dynamic var and was pulling my hair out
+trying to get my tests to run without hitting concurrency issues. Changing it to
+a dynamic var and leveraging &lt;code&gt;binding&lt;/code&gt; made things quite a bit nicer. (and quite a bit faster too)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We&amp;rsquo;ll need to require this namespace in our test, and tell our tests to use this
+&lt;code&gt;db-transaction-fixture&lt;/code&gt; fixture:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.integration.entities.accounts&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;clojure.test&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:all&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.test-helpers&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;db-transaction-fixture&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.entities.accounts&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:all&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;use-fixtures&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:each&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;db-transaction-fixture&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;deftest&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;create!-test&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;testing&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;create! creates and returns an account&amp;quot;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;is&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;not &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;nil? &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;is&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;= &lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Running &lt;code&gt;(test)&lt;/code&gt; at the repl should be successful now. Let&amp;rsquo;s fill out the rest
+of our tests. I&amp;rsquo;m going to include the whole thing since it&amp;rsquo;s so short:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.integration.entities.accounts&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;clojure.test&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:all&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.test-helpers&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;db-transaction-fixture&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;postgres-example.entities.accounts&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:refer&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:all&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;use-fixtures&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:each&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;db-transaction-fixture&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;deftest&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;create!-test&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;testing&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;create! creates and returns an account&amp;quot;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;is&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;not &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;nil? &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;is&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;= &lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;deftest&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;by-id-test&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;testing&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;by-id returns the correct account by id&amp;quot;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;is&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;= &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;
+             &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))))))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;deftest&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;set-opened!-test&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;testing&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;set-opened! sets an account&amp;#39;s status to opened-status&amp;quot;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;closed&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-opened!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;is&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;= &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;opened-status&lt;/span&gt;
+             &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/status&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))))))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;deftest&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;set-closed!-test&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;testing&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;set-closed! sets an account&amp;#39;s status to closed-status&amp;quot;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;let &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;create!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set-closed!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;is&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;= &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;closed-status&lt;/span&gt;
+             &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/status&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;These 4 tests run in about 0.022 seconds on my machine. If you check your local postgres
+database, you should (hopefully) see that your accounts table is empty:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-psql&#34; data-lang=&#34;psql&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;gp&#34;&gt;$&lt;/span&gt; psql -U postgres_example postgres_example_test
+
+&lt;span class=&#34;gp&#34;&gt;postgres_example_test=#&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;select&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;accounts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;go&#34;&gt;┌────┬────────┬────────────┬────────────┐&lt;/span&gt;
+&lt;span class=&#34;go&#34;&gt;│ id │ status │ created_at │ updated_at │&lt;/span&gt;
+&lt;span class=&#34;go&#34;&gt;├────┼────────┼────────────┼────────────┤&lt;/span&gt;
+&lt;span class=&#34;go&#34;&gt;└────┴────────┴────────────┴────────────┘&lt;/span&gt;
+&lt;span class=&#34;go&#34;&gt;(0 rows)&lt;/span&gt;
+
+&lt;span class=&#34;go&#34;&gt;Time: 1.330 ms&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The &lt;code&gt;id&lt;/code&gt; column is an auto-incrementing sequence though, so you should still see
+that changing:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-postgres-console&#34; data-lang=&#34;postgres-console&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;gp&#34;&gt;postgres_example_test=#&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;select&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;currval&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;accounts_id_seq&amp;#39;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;regclass&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;span class=&#34;go&#34;&gt;┌─────────┐&lt;/span&gt;
+&lt;span class=&#34;go&#34;&gt;│ currval │&lt;/span&gt;
+&lt;span class=&#34;go&#34;&gt;├─────────┤&lt;/span&gt;
+&lt;span class=&#34;go&#34;&gt;│      47 │&lt;/span&gt;
+&lt;span class=&#34;go&#34;&gt;└─────────┘&lt;/span&gt;
+&lt;span class=&#34;go&#34;&gt;(1 row)&lt;/span&gt;
+
+&lt;span class=&#34;go&#34;&gt;Time: 1.910 ms&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I&amp;rsquo;ll reiterate that integration tests should be used sparingly, and only in
+critical places where two or more &lt;em&gt;things&lt;/em&gt; are interacting together. This
+pattern is the same one I apply to all Clojure projects that interact with
+Postgres.&lt;/p&gt;
+
+&lt;p&gt;Hopefully this has been helpful to someone :). If you notice any errors in this
+post, &lt;a href=&#34;https://twitter.com/cramm&#34;&gt;please let me know&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Off the ground with Clojure and Postgres</title>
       <link>http://mcramm.com/post/off-the-ground-with-clojure-and-postgres/</link>
       <pubDate>Mon, 12 Dec 2016 20:10:00 -0600</pubDate>
@@ -28,7 +301,7 @@ to do this kind of thing, then maybe this is something you could apply.&lt;/p&gt
 &lt;p&gt;This is going to be pretty quick. Lets say you&amp;rsquo;re tracking user
 accounts with a status. We&amp;rsquo;d like to be able to do the following:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;span class=&#34;c1&#34;&gt;; =&amp;gt; nil&lt;/span&gt;
 
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/create!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
@@ -48,7 +321,7 @@ accounts with a status. We&amp;rsquo;d like to be able to do the following:&lt;/
 &lt;p&gt;Note that the resulting representation of accounts and invoices is a namespaced map, which is new to Clojure 1.9.
 It&amp;rsquo;s exactly the same as:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/id&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;
  &lt;span class=&#34;ss&#34;&gt;:account/status&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;closed&amp;quot;&lt;/span&gt;
  &lt;span class=&#34;ss&#34;&gt;:account/created-at&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;lt;some-instant-in-time&amp;gt;&amp;quot;&lt;/span&gt;
  &lt;span class=&#34;ss&#34;&gt;:account/updated-at&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;lt;some-instant-in-time&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
@@ -57,7 +330,7 @@ It&amp;rsquo;s exactly the same as:&lt;/p&gt;
 
 &lt;p&gt;Let&amp;rsquo;s tackle this top-down by defining a protocol for the operations we&amp;rsquo;re performing.&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defprotocol &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;AccountOps&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;by-id&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;this&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
@@ -76,7 +349,7 @@ reader.&lt;/p&gt;
 running postgres instance, with a database already created. &lt;a href=&#34;https://github.com/mcramm/postgres-example&#34;&gt;I have a full example here&lt;/a&gt; that
 also sets up &lt;a href=&#34;https://github.com/weavejester/ragtime&#34;&gt;Ragtime&lt;/a&gt; to ensure the necessary schema exists.&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;defrecord &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
 
@@ -91,7 +364,7 @@ will let us define our queries in raw sql.&lt;/p&gt;
 
 &lt;p&gt;Let&amp;rsquo;s start with writing a query to look up an account by an id. Open a new file at &lt;code&gt;resources/sql/accounts.sql&lt;/code&gt;
 and add the following content:
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span class=&#34;c1&#34;&gt;-- :name account-by-id :? :1&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;-- :name account-by-id :? :1&lt;/span&gt;
 &lt;span class=&#34;c1&#34;&gt;-- :doc Get an account by id&lt;/span&gt;
 &lt;span class=&#34;k&#34;&gt;SELECT&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;
 &lt;span class=&#34;k&#34;&gt;FROM&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;accounts&lt;/span&gt;
@@ -105,7 +378,7 @@ result.&lt;/p&gt;
 
 &lt;p&gt;Now we&amp;rsquo;ll create a namespace to define this function in:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;hugsql.core&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;hugsql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
 
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;hugsql/def-db-fns&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;sql/accounts.sql&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
@@ -114,7 +387,7 @@ result.&lt;/p&gt;
 
 &lt;p&gt;After loading this namespace, we&amp;rsquo;ll then have a function we can call to load an account by an id:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;require&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;require&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/account-by-id&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;your-database-uri&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;123&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
 &lt;span class=&#34;c1&#34;&gt;; =&amp;gt; nil&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -123,7 +396,7 @@ result.&lt;/p&gt;
 &lt;p&gt;Hurray! It worked&amp;hellip; kinda. Let&amp;rsquo;s define a way to create a new account with an
 initial status:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span class=&#34;c1&#34;&gt;-- :name insert-account! :&amp;lt;! :1&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;-- :name insert-account! :&amp;lt;! :1&lt;/span&gt;
 &lt;span class=&#34;c1&#34;&gt;-- :doc Inserts an account and returns the id&lt;/span&gt;
 &lt;span class=&#34;k&#34;&gt;INSERT&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;INTO&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;accounts&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;span class=&#34;k&#34;&gt;VALUES&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
@@ -133,7 +406,7 @@ initial status:&lt;/p&gt;
 
 &lt;p&gt;You&amp;rsquo;ll have to reload your REPL if you&amp;rsquo;re following along at one. This will define a new method called
 &lt;code&gt;insert-account!&lt;/code&gt; and return the id of the row that was just inserted. Now you can do the following:
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;require&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;require&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/insert-account!&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;your-database-uri&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:status&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
 &lt;span class=&#34;c1&#34;&gt;; =&amp;gt; {:id 1}&lt;/span&gt;
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;sql/account-by-id&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;your-database-uri&amp;quot;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:id&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
@@ -152,7 +425,7 @@ details that I&amp;rsquo;ve encountered so far.&lt;/p&gt;
 
 &lt;p&gt;Switch back to our accounts namespace and use these functions in our AccountOps protocol:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
             &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:import&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my_project.components.postgres&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
@@ -186,7 +459,7 @@ decision I&amp;rsquo;m making; your needs may vary.&lt;/p&gt;
 map, but we&amp;rsquo;re getting back just a regular one. To do this we&amp;rsquo;re going to pass
 every result of &lt;code&gt;sql/account-by-id&lt;/code&gt; through a function &lt;code&gt;sql-&amp;gt;account&lt;/code&gt;:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
             &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.sql&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;sql&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:import&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my_project.components.postgres&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;Postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
@@ -224,7 +497,7 @@ to manipulate the data to suite our needs as it comes out of the database.&lt;/p
 &lt;p&gt;There is one more thing I would recommend doing at this point, and it would be
 to require &lt;code&gt;clj-time.jdbc&lt;/code&gt; in our accounts namespace:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.entities.accounts&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;clj-time.jdbc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
 
             &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.postgres&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
@@ -239,7 +512,7 @@ dates out of the database, that they&amp;rsquo;re mapped to JodaTime instances.&
 
 &lt;p&gt;Now we&amp;rsquo;re finally ready to give these a try:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;span class=&#34;c1&#34;&gt;; =&amp;gt; nil&lt;/span&gt;
 
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/create!&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
@@ -258,7 +531,7 @@ dates out of the database, that they&amp;rsquo;re mapped to JodaTime instances.&
 
 &lt;p&gt;Success! The last thing we&amp;rsquo;ll do is implement our &lt;code&gt;set-*&lt;/code&gt; functions.&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;c1&#34;&gt;;; ========================================&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;;; ========================================&lt;/span&gt;
 &lt;span class=&#34;c1&#34;&gt;;; in my-project.entities.accounts&lt;/span&gt;
 
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;opened-status&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;open&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
@@ -278,7 +551,7 @@ dates out of the database, that they&amp;rsquo;re mapped to JodaTime instances.&
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span class=&#34;c1&#34;&gt;-- ========================================&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;-- ========================================&lt;/span&gt;
 &lt;span class=&#34;c1&#34;&gt;-- in resources/sql/accounts.sql&lt;/span&gt;
 
 &lt;span class=&#34;c1&#34;&gt;-- :name update-account! :&amp;lt; :1&lt;/span&gt;
@@ -293,7 +566,7 @@ dates out of the database, that they&amp;rsquo;re mapped to JodaTime instances.&
 
 &lt;p&gt;And let&amp;rsquo;s try them out:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-account&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;accounts/by-id&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
 
 &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:account/status&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;my-account&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;span class=&#34;c1&#34;&gt;; =&amp;gt; &amp;quot;open&amp;quot;&lt;/span&gt;
@@ -360,7 +633,7 @@ database.&lt;/p&gt;
 
 &lt;p&gt;This is pretty easy, but you should have something like this:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.datomic&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.components.datomic&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;com.stuartsierra.component&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;component&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
             &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;datomic.api&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;datomic&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
 
@@ -380,7 +653,7 @@ database.&lt;/p&gt;
 
 &lt;p&gt;Schema should be ideally be kept in an EDN file and loaded on demand:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;schema&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;schema&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;delay&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;read-string&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;slurp &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;io/resource&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;my_project/schema.edn&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
@@ -392,7 +665,7 @@ database.&lt;/p&gt;
 
 &lt;p&gt;Here is what your schema might look like:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;c1&#34;&gt;; resources/my_project/schema.edn&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;; resources/my_project/schema.edn&lt;/span&gt;
 
 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
@@ -435,7 +708,7 @@ is documented &lt;a href=&#34;http://docs.datomic.com/schema.html&#34;&gt;here&l
 
 &lt;p&gt;Like your schema, any seed data should be kept in a separate file:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;seed-data&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;def &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;seed-data&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;delay&lt;/span&gt;
     &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;read-string&lt;/span&gt;
       &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;slurp &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;io/resource&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;my_project/seed.edn&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
@@ -447,7 +720,7 @@ is documented &lt;a href=&#34;http://docs.datomic.com/schema.html&#34;&gt;here&l
 
 &lt;p&gt;Here is what your seed data might look like:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;c1&#34;&gt;; resources/my_project/seed.edn&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;; resources/my_project/seed.edn&lt;/span&gt;
 &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;
   &lt;span class=&#34;c1&#34;&gt;;; Users&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db/id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;db/id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:db.part/user&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;-1000001&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
@@ -478,7 +751,7 @@ is documented &lt;a href=&#34;http://docs.datomic.com/schema.html&#34;&gt;here&l
 
 &lt;p&gt;The operations to be performed on an entity should be confined to it&amp;rsquo;s own namespace:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.users&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;ns &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.users&lt;/span&gt;
   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:require&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;datomic.api&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;datomic&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
             &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;my-project.component.datomic&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
   &lt;span class=&#34;c1&#34;&gt;; Note the change from using a dash to an underscore&lt;/span&gt;
@@ -512,7 +785,7 @@ is documented &lt;a href=&#34;http://docs.datomic.com/schema.html&#34;&gt;here&l
 
 &lt;p&gt;It&amp;rsquo;s possible to pull in &lt;code&gt;refs&lt;/code&gt; by specifying them in the pull pattern. If you wanted cakes with their owners:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?cake&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;* &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}])&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;p&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?cake&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;* &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}])&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
              &lt;span class=&#34;ss&#34;&gt;:where&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;?cake&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:cake/owner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
            &lt;span class=&#34;nv&#34;&gt;db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -520,7 +793,7 @@ is documented &lt;a href=&#34;http://docs.datomic.com/schema.html&#34;&gt;here&l
 
 &lt;p&gt;If however you wanted the reverse, users and their cakes:&lt;/p&gt;
 
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;* &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:cake/_owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}])&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;datomic/q&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:find&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pull&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;* &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;:cake/_owner&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]}])&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
              &lt;span class=&#34;ss&#34;&gt;:where&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;?user&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:user/email&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
            &lt;span class=&#34;nv&#34;&gt;db&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;

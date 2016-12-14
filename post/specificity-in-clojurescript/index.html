@@ -59,6 +59,19 @@
           background-color: #F3F3F3;
         }
 
+        section.personal-ad {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        section.personal-ad a {
+          text-align: center;
+          display: block;
+          color: black;
+          text-decoration: none;
+        }
+
         .intro {
           margin: 0 2em;
         }
@@ -93,7 +106,7 @@ protocols on specific values:</p>
 
 <p></p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">ns </span><span class="nv">example1</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="kd">ns </span><span class="nv">example1</span><span class="p">)</span>
     <span class="p">(</span><span class="nf">enable-console-print!</span><span class="p">)</span>
 
     <span class="p">(</span><span class="kd">defprotocol </span><span class="nv">Listable</span>
@@ -138,6 +151,16 @@ modularity without a huge performance cost.</p>
 <p>This change was authored by the indomitable <a href="http://swannodette.github.io/">David Nolen</a> whose <a href="https://github.com/swannodette/om">latest open source offering</a> in a Clojurescript interface over Facebook&rsquo;s <a href="http://facebook.github.io/react/">React</a>.</p>
             
 
+        </section>
+
+        <hr />
+
+        <section class='personal-ad'>
+          <a class='project' href='https://mailfeedapp.com' target='_blank' rel='noopener' >
+            <img src="/images/mailfeed-logo.png" />
+            <h2> Mailfeed </h2>
+            <p> Have the RSS feeds you care delivered directly to your inbox.</p>
+          </a>
         </section>
 
         

@@ -59,6 +59,19 @@
           background-color: #F3F3F3;
         }
 
+        section.personal-ad {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        section.personal-ad a {
+          text-align: center;
+          display: block;
+          color: black;
+          text-decoration: none;
+        }
+
         .intro {
           margin: 0 2em;
         }
@@ -97,7 +110,7 @@ in Clojure.</p>
 <p>There is a function in clojure.core called <code>comp</code> that takes a set of
 functions and returns a function that is a composition of those functions:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="kd">defn </span><span class="nv">doubler</span> <span class="p">[</span><span class="nv">x</span><span class="p">]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="kd">defn </span><span class="nv">doubler</span> <span class="p">[</span><span class="nv">x</span><span class="p">]</span>
       <span class="p">(</span><span class="nb">* </span><span class="nv">x</span> <span class="mi">2</span><span class="p">))</span>
 
     <span class="p">(</span><span class="kd">defn </span><span class="nv">incrementer</span> <span class="p">[</span><span class="nv">x</span><span class="p">]</span>
@@ -116,7 +129,7 @@ functions and returns a function that is a composition of those functions:</p>
 <p>Note that when composing functions with comp, they are applied right to left to
 their arguments:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="k">def </span><span class="nv">incrementer-and-doubler</span> <span class="p">(</span><span class="nb">comp </span><span class="nv">doubler</span> <span class="nv">incrementer</span><span class="p">))</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="k">def </span><span class="nv">incrementer-and-doubler</span> <span class="p">(</span><span class="nb">comp </span><span class="nv">doubler</span> <span class="nv">incrementer</span><span class="p">))</span>
 
     <span class="p">(</span><span class="nb">map </span><span class="nv">incrementer-and-doubler</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">])</span> <span class="c1">; =&gt; [4 6 8 10]</span>
 </code></pre></div>
@@ -129,7 +142,7 @@ arguments to that function and returns a new function that will accept the
 remaining number of arguments. This can be useful when combined with comp and
 writing a custom reducer:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="k">def </span><span class="nv">incrementer-and-doubler</span> <span class="p">(</span><span class="nb">comp </span><span class="p">(</span><span class="nb">partial map </span><span class="nv">doubler</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="k">def </span><span class="nv">incrementer-and-doubler</span> <span class="p">(</span><span class="nb">comp </span><span class="p">(</span><span class="nb">partial map </span><span class="nv">doubler</span><span class="p">)</span>
                                        <span class="p">(</span><span class="nb">partial map </span><span class="nv">incrementer</span><span class="p">)))</span>
 
     <span class="p">(</span><span class="nf">incrementer-and-doubler</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">])</span> <span class="c1">; =&gt; [4 6 8 10]</span>
@@ -152,20 +165,20 @@ argument of the next form and so on.</p>
 
 <p>In other words, this:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nf">doubler</span> <span class="p">(</span><span class="nf">incrementer</span> <span class="mi">2</span><span class="p">))</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="nf">doubler</span> <span class="p">(</span><span class="nf">incrementer</span> <span class="mi">2</span><span class="p">))</span>
 </code></pre></div>
 
 
 <p>Is the same as this:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nb">-&gt; </span><span class="mi">2</span> <span class="nv">incrementer</span> <span class="nv">doubler</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="nb">-&gt; </span><span class="mi">2</span> <span class="nv">incrementer</span> <span class="nv">doubler</span><span class="p">)</span>
 </code></pre></div>
 
 
 <p>Thread-last works the same way, but it passes the result of each expression into
 the last element of each successive form.</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nf">-&gt;&gt;</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="nf">-&gt;&gt;</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
          <span class="p">(</span><span class="nb">map </span><span class="nv">incrementer</span><span class="p">)</span>
          <span class="p">(</span><span class="nb">map </span><span class="nv">doubler</span><span class="p">))</span>
 </code></pre></div>
@@ -173,10 +186,20 @@ the last element of each successive form.</p>
 
 <p>Is the same as:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure">    <span class="p">(</span><span class="nb">map </span><span class="nv">doubler</span> <span class="p">(</span><span class="nb">map </span><span class="nv">incrementer</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]))</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span>    <span class="p">(</span><span class="nb">map </span><span class="nv">doubler</span> <span class="p">(</span><span class="nb">map </span><span class="nv">incrementer</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]))</span>
 </code></pre></div>
             
 
+        </section>
+
+        <hr />
+
+        <section class='personal-ad'>
+          <a class='project' href='https://mailfeedapp.com' target='_blank' rel='noopener' >
+            <img src="/images/mailfeed-logo.png" />
+            <h2> Mailfeed </h2>
+            <p> Have the RSS feeds you care delivered directly to your inbox.</p>
+          </a>
         </section>
 
         

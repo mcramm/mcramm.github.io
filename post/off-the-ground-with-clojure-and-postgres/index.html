@@ -59,6 +59,19 @@
           background-color: #F3F3F3;
         }
 
+        section.personal-ad {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        section.personal-ad a {
+          text-align: center;
+          display: block;
+          color: black;
+          text-decoration: none;
+        }
+
         .intro {
           margin: 0 2em;
         }
@@ -101,7 +114,7 @@ to do this kind of thing, then maybe this is something you could apply.</p>
 <p>This is going to be pretty quick. Lets say you&rsquo;re tracking user
 accounts with a status. We&rsquo;d like to be able to do the following:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">accounts/by-id</span> <span class="nv">store</span> <span class="mi">1</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="nf">accounts/by-id</span> <span class="nv">store</span> <span class="mi">1</span><span class="p">)</span>
 <span class="c1">; =&gt; nil</span>
 
 <span class="p">(</span><span class="nf">accounts/create!</span> <span class="nv">store</span> <span class="s">&quot;open&quot;</span><span class="p">)</span>
@@ -121,7 +134,7 @@ accounts with a status. We&rsquo;d like to be able to do the following:</p>
 <p>Note that the resulting representation of accounts and invoices is a namespaced map, which is new to Clojure 1.9.
 It&rsquo;s exactly the same as:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">{</span><span class="ss">:account/id</span> <span class="mi">1</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">{</span><span class="ss">:account/id</span> <span class="mi">1</span>
  <span class="ss">:account/status</span> <span class="s">&quot;closed&quot;</span>
  <span class="ss">:account/created-at</span> <span class="s">&quot;&lt;some-instant-in-time&gt;&quot;</span>
  <span class="ss">:account/updated-at</span> <span class="s">&quot;&lt;some-instant-in-time&gt;&quot;</span><span class="p">}</span>
@@ -130,7 +143,7 @@ It&rsquo;s exactly the same as:</p>
 
 <p>Let&rsquo;s tackle this top-down by defining a protocol for the operations we&rsquo;re performing.</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span><span class="p">)</span>
 
 <span class="p">(</span><span class="kd">defprotocol </span><span class="nv">AccountOps</span>
   <span class="p">(</span><span class="nf">by-id</span> <span class="p">[</span><span class="nv">this</span> <span class="nv">id</span><span class="p">])</span>
@@ -149,7 +162,7 @@ reader.</p>
 running postgres instance, with a database already created. <a href="https://github.com/mcramm/postgres-example">I have a full example here</a> that
 also sets up <a href="https://github.com/weavejester/ragtime">Ragtime</a> to ensure the necessary schema exists.</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.components.postgres</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.components.postgres</span><span class="p">)</span>
 
 <span class="p">(</span><span class="kd">defrecord </span><span class="nv">Postgres</span> <span class="p">[</span><span class="nv">uri</span><span class="p">])</span>
 
@@ -164,7 +177,7 @@ will let us define our queries in raw sql.</p>
 
 <p>Let&rsquo;s start with writing a query to look up an account by an id. Open a new file at <code>resources/sql/accounts.sql</code>
 and add the following content:
-<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="c1">-- :name account-by-id :? :1</span>
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span></span><span class="c1">-- :name account-by-id :? :1</span>
 <span class="c1">-- :doc Get an account by id</span>
 <span class="k">SELECT</span> <span class="o">*</span>
 <span class="k">FROM</span> <span class="n">accounts</span>
@@ -178,7 +191,7 @@ result.</p>
 
 <p>Now we&rsquo;ll create a namespace to define this function in:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.sql</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.sql</span>
   <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">hugsql.core</span> <span class="ss">:as</span> <span class="nv">hugsql</span><span class="p">]))</span>
 
 <span class="p">(</span><span class="nf">hugsql/def-db-fns</span> <span class="s">&quot;sql/accounts.sql&quot;</span><span class="p">)</span>
@@ -187,7 +200,7 @@ result.</p>
 
 <p>After loading this namespace, we&rsquo;ll then have a function we can call to load an account by an id:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">require</span> <span class="o">&#39;</span><span class="p">[</span><span class="nv">my-project.sql</span> <span class="ss">:as</span> <span class="nv">sql</span><span class="p">])</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="nf">require</span> <span class="o">&#39;</span><span class="p">[</span><span class="nv">my-project.sql</span> <span class="ss">:as</span> <span class="nv">sql</span><span class="p">])</span>
 <span class="p">(</span><span class="nf">sql/account-by-id</span> <span class="s">&quot;your-database-uri&quot;</span> <span class="p">{</span><span class="ss">:id</span> <span class="mi">123</span><span class="p">})</span>
 <span class="c1">; =&gt; nil</span>
 </code></pre></div>
@@ -196,7 +209,7 @@ result.</p>
 <p>Hurray! It worked&hellip; kinda. Let&rsquo;s define a way to create a new account with an
 initial status:</p>
 
-<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="c1">-- :name insert-account! :&lt;! :1</span>
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span></span><span class="c1">-- :name insert-account! :&lt;! :1</span>
 <span class="c1">-- :doc Inserts an account and returns the id</span>
 <span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">accounts</span> <span class="p">(</span><span class="n">status</span><span class="p">)</span>
 <span class="k">VALUES</span> <span class="p">(:</span><span class="n">status</span><span class="p">)</span>
@@ -206,7 +219,7 @@ initial status:</p>
 
 <p>You&rsquo;ll have to reload your REPL if you&rsquo;re following along at one. This will define a new method called
 <code>insert-account!</code> and return the id of the row that was just inserted. Now you can do the following:
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">require</span> <span class="o">&#39;</span><span class="p">[</span><span class="nv">my-project.sql</span> <span class="ss">:as</span> <span class="nv">sql</span><span class="p">])</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="nf">require</span> <span class="o">&#39;</span><span class="p">[</span><span class="nv">my-project.sql</span> <span class="ss">:as</span> <span class="nv">sql</span><span class="p">])</span>
 <span class="p">(</span><span class="nf">sql/insert-account!</span> <span class="s">&quot;your-database-uri&quot;</span> <span class="p">{</span><span class="ss">:status</span> <span class="s">&quot;open&quot;</span><span class="p">})</span>
 <span class="c1">; =&gt; {:id 1}</span>
 <span class="p">(</span><span class="nf">sql/account-by-id</span> <span class="s">&quot;your-database-uri&quot;</span> <span class="p">{</span><span class="ss">:id</span> <span class="mi">1</span><span class="p">})</span>
@@ -225,7 +238,7 @@ details that I&rsquo;ve encountered so far.</p>
 
 <p>Switch back to our accounts namespace and use these functions in our AccountOps protocol:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span>
   <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">my-project.components.postgres</span><span class="p">]</span>
             <span class="p">[</span><span class="nv">my-project.sql</span> <span class="ss">:as</span> <span class="nv">sql</span><span class="p">])</span>
   <span class="p">(</span><span class="ss">:import</span> <span class="p">[</span><span class="nv">my_project.components.postgres</span> <span class="nv">Postgres</span><span class="p">]))</span>
@@ -259,7 +272,7 @@ decision I&rsquo;m making; your needs may vary.</p>
 map, but we&rsquo;re getting back just a regular one. To do this we&rsquo;re going to pass
 every result of <code>sql/account-by-id</code> through a function <code>sql-&gt;account</code>:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span>
   <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">my-project.components.postgres</span><span class="p">]</span>
             <span class="p">[</span><span class="nv">my-project.sql</span> <span class="ss">:as</span> <span class="nv">sql</span><span class="p">])</span>
   <span class="p">(</span><span class="ss">:import</span> <span class="p">[</span><span class="nv">my_project.components.postgres</span> <span class="nv">Postgres</span><span class="p">]))</span>
@@ -297,7 +310,7 @@ to manipulate the data to suite our needs as it comes out of the database.</p>
 <p>There is one more thing I would recommend doing at this point, and it would be
 to require <code>clj-time.jdbc</code> in our accounts namespace:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.entities.accounts</span>
   <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">clj-time.jdbc</span><span class="p">]</span>
 
             <span class="p">[</span><span class="nv">my-project.components.postgres</span><span class="p">]</span>
@@ -312,7 +325,7 @@ dates out of the database, that they&rsquo;re mapped to JodaTime instances.</p>
 
 <p>Now we&rsquo;re finally ready to give these a try:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">accounts/by-id</span> <span class="nv">store</span> <span class="mi">1</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="nf">accounts/by-id</span> <span class="nv">store</span> <span class="mi">1</span><span class="p">)</span>
 <span class="c1">; =&gt; nil</span>
 
 <span class="p">(</span><span class="nf">accounts/create!</span> <span class="nv">store</span> <span class="s">&quot;open&quot;</span><span class="p">)</span>
@@ -331,7 +344,7 @@ dates out of the database, that they&rsquo;re mapped to JodaTime instances.</p>
 
 <p>Success! The last thing we&rsquo;ll do is implement our <code>set-*</code> functions.</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="c1">;; ========================================</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="c1">;; ========================================</span>
 <span class="c1">;; in my-project.entities.accounts</span>
 
 <span class="p">(</span><span class="k">def </span><span class="nv">opened-status</span> <span class="s">&quot;open&quot;</span><span class="p">)</span>
@@ -351,7 +364,7 @@ dates out of the database, that they&rsquo;re mapped to JodaTime instances.</p>
 </code></pre></div>
 
 
-<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="c1">-- ========================================</span>
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span></span><span class="c1">-- ========================================</span>
 <span class="c1">-- in resources/sql/accounts.sql</span>
 
 <span class="c1">-- :name update-account! :&lt; :1</span>
@@ -366,7 +379,7 @@ dates out of the database, that they&rsquo;re mapped to JodaTime instances.</p>
 
 <p>And let&rsquo;s try them out:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="k">def </span><span class="nv">my-account</span> <span class="p">(</span><span class="nf">accounts/by-id</span> <span class="nv">store</span> <span class="mi">1</span><span class="p">))</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="k">def </span><span class="nv">my-account</span> <span class="p">(</span><span class="nf">accounts/by-id</span> <span class="nv">store</span> <span class="mi">1</span><span class="p">))</span>
 
 <span class="p">(</span><span class="ss">:account/status</span> <span class="nv">my-account</span><span class="p">)</span>
 <span class="c1">; =&gt; &quot;open&quot;</span>
@@ -398,6 +411,16 @@ it to be a good jumping off point for most projects to start with.</p>
 
             
 
+        </section>
+
+        <hr />
+
+        <section class='personal-ad'>
+          <a class='project' href='https://mailfeedapp.com' target='_blank' rel='noopener' >
+            <img src="/images/mailfeed-logo.png" />
+            <h2> Mailfeed </h2>
+            <p> Have the RSS feeds you care delivered directly to your inbox.</p>
+          </a>
         </section>
 
         

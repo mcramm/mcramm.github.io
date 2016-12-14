@@ -59,6 +59,19 @@
           background-color: #F3F3F3;
         }
 
+        section.personal-ad {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        section.personal-ad a {
+          text-align: center;
+          display: block;
+          color: black;
+          text-decoration: none;
+        }
+
         .intro {
           margin: 0 2em;
         }
@@ -116,7 +129,7 @@ database.</p>
 
 <p>This is pretty easy, but you should have something like this:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.components.datomic</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.components.datomic</span>
   <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">com.stuartsierra.component</span> <span class="ss">:as</span> <span class="nv">component</span><span class="p">]</span>
             <span class="p">[</span><span class="nv">datomic.api</span> <span class="ss">:as</span> <span class="nv">datomic</span><span class="p">]))</span>
 
@@ -136,7 +149,7 @@ database.</p>
 
 <p>Schema should be ideally be kept in an EDN file and loaded on demand:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="k">def </span><span class="nv">schema</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="k">def </span><span class="nv">schema</span>
   <span class="p">(</span><span class="nf">delay</span>
     <span class="p">(</span><span class="nf">read-string</span>
       <span class="p">(</span><span class="nb">slurp </span><span class="p">(</span><span class="nf">io/resource</span> <span class="s">&quot;my_project/schema.edn&quot;</span><span class="p">))))</span>
@@ -148,7 +161,7 @@ database.</p>
 
 <p>Here is what your schema might look like:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="c1">; resources/my_project/schema.edn</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="c1">; resources/my_project/schema.edn</span>
 
 <span class="p">[</span>
   <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/db</span><span class="p">]</span>
@@ -191,7 +204,7 @@ is documented <a href="http://docs.datomic.com/schema.html">here</a>.</p>
 
 <p>Like your schema, any seed data should be kept in a separate file:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="k">def </span><span class="nv">seed-data</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="k">def </span><span class="nv">seed-data</span>
   <span class="p">(</span><span class="nf">delay</span>
     <span class="p">(</span><span class="nf">read-string</span>
       <span class="p">(</span><span class="nb">slurp </span><span class="p">(</span><span class="nf">io/resource</span> <span class="s">&quot;my_project/seed.edn&quot;</span><span class="p">))))</span>
@@ -203,7 +216,7 @@ is documented <a href="http://docs.datomic.com/schema.html">here</a>.</p>
 
 <p>Here is what your seed data might look like:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="c1">; resources/my_project/seed.edn</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="c1">; resources/my_project/seed.edn</span>
 <span class="p">[</span>
   <span class="c1">;; Users</span>
   <span class="p">{</span><span class="ss">:db/id</span> <span class="o">#</span><span class="nv">db/id</span><span class="p">[</span><span class="ss">:db.part/user</span> <span class="mi">-1000001</span><span class="p">]</span>
@@ -234,7 +247,7 @@ is documented <a href="http://docs.datomic.com/schema.html">here</a>.</p>
 
 <p>The operations to be performed on an entity should be confined to it&rsquo;s own namespace:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.users</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="kd">ns </span><span class="nv">my-project.users</span>
   <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">datomic.api</span> <span class="ss">:as</span> <span class="nv">datomic</span><span class="p">]</span>
             <span class="p">[</span><span class="nv">my-project.component.datomic</span><span class="p">])</span>
   <span class="c1">; Note the change from using a dash to an underscore</span>
@@ -268,7 +281,7 @@ is documented <a href="http://docs.datomic.com/schema.html">here</a>.</p>
 
 <p>It&rsquo;s possible to pull in <code>refs</code> by specifying them in the pull pattern. If you wanted cakes with their owners:</p>
 
-<p><div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?cake</span> <span class="p">[</span><span class="nb">* </span><span class="p">{</span><span class="ss">:cake/owner</span> <span class="p">[</span><span class="nv">*</span><span class="p">]}])</span> <span class="nv">...</span><span class="p">]</span>
+<p><div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?cake</span> <span class="p">[</span><span class="nb">* </span><span class="p">{</span><span class="ss">:cake/owner</span> <span class="p">[</span><span class="nv">*</span><span class="p">]}])</span> <span class="nv">...</span><span class="p">]</span>
              <span class="ss">:where</span> <span class="p">[</span><span class="nv">?cake</span> <span class="ss">:cake/owner</span><span class="p">]]</span>
            <span class="nv">db</span><span class="p">)</span>
 </code></pre></div>
@@ -276,7 +289,7 @@ is documented <a href="http://docs.datomic.com/schema.html">here</a>.</p>
 
 <p>If however you wanted the reverse, users and their cakes:</p>
 
-<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?user</span> <span class="p">[</span><span class="nb">* </span><span class="p">{</span><span class="ss">:cake/_owner</span> <span class="p">[</span><span class="nv">*</span><span class="p">]}])</span> <span class="nv">...</span><span class="p">]</span>
+<div class="highlight"><pre><code class="language-clojure" data-lang="clojure"><span></span><span class="p">(</span><span class="nf">datomic/q</span> <span class="o">&#39;</span><span class="p">[</span><span class="ss">:find</span> <span class="p">[(</span><span class="nf">pull</span> <span class="nv">?user</span> <span class="p">[</span><span class="nb">* </span><span class="p">{</span><span class="ss">:cake/_owner</span> <span class="p">[</span><span class="nv">*</span><span class="p">]}])</span> <span class="nv">...</span><span class="p">]</span>
              <span class="ss">:where</span> <span class="p">[</span><span class="nv">?user</span> <span class="ss">:user/email</span><span class="p">]]</span>
            <span class="nv">db</span><span class="p">)</span>
 </code></pre></div>
@@ -292,6 +305,16 @@ is documented <a href="http://docs.datomic.com/schema.html">here</a>.</p>
 
             
 
+        </section>
+
+        <hr />
+
+        <section class='personal-ad'>
+          <a class='project' href='https://mailfeedapp.com' target='_blank' rel='noopener' >
+            <img src="/images/mailfeed-logo.png" />
+            <h2> Mailfeed </h2>
+            <p> Have the RSS feeds you care delivered directly to your inbox.</p>
+          </a>
         </section>
 
         

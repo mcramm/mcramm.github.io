@@ -59,6 +59,19 @@
           background-color: #F3F3F3;
         }
 
+        section.personal-ad {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        section.personal-ad a {
+          text-align: center;
+          display: block;
+          color: black;
+          text-decoration: none;
+        }
+
         .intro {
           margin: 0 2em;
         }
@@ -97,19 +110,19 @@ it with the same example in Om.</p>
 container for the React root component, which we&rsquo;ll give the id <code>app</code>, and we&rsquo;ll
 include the React library and the JSX transformer.</p>
 
-<div class="highlight"><pre><code class="language-html" data-lang="html">    <span class="nt">&lt;html&gt;</span>
-        <span class="nt">&lt;body&gt;</span>
-            <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&#39;app&#39;</span><span class="nt">&gt;&lt;/div&gt;</span>
-            <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;http://fb.me/react-0.8.0.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-            <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;http://fb.me/JSXTransformer-0.8.0.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-            <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&#39;text/jsx&#39;</span><span class="nt">&gt;</span>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    <span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#39;app&#39;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;http://fb.me/react-0.8.0.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;http://fb.me/JSXTransformer-0.8.0.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#39;text/jsx&#39;</span><span class="p">&gt;</span>
                 <span class="cm">/**</span>
 <span class="cm">                * @jsx React.DOM</span>
 <span class="cm">                */</span>
                 <span class="c1">// Your code goes here</span>
-            <span class="nt">&lt;/script&gt;</span>
-        <span class="nt">&lt;/body&gt;</span>
-    <span class="nt">&lt;/html&gt;</span>
+            <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
 </code></pre></div>
 
 
@@ -117,13 +130,13 @@ include the React library and the JSX transformer.</p>
 where our code will go. This is required for the JSX transformer to be able to
 process elements in our components from this:</p>
 
-<div class="highlight"><pre><code class="language-html" data-lang="html">    <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://google.com&quot;</span><span class="nt">&gt;</span>Click Me<span class="nt">&lt;/a&gt;</span>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;http://google.com&quot;</span><span class="p">&gt;</span>Click Me<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
 </code></pre></div>
 
 
 <p>Into this:</p>
 
-<div class="highlight"><pre><code class="language-html" data-lang="html">    React.DOM.a( {href:&quot;http://google.com&quot;}, &quot;Click Me&quot;)
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    React.DOM.a( {href:&quot;http://google.com&quot;}, &quot;Click Me&quot;)
 </code></pre></div>
 
 
@@ -135,15 +148,15 @@ where any entered text is rendered out to some node.</p>
 
 <p>First we&rsquo;ll create our root component and pass it some initial state:</p>
 
-<div class="highlight"><pre><code class="language-html" data-lang="html">    var VariableText = React.createClass({
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    var VariableText = React.createClass({
         render: function() {
             return (
-                <span class="nt">&lt;p&gt;</span>{this.props.defaultText}<span class="nt">&lt;/p&gt;</span>
+                <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{this.props.defaultText}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
             );
         }
     });
     React.renderComponent(
-        <span class="nt">&lt;VariableText</span> <span class="na">defaultText=</span><span class="s">&quot;Some text&quot;</span> <span class="nt">/&gt;</span>,
+        <span class="p">&lt;</span><span class="nt">VariableText</span> <span class="na">defaultText</span><span class="o">=</span><span class="s">&quot;Some text&quot;</span> <span class="p">/&gt;</span>,
         document.getElementById(&#39;app&#39;)
     );
 </code></pre></div>
@@ -160,7 +173,7 @@ little bit bigger, but all we really want to do is create a <code>TextInput</cod
 component that renders an <code>input</code> tag and responds to changes. We&rsquo;ll also want
 to pass it our default text to set the input&rsquo;s initial value.</p>
 
-<div class="highlight"><pre><code class="language-html" data-lang="html">    var TextInput = React.createClass({
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    var TextInput = React.createClass({
         handleChange: function() {
             var text = this.refs.text.getDOMNode().value;
             this.props.onTextChanged(text);
@@ -168,14 +181,14 @@ to pass it our default text to set the input&rsquo;s initial value.</p>
         },
         render: function() {
             return (
-                <span class="nt">&lt;div&gt;</span>
-                    <span class="nt">&lt;input</span>
-                        <span class="na">ref=</span><span class="s">&quot;text&quot;</span>
-                        <span class="na">onChange=</span><span class="s">{this.handleChange}</span>
-                        <span class="na">type=</span><span class="s">&#39;text&#39;</span>
-                        <span class="na">value=</span><span class="s">{this.props.inputValue}</span>
-                    <span class="nt">/&gt;</span>
-                <span class="nt">&lt;/div&gt;</span>
+                <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">input</span>
+                        <span class="na">ref</span><span class="o">=</span><span class="s">&quot;text&quot;</span>
+                        <span class="na">onChange</span><span class="o">=</span><span class="s">{this.handleChange}</span>
+                        <span class="na">type</span><span class="o">=</span><span class="s">&#39;text&#39;</span>
+                        <span class="na">value</span><span class="o">=</span><span class="s">{this.props.inputValue}</span>
+                    <span class="p">/&gt;</span>
+                <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
             );
         }
     });
@@ -191,13 +204,13 @@ to pass it our default text to set the input&rsquo;s initial value.</p>
         },
         render: function() {
             return (
-                <span class="nt">&lt;div&gt;</span>
-                    <span class="nt">&lt;TextInput</span>
-                        <span class="na">onTextChanged=</span><span class="s">{this.handleTextChange}</span>
-                        <span class="na">inputValue=</span><span class="s">{this.state.text}</span>
-                    <span class="nt">/&gt;</span>
-                    <span class="nt">&lt;p&gt;</span>{this.state.text}<span class="nt">&lt;/p&gt;</span>
-                <span class="nt">&lt;/div&gt;</span>
+                <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">TextInput</span>
+                        <span class="na">onTextChanged</span><span class="o">=</span><span class="s">{this.handleTextChange}</span>
+                        <span class="na">inputValue</span><span class="o">=</span><span class="s">{this.state.text}</span>
+                    <span class="p">/&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{this.state.text}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+                <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
             );
         }
     });
@@ -226,7 +239,7 @@ throughout the rest of the example.</p>
 
 <p>Now let&rsquo;s introduce a slider to change the font size of our output text. We&rsquo;ll
 create a <code>FontSizeSlider</code> component that again renders an <code>input</code> tag.
-<div class="highlight"><pre><code class="language-html" data-lang="html">    var FontSizeSlider = React.createClass({
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    var FontSizeSlider = React.createClass({
         handleChange: function() {
             var value = this.refs.slider.getDOMNode().value;
             this.props.onSliderChanged(value);
@@ -234,18 +247,18 @@ create a <code>FontSizeSlider</code> component that again renders an <code>input
         },
         render: function() {
             return (
-                <span class="nt">&lt;div&gt;</span>
-                    <span class="nt">&lt;input</span>
-                        <span class="na">ref=</span><span class="s">&quot;slider&quot;</span>
-                        <span class="na">onChange=</span><span class="s">{this.handleChange}</span>
-                        <span class="na">value=</span><span class="s">{this.props.size}</span>
-                        <span class="na">type=</span><span class="s">&#39;range&#39;</span>
-                        <span class="na">min=</span><span class="s">&quot;9&quot;</span>
-                        <span class="na">max=</span><span class="s">&quot;50&quot;</span>
-                        <span class="na">step=</span><span class="s">&quot;0.2&quot;</span> 
-                    <span class="nt">/&gt;</span>
-                    <span class="nt">&lt;span&gt;</span> Font Size: {this.props.size} <span class="nt">&lt;/span&gt;</span>
-                <span class="nt">&lt;/div&gt;</span>
+                <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">input</span>
+                        <span class="na">ref</span><span class="o">=</span><span class="s">&quot;slider&quot;</span>
+                        <span class="na">onChange</span><span class="o">=</span><span class="s">{this.handleChange}</span>
+                        <span class="na">value</span><span class="o">=</span><span class="s">{this.props.size}</span>
+                        <span class="na">type</span><span class="o">=</span><span class="s">&#39;range&#39;</span>
+                        <span class="na">min</span><span class="o">=</span><span class="s">&quot;9&quot;</span>
+                        <span class="na">max</span><span class="o">=</span><span class="s">&quot;50&quot;</span>
+                        <span class="na">step</span><span class="o">=</span><span class="s">&quot;0.2&quot;</span> 
+                    <span class="p">/&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span> Font Size: {this.props.size} <span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+                <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
             );
         }
     });
@@ -254,7 +267,7 @@ create a <code>FontSizeSlider</code> component that again renders an <code>input
 This should look very similar to the <code>TextInput</code> component. Here is what changed
 on <code>VariableText</code>:</p>
 
-<p><div class="highlight"><pre><code class="language-html" data-lang="html">    getInitialState: function() {
+<p><div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    getInitialState: function() {
         return {
             size: this.props.defaultSize,
             text: this.props.defaultText,
@@ -266,17 +279,17 @@ on <code>VariableText</code>:</p>
     },
     render: function() {
         return (
-            <span class="nt">&lt;div&gt;</span>
-                <span class="nt">&lt;TextInput</span>
-                    <span class="na">onTextChanged=</span><span class="s">{this.handleTextChange}</span>
-                    <span class="na">inputValue=</span><span class="s">{this.state.text}</span>
-                <span class="nt">/&gt;</span>
-                <span class="nt">&lt;FontSizeSlider</span>
-                    <span class="na">onSliderChanged=</span><span class="s">{this.handleFontSizeChange}</span>
-                    <span class="na">size=</span><span class="s">{this.state.size}</span>
-                <span class="nt">/&gt;</span>
-                <span class="nt">&lt;p</span> <span class="na">ref=</span><span class="s">&#39;outputText&#39;</span><span class="nt">&gt;</span>{this.state.text}<span class="nt">&lt;/p&gt;</span>
-            <span class="nt">&lt;/div&gt;</span>
+            <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+                <span class="p">&lt;</span><span class="nt">TextInput</span>
+                    <span class="na">onTextChanged</span><span class="o">=</span><span class="s">{this.handleTextChange}</span>
+                    <span class="na">inputValue</span><span class="o">=</span><span class="s">{this.state.text}</span>
+                <span class="p">/&gt;</span>
+                <span class="p">&lt;</span><span class="nt">FontSizeSlider</span>
+                    <span class="na">onSliderChanged</span><span class="o">=</span><span class="s">{this.handleFontSizeChange}</span>
+                    <span class="na">size</span><span class="o">=</span><span class="s">{this.state.size}</span>
+                <span class="p">/&gt;</span>
+                <span class="p">&lt;</span><span class="nt">p</span> <span class="na">ref</span><span class="o">=</span><span class="s">&#39;outputText&#39;</span><span class="p">&gt;</span>{this.state.text}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+            <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
         );
     }
 </code></pre></div>
@@ -285,7 +298,7 @@ Again this should look similar to the previous change. All we&rsquo;ve done is a
 another child component and react to it changing it the same way as <code>TextInput</code>.</p>
 
 <p>The <code>defaultSize</code> prop will also need to be passed into the root component:
-<div class="highlight"><pre><code class="language-html" data-lang="html">    <span class="nt">&lt;VariableText</span> <span class="na">defaultText=</span><span class="s">&quot;Some text&quot;</span> <span class="na">defaultSize=</span><span class="s">{15}/</span><span class="nt">&gt;</span>,
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    <span class="p">&lt;</span><span class="nt">VariableText</span> <span class="na">defaultText</span><span class="o">=</span><span class="s">&quot;Some text&quot;</span> <span class="na">defaultSize</span><span class="o">=</span><span class="s">{15}/</span><span class="p">&gt;</span>,
 </code></pre></div>
 </p>
 
@@ -299,7 +312,7 @@ and blue levels of our output text.</p>
 <p>Since these sliders will respond to change similarly to our <code>FontSizeSlider</code>
 component, we&rsquo;ll create a mixin:</p>
 
-<div class="highlight"><pre><code class="language-html" data-lang="html">    var HandleSliderChangeMixin = {
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    var HandleSliderChangeMixin = {
         handleChange: function() {
             var value = this.refs.slider.getDOMNode().value;
             this.props.onSliderChanged(value);
@@ -313,22 +326,22 @@ component, we&rsquo;ll create a mixin:</p>
 to 255, and have a label to display its value. Let&rsquo;s create a generic component
 first:</p>
 
-<div class="highlight"><pre><code class="language-html" data-lang="html">    var FontColorSlider = React.createClass({
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    var FontColorSlider = React.createClass({
         mixins: [HandleSliderChangeMixin],
         render: function() {
             return (
-                <span class="nt">&lt;div&gt;</span>
-                    <span class="nt">&lt;input</span>
-                        <span class="na">ref=</span><span class="s">&quot;slider&quot;</span>
-                        <span class="na">onChange=</span><span class="s">{this.handleChange}</span>
-                        <span class="na">value=</span><span class="s">{this.props.value}</span>
-                        <span class="na">type=</span><span class="s">&#39;range&#39;</span>
-                        <span class="na">min=</span><span class="s">&quot;0&quot;</span>
-                        <span class="na">max=</span><span class="s">&quot;255&quot;</span>
-                        <span class="na">step=</span><span class="s">&quot;1&quot;</span>
-                    <span class="nt">/&gt;</span>
-                    <span class="nt">&lt;label&gt;</span>{this.props.label}: {this.props.value}<span class="nt">&lt;/label&gt;</span>
-                <span class="nt">&lt;/div&gt;</span>
+                <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">input</span>
+                        <span class="na">ref</span><span class="o">=</span><span class="s">&quot;slider&quot;</span>
+                        <span class="na">onChange</span><span class="o">=</span><span class="s">{this.handleChange}</span>
+                        <span class="na">value</span><span class="o">=</span><span class="s">{this.props.value}</span>
+                        <span class="na">type</span><span class="o">=</span><span class="s">&#39;range&#39;</span>
+                        <span class="na">min</span><span class="o">=</span><span class="s">&quot;0&quot;</span>
+                        <span class="na">max</span><span class="o">=</span><span class="s">&quot;255&quot;</span>
+                        <span class="na">step</span><span class="o">=</span><span class="s">&quot;1&quot;</span>
+                    <span class="p">/&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">label</span><span class="p">&gt;</span>{this.props.label}: {this.props.value}<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+                <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
             );
         }
     });
@@ -341,7 +354,7 @@ first:</p>
 <p>Next we&rsquo;ll create a component that will create a <code>FontColorSlider</code> for each
 color value and communicate to our root component with the new values.</p>
 
-<div class="highlight"><pre><code class="language-html" data-lang="html">    var FontColorSliders = React.createClass({
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    var FontColorSliders = React.createClass({
         handleChange: function(r, g, b) {
             this.props.onColorsChanged({r: r, g: g, b: b});
         },
@@ -356,23 +369,23 @@ color value and communicate to our root component with the new values.</p>
         },
         render: function() {
             return (
-                <span class="nt">&lt;div&gt;</span>
-                    <span class="nt">&lt;FontColorSlider</span>
-                        <span class="na">onSliderChanged=</span><span class="s">{this.handleRedChange}</span>
-                        <span class="na">label=</span><span class="s">&quot;Red&quot;</span>
-                        <span class="na">value=</span><span class="s">{this.props.colors.r}</span>
-                    <span class="nt">/&gt;</span>
-                    <span class="nt">&lt;FontColorSlider</span>
-                        <span class="na">onSliderChanged=</span><span class="s">{this.handleGreenChange}</span>
-                        <span class="na">label=</span><span class="s">&quot;Green&quot;</span>
-                        <span class="na">value=</span><span class="s">{this.props.colors.g}</span>
-                    <span class="nt">/&gt;</span>
-                    <span class="nt">&lt;FontColorSlider</span>
-                        <span class="na">onSliderChanged=</span><span class="s">{this.handleBlueChange}</span>
-                        <span class="na">label=</span><span class="s">&quot;Blue&quot;</span>
-                        <span class="na">value=</span><span class="s">{this.props.colors.b}</span>
-                    <span class="nt">/&gt;</span>
-                <span class="nt">&lt;/div&gt;</span>
+                <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">FontColorSlider</span>
+                        <span class="na">onSliderChanged</span><span class="o">=</span><span class="s">{this.handleRedChange}</span>
+                        <span class="na">label</span><span class="o">=</span><span class="s">&quot;Red&quot;</span>
+                        <span class="na">value</span><span class="o">=</span><span class="s">{this.props.colors.r}</span>
+                    <span class="p">/&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">FontColorSlider</span>
+                        <span class="na">onSliderChanged</span><span class="o">=</span><span class="s">{this.handleGreenChange}</span>
+                        <span class="na">label</span><span class="o">=</span><span class="s">&quot;Green&quot;</span>
+                        <span class="na">value</span><span class="o">=</span><span class="s">{this.props.colors.g}</span>
+                    <span class="p">/&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">FontColorSlider</span>
+                        <span class="na">onSliderChanged</span><span class="o">=</span><span class="s">{this.handleBlueChange}</span>
+                        <span class="na">label</span><span class="o">=</span><span class="s">&quot;Blue&quot;</span>
+                        <span class="na">value</span><span class="o">=</span><span class="s">{this.props.colors.b}</span>
+                    <span class="p">/&gt;</span>
+                <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
             );
         }
     });
@@ -380,7 +393,7 @@ color value and communicate to our root component with the new values.</p>
 
 
 <p>Here are the changes to <code>VariableText</code> that we&rsquo;ll need to make:
-<div class="highlight"><pre><code class="language-html" data-lang="html">    getInitialState: function() {
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    getInitialState: function() {
         return {
             size: this.props.defaultSize,
             text: this.props.defaultText,
@@ -398,10 +411,10 @@ color value and communicate to our root component with the new values.</p>
 </p>
 
 <p>Don&rsquo;t forget to add our new component to the <code>render</code> method:
-<div class="highlight"><pre><code class="language-html" data-lang="html">    <span class="nt">&lt;FontColorSliders</span>
-        <span class="na">onColorsChanged=</span><span class="s">{this.handleColorsChange}</span>
-        <span class="na">colors=</span><span class="s">{this.state.colors}</span>
-    <span class="nt">/&gt;</span>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span>    <span class="p">&lt;</span><span class="nt">FontColorSliders</span>
+        <span class="na">onColorsChanged</span><span class="o">=</span><span class="s">{this.handleColorsChange}</span>
+        <span class="na">colors</span><span class="o">=</span><span class="s">{this.state.colors}</span>
+    <span class="p">/&gt;</span>
 </code></pre></div>
 </p>
 
@@ -427,6 +440,16 @@ checking out the different <a href="http://facebook.github.io/react/docs/compone
 
             
 
+        </section>
+
+        <hr />
+
+        <section class='personal-ad'>
+          <a class='project' href='https://mailfeedapp.com' target='_blank' rel='noopener' >
+            <img src="/images/mailfeed-logo.png" />
+            <h2> Mailfeed </h2>
+            <p> Have the RSS feeds you care delivered directly to your inbox.</p>
+          </a>
         </section>
 
         
