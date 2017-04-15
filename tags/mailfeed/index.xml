@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>mcrammm.com</title>
+    <link>http://mcramm.com/tags/mailfeed/index.xml</link>
+    <description>Recent content on mcrammm.com</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="http://mcramm.com/tags/mailfeed/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Mailfeed In Retrospect</title>
+      <link>http://mcramm.com/post/mailfeed-in-retrospect/</link>
+      <pubDate>Sat, 15 Apr 2017 13:21:00 -0700</pubDate>
+      
+      <guid>http://mcramm.com/post/mailfeed-in-retrospect/</guid>
+      <description>
+
+&lt;p&gt;It&amp;rsquo;s been a few weeks since I &lt;a href=&#34;https://www.reddit.com/r/Clojure/comments/60lqvw/my_first_clojure_production_app_mailfeed&#34;&gt;announced on /r/Clojure&lt;/a&gt; I was finished working on Mailfeed, a service that emails you whenever an RSS feed updates. A comment on that thread suggested that I share a little about the technologies I used and some of the pitfalls I hit during development.&lt;/p&gt;
+
+&lt;p&gt;There&amp;rsquo;s a lot to talk about, so I thought I&amp;rsquo;d just drop a nice big list of all the major tech, services and libraries, then move on to some of the more interesting challenges.&lt;/p&gt;
+
+&lt;p&gt;Major Tech used:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Clojure(script)&lt;/li&gt;
+&lt;li&gt;Postgres&lt;/li&gt;
+&lt;li&gt;Nginx&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Services:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Stathat&lt;/li&gt;
+&lt;li&gt;Rollbar&lt;/li&gt;
+&lt;li&gt;Papertrail&lt;/li&gt;
+&lt;li&gt;Mailgun&lt;/li&gt;
+&lt;li&gt;Digital Ocean&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Libraries:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Ring&lt;/li&gt;
+&lt;li&gt;Compojure&lt;/li&gt;
+&lt;li&gt;Enlive (for emails)&lt;/li&gt;
+&lt;li&gt;Hiccup (for everything else)&lt;/li&gt;
+&lt;li&gt;HugSQL&lt;/li&gt;
+&lt;li&gt;Ragtime&lt;/li&gt;
+&lt;li&gt;Environ&lt;/li&gt;
+&lt;li&gt;Quartzite&lt;/li&gt;
+&lt;li&gt;Buddy&lt;/li&gt;
+&lt;li&gt;Component&lt;/li&gt;
+&lt;li&gt;clj-time&lt;/li&gt;
+&lt;li&gt;clj-stripe&lt;/li&gt;
+&lt;li&gt;clj-http&lt;/li&gt;
+&lt;li&gt;clj-rollcage&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The meat of the application is in the worker and the web apps. Both of these are
+written entirely in Clojure with a &lt;em&gt;little&lt;/em&gt; Clojurescript on one page in the
+web app. I chose Postgres as a database simply because I already knew it really
+ well.&lt;/p&gt;
+
+&lt;h2 id=&#34;rss-processing-woes&#34;&gt;RSS Processing Woes&lt;/h2&gt;
+
+&lt;p&gt;The first iteration of Mailfeed was basically the same app that exists
+today with the worker existing as a background thread that was spun up whenever
+the app booted. I designed the system using
+&lt;a href=&#34;https://github.com/stuartsierra/component&#34;&gt;Component&lt;/a&gt; early on, and
+although I had a couple of small trip-ups along the way, I&amp;rsquo;m very glad that I
+chose it.&lt;/p&gt;
+
+&lt;p&gt;At that time the worker was very un-optimized, generated a lot
+of errors, and died from time to time. Rebooting it meant rebooting the whole
+application and this made the engineer in me cry. The worker is the &lt;em&gt;core&lt;/em&gt; of the application; it does a lot of heavy lifting and is the main reason anyone would ever want to
+actually use the service.&lt;/p&gt;
+
+&lt;p&gt;In my first spike I tried to convert the worker to using
+&lt;a href=&#34;https://github.com/clojure/core.async&#34;&gt;core.async&lt;/a&gt;, but it started to feel like the wrong solution pretty quick. The library is more about communication
+between two processes and what I wanted was a completely independent process that
+would:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Query the database at a regular interval&lt;/li&gt;
+&lt;li&gt;Get any feeds that needed to be updated&lt;/li&gt;
+&lt;li&gt;Process new entries for these feeds&lt;/li&gt;
+&lt;li&gt;Send any relevant emails to subscribers.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;On my next spike I sat down and wrote a &amp;ldquo;Scheduler&amp;rdquo; component in &lt;a href=&#34;http://clojurequartz.info&#34;&gt;Quartzite&lt;/a&gt;, abstracting the task of feed refreshing into it&amp;rsquo;s own job. I peppered in some error handling to ensure that &lt;strong&gt;when&lt;/strong&gt; an error occurred, the job could clean up and continue. I made sure to fire the error off to &lt;a href=&#34;https://rollbar.com&#34;&gt;Rollbar&lt;/a&gt; as I still wanted visibility on them.&lt;/p&gt;
+
+&lt;p&gt;Everything worked but the process was still really slow. At the time I had around 30 feeds that I wanted to refresh every 5 minutes. On average, the job was completing in about 40 seconds with an occasional spike up into 2 minutes. This was &lt;em&gt;technically&lt;/em&gt; still within my acceptable time frame, but still felt a little extreme for such a small number of feeds. I added in some monitoring, sending the processing times of a few different functions to &lt;a href=&#34;http://stathat.com&#34;&gt;StatHat&lt;/a&gt;, and left it for a few days to get a good baseline. I blocked off my next weekend to investigate and see what improvements could be made.&lt;/p&gt;
+
+&lt;p&gt;When I sat down on Saturday morning I poked around and determined the job was spending most of its time waiting for a response from a few different sites. Everything else was pretty speedy. Since network latency was completely outside of my ability to correct, I decided to look at parallelizing the feed fetching/processing task. I went back to core.async very briefly again, before remembering about &lt;a href=&#34;https://clojuredocs.org/clojure.core/pmap&#34;&gt;pmap&lt;/a&gt;. I made the switch from:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;dorun &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;map &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;update-feed&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;get-feeds&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;To:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;dorun &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pmap&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;update-feed&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;get-feeds&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;After a lot more testing to make sure I hadn&amp;rsquo;t missed anything, I found that I had brought the average total processing time for the job down to 2 seconds.&lt;/p&gt;
+
+&lt;p&gt;Woo hoo!&lt;/p&gt;
+
+&lt;p&gt;I decided to call that &amp;ldquo;mission accomplished&amp;rdquo; and closed my computer to go make breakfast. Even now with almost 3 times the number of feeds, the mean time for the job to complete is 3.113 seconds.&lt;/p&gt;
+
+&lt;h2 id=&#34;the-monolith-with-two-doors&#34;&gt;The Monolith with Two Doors&lt;/h2&gt;
+
+&lt;p&gt;At this point I was really happy with how the worker was performing, but still felt like it made sense to completely separate the worker from the web app in production. I wanted them to be able to exist on their own boxes so that I could fine tune each individually.&lt;/p&gt;
+
+&lt;p&gt;I mentioned previously that I was using component to try and keep the logical
+pieces of Mailfeed as separate as possible. With Component you create &amp;ldquo;systems&amp;rdquo;
+which is basically just a way of describing all your components and the
+components they depend on to do their job. What I had was two systems
+that shared a lot of the same components, but whose primary functions were
+quite different.&lt;/p&gt;
+
+&lt;p&gt;So that&amp;rsquo;s what I created. The &amp;ldquo;Web System&amp;rdquo; contained the all the routes, the
+web handler, the database and the mailer, while the &amp;ldquo;Worker System&amp;rdquo; contained
+the scheduler, the database, the mailer and the feed parser. When I go to
+deploy, I build two JARs in &lt;a href=&#34;http://boot-clj.com&#34;&gt;Boot&lt;/a&gt;:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-clojure&#34; data-lang=&#34;clojure&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;deftask&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;build-web&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[]&lt;/span&gt;
+ &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;comp &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;aot&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:namespace&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;#&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;mailfeed.web.core&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pom&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;uber&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;jar&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:main&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;&amp;#39;mailfeed.web.core&lt;/span&gt;
+       &lt;span class=&#34;ss&#34;&gt;:file&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;mailfeed-web.jar&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;target&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:dir&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;target/web&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;deftask&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;build-worker&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[]&lt;/span&gt;
+ &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;comp &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;aot&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:namespace&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;#&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;mailfeed.worker.core&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;pom&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;uber&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;jar&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:main&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;&amp;#39;mailfeed.worker.core&lt;/span&gt;
+       &lt;span class=&#34;ss&#34;&gt;:file&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;mailfeed-worker.jar&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;target&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;:dir&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;target/worker&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Overall I&amp;rsquo;m actually really happy with this approach. The only thing I have to
+be careful of is database migrations. If I make a change for one part of the
+application, I need to make sure everything is backwards compatible, since there
+is no mechanism for keeping both the worker and the web app in-sync. I do one
+deploy, and then the other. This is mostly-OK, since it&amp;rsquo;s generally a good idea
+to write a migration to &lt;em&gt;add&lt;/em&gt; a new thing, then, if you need to, write another
+migration to &lt;em&gt;remove&lt;/em&gt; the old thing once you&amp;rsquo;ve verified it&amp;rsquo;s not being used
+anymore.&lt;/p&gt;
+
+&lt;p&gt;This leads me into my next topic; one that I&amp;rsquo;m not very excited to share:&lt;/p&gt;
+
+&lt;h1 id=&#34;deployment&#34;&gt;Deployment&lt;/h1&gt;
+
+&lt;p&gt;Right now Mailfeed is deployed to &lt;a href=&#34;https://www.digitalocean.com/&#34;&gt;Digital Ocean&lt;/a&gt;. Everything is deployed with a couple of shell scripts and some preconfigured
+&amp;ldquo;droplets&amp;rdquo; that I set up by hand then took snapshots of.&lt;/p&gt;
+
+&lt;p&gt;The above sentence should have made you go:&lt;/p&gt;
+
+&lt;p&gt;&lt;img
+style=&#34;width: 30em&#34;
+src=&#34;https://cloud.githubusercontent.com/assets/150988/24832190/5f719e88-1c67-11e7-8d44-e3ddec4b3dba.jpg&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Yeah&amp;hellip; I&amp;rsquo;m right there with you. Dumb! Dumb. Baaad Mike.&lt;/p&gt;
+
+&lt;p&gt;But it works! I ran a failure-scenario a couple of months ago and I managed to
+get everything up and running again within 30 minutes. That&amp;rsquo;s not &amp;hellip; great, but
+considering how mission-critical the application is, it&amp;rsquo;s not bad either.
+And if I had paying customers then I would spend the time to rework everything
+through Ansible.&lt;/p&gt;
+
+&lt;p&gt;If I was starting again today, then Ansible would definitely be technology I would consider to provision these servers for me. I&amp;rsquo;ve used in the past and had very a very good experience with it. Daniel Higginbotham has also recently released a book &amp;ldquo;&lt;a href=&#34;https://gum.co/gHcWk&#34;&gt;Deploying Your First Clojure App &amp;hellip;From the Shadows&lt;/a&gt;&amp;ldquo;
+that I &lt;em&gt;wish&lt;/em&gt; had existed before I started Mailfeed.&lt;/p&gt;
+
+&lt;h1 id=&#34;monitoring&#34;&gt;Monitoring&lt;/h1&gt;
+
+&lt;p&gt;I&amp;rsquo;ve written a bit about monitoring, but in summary I:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Track of errors with Rollbar&lt;/li&gt;
+&lt;li&gt;Send some key stats with Stathat&lt;/li&gt;
+&lt;li&gt;Monitor hardware with Digital Ocean Monitoring&lt;/li&gt;
+&lt;li&gt;Logs with Papertrail&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I experimented a bit with Riemann early on but found it was a little over my head at the time. It certainly seems capable of tracking most of the above, without the limitations imposed by having to stick to the Free account tiers.&lt;/p&gt;
+
+&lt;h1 id=&#34;what-s-the-lesson&#34;&gt;What&amp;rsquo;s the lesson?&lt;/h1&gt;
+
+&lt;p&gt;I was really happy with using Clojure and I didn&amp;rsquo;t have any huge surprises during development. But every story should have a lesson! I think the big lessons I learned weren&amp;rsquo;t really related to the actual development process, but more to the things that need to go along around it. If I had to pick something I needed to improve it would be to do a little more up front market research and planning instead of just jumping in and building something I and a few friends of mine wanted.&lt;/p&gt;
+
+&lt;p&gt;Hopefully some of that was insightful. If you&amp;rsquo;re reading this and are curious about something specific, please don&amp;rsquo;t hesitate to reach out on &lt;a href=&#34;https://twitter.com/cramm&#34;&gt;Twitter&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
