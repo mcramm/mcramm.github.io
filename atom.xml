@@ -1,0 +1,1127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>MCRAMM.COM</title>
+  <link href="https://mcramm.com/atom.xml" rel="self"/>
+  <link href="https://mcramm.com/"/>
+  <updated>2022-01-08T19:01:44+00:00</updated>
+  <id>https://mcramm.com/</id>
+  <author>
+    <name>Michael Cramm</name>
+  </author>
+  <entry>
+    <id>https://mcramm.com/mailfeed-in-retrospect.html</id>
+    <link href="https://mcramm.com/mailfeed-in-retrospect.html"/>
+    <title>Mailfeed in Retrospect</title>
+    <updated>2017-04-15T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>It's been a few weeks since I <a href='https://www.reddit.com/r/Clojure/comments/60lqvw/my_first_clojure_production_app_mailfeed'>announced on /r/Clojure</a> I was finished working on Mailfeed, a service that emails you whenever an RSS feed updates. A comment on that thread suggested that I share a little about the technologies I used and some of the pitfalls I hit during development.</p><p>There's a lot to talk about, so I thought I'd just drop a nice big list of all the major tech, services and libraries, then move on to some of the more interesting challenges.</p><p>Major Tech used:</p><ul><li>Clojure(script)</li><li>Postgres</li><li>Nginx</li></ul><p>Services:</p><ul><li>Stathat</li><li>Rollbar</li><li>Papertrail</li><li>Mailgun</li><li>Digital Ocean</li></ul><p>Libraries:</p><ul><li>Ring</li><li>Compojure</li><li>Enlive (for emails)</li><li>Hiccup (for everything else)</li><li>HugSQL</li><li>Ragtime</li><li>Environ</li><li>Quartzite</li><li>Buddy</li><li>Component</li><li>clj-time</li><li>clj-stripe</li><li>clj-http</li><li>clj-rollcage</li></ul><p>The meat of the application is in the worker and the web apps. Both of these are written entirely in Clojure with a <i>little</i> Clojurescript on one page in the web app. I chose Postgres as a database simply because I already knew it really  well.</p><h2>RSS Processing Woes</h2><p>The first iteration of Mailfeed was basically the same app that exists today with the worker existing as a background thread that was spun up whenever the app booted. I designed the system using <a href='https://github.com/stuartsierra/component'>Component</a> early on, and although I had a couple of small trip-ups along the way, I'm very glad that I chose it.</p><p>At that time the worker was very un-optimized, generated a lot of errors, and died from time to time. Rebooting it meant rebooting the whole application and this made the engineer in me cry. The worker is the <em>core</em> of the application; it does a lot of heavy lifting and is the main reason anyone would ever want to actually use the service.</p><p>In my first spike I tried to convert the worker to using <a href='https://github.com/clojure/core.async'>core.async</a>, but it started to feel like the wrong solution pretty quick. The library is more about communication between two processes and what I wanted was a completely independent process that would:</p><ol><li>Query the database at a regular interval</li><li>Get any feeds that needed to be updated</li><li>Process new entries for these feeds</li><li>Send any relevant emails to subscribers.</li></ol><p>On my next spike I sat down and wrote a "Scheduler" component in <a href='http://clojurequartz.info'>Quartzite</a>, abstracting the task of feed refreshing into it's own job. I peppered in some error handling to ensure that <strong>when</strong> an error occurred, the job could clean up and continue. I made sure to fire the error off to <a href='https://rollbar.com'>Rollbar</a> as I still wanted visibility on them.</p><p>Everything worked but the process was still really slow. At the time I had around 30 feeds that I wanted to refresh every 5 minutes. On average, the job was completing in about 40 seconds with an occasional spike up into 2 minutes. This was <em>technically</em> still within my acceptable time frame, but still felt a little extreme for such a small number of feeds. I added in some monitoring, sending the processing times of a few different functions to <a href='http://stathat.com'>StatHat</a>, and left it for a few days to get a good baseline. I blocked off my next weekend to investigate and see what improvements could be made.</p><p>When I sat down on Saturday morning I poked around and determined the job was spending most of its time waiting for a response from a few different sites. Everything else was pretty speedy. Since network latency was completely outside of my ability to correct, I decided to look at parallelizing the feed fetching/processing task. I went back to core.async very briefly again, before remembering about <a href='https://clojuredocs.org/clojure.core/pmap'>pmap</a>. I made the switch from:</p><pre><code class="clojure">&#40;dorun &#40;map update-feed &#40;get-feeds&#41;&#41;&#41;
+</code></pre><p>To:</p><pre><code class="clojure">&#40;dorun &#40;pmap update-feed &#40;get-feeds&#41;&#41;&#41;
+</code></pre><p>After a lot more testing to make sure I hadn't missed anything, I found that I had brought the average total processing time for the job down to 2 seconds.</p><p> Woo hoo!</p><p>I decided to call that "mission accomplished" and closed my computer to go make breakfast. Even now with almost 3 times the number of feeds, the mean time for the job to complete is 3.113 seconds.</p><h2>The Monolith with Two Doors</h2><p>At this point I was really happy with how the worker was performing, but still felt like it made sense to completely separate the worker from the web app in production. I wanted them to be able to exist on their own boxes so that I could fine tune each individually.</p><p>I mentioned previously that I was using component to try and keep the logical pieces of Mailfeed as separate as possible. With Component you create "systems" which is basically just a way of describing all your components and the components they depend on to do their job. What I had was two systems that shared a lot of the same components, but whose primary functions were quite different.</p><p>So that's what I created. The "Web System" contained the all the routes, the web handler, the database and the mailer, while the "Worker System" contained the scheduler, the database, the mailer and the feed parser. When I go to deploy, I build two JARs in <a href='http://boot-clj.com'>Boot</a>:</p><pre><code class="clojure">&#40;deftask build-web &#91;&#93;
+ &#40;comp &#40;aot :namespace '#{mailfeed.web.core}&#41;
+  &#40;pom&#41;
+  &#40;uber&#41;
+  &#40;jar :main 'mailfeed.web.core
+       :file &quot;mailfeed-web.jar&quot;&#41;
+  &#40;target :dir #{&quot;target/web&quot;}&#41;&#41;&#41;
+
+&#40;deftask build-worker &#91;&#93;
+ &#40;comp &#40;aot :namespace '#{mailfeed.worker.core}&#41;
+  &#40;pom&#41;
+  &#40;uber&#41;
+  &#40;jar :main 'mailfeed.worker.core
+       :file &quot;mailfeed-worker.jar&quot;&#41;
+  &#40;target :dir #{&quot;target/worker&quot;}&#41;&#41;&#41;
+</code></pre><p>Overall I'm actually really happy with this approach. The only thing I have to be careful of is database migrations. If I make a change for one part of the application, I need to make sure everything is backwards compatible, since there is no mechanism for keeping both the worker and the web app in-sync. I do one deploy, and then the other. This is mostly-OK, since it's generally a good idea to write a migration to <em>add</em> a new thing, then, if you need to, write another migration to <em>remove</em> the old thing once you've verified it's not being used anymore.</p><p>This leads me into my next topic; one that I'm not very excited to share:</p><h1>Deployment</h1><p>Right now Mailfeed is deployed to <a href='https://www.digitalocean.com/'>Digital Ocean</a>. Everything is deployed with a couple of shell scripts and some preconfigured "droplets" that I set up by hand then took snapshots of.</p><p>The above sentence should have made you go:</p><p><img style="width: 30em" src="https://cloud.githubusercontent.com/assets/150988/24832190/5f719e88-1c67-11e7-8d44-e3ddec4b3dba.jpg" /></p><p>Yeah... I'm right there with you. Dumb! Dumb. Baaad Mike.</p><p>But it works! I ran a failure-scenario a couple of months ago and I managed to get everything up and running again within 30 minutes. That's not ... great, but considering how mission-critical the application is, it's not bad either. And if I had paying customers then I would spend the time to rework everything through Ansible.</p><p>If I was starting again today, then Ansible would definitely be technology I would consider to provision these servers for me. I've used in the past and had very a very good experience with it. Daniel Higginbotham has also recently released a book "<a href='https://gum.co/gHcWk'>Deploying Your First Clojure App ...From the Shadows</a>" that I <em>wish</em> had existed before I started Mailfeed.</p><h1>Monitoring</h1><p>I've written a bit about monitoring, but in summary I:</p><ul><li>Track of errors with Rollbar</li><li>Send some key stats with Stathat</li><li>Monitor hardware with Digital Ocean Monitoring</li><li>Logs with Papertrail</li></ul><p>I experimented a bit with Riemann early on but found it was a little over my head at the time. It certainly seems capable of tracking most of the above, without the limitations imposed by having to stick to the Free account tiers.</p><h1>What's the lesson?</h1><p>I was really happy with using Clojure and I didn't have any huge surprises during development. But every story should have a lesson! I think the big lessons I learned weren't really related to the actual development process, but more to the things that need to go along around it. If I had to pick something I needed to improve it would be to do a little more up front market research and planning instead of just jumping in and building something I and a few friends of mine wanted.</p><p>Hopefully some of that was insightful. If you're reading this and are curious about something specific, please don't hesitate to reach out on <a href='https://twitter.com/cramm'>Twitter</a>.</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>https://mcramm.com/integration-tests-for-clojure-and-postgres.html</id>
+    <link href="https://mcramm.com/integration-tests-for-clojure-and-postgres.html"/>
+    <title>Integration Testing with Clojure and Postgres</title>
+    <updated>2016-12-14T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>If you're writing a non-trivial application that will run in production, it's usually a good idea to have some automated way to make sure that all the pieces are working together correctly. On a lot of projects this is going to mean integration tests. How granular these tests become will depend on your level of paranoia and <em>how</em> critical those integration points are to your application as a whole.</p><p>In this post I'm going to use an example [from a previous article](http://mcramm.com/post/off-the-ground-with-clojure-and-postgres/) and add some integration tests to ensure that we're creating and updating accounts correctly.</p><p>It's worth noting that my opinion on integration tests is that they should act as <em>smoke</em> tests, except in some extreme cases. If you find yourself testing complex business logic and needing to integrate with the database to do so, then chances are you're doing something wrong. Integration tests should not be a replacement for QA or to compensate for bad design. But the world isn't perfect, and sometimes a convoluted, slow running set of integration tests is the best you can do.</p><p>Alright, enough postulating. Let's move on.  Here is the namespace that we'll be targeting for our tests:</p><pre><code class="clojure">&#40;ns postgres-example.entities.accounts
+  &#40;:require &#91;clj-time.jdbc&#93;
+
+            &#91;postgres-example.sql :as sql&#93;
+            &#91;postgres-example.components.postgres&#93;&#41;
+  &#40;:import &#91;postgres&#95;example.components.postgres Postgres&#93;&#41;&#41;
+
+
+&#40;defprotocol AccountOps
+  &#40;by-id &#91;this id&#93;&#41;
+  &#40;create! &#91;this status&#93;&#41;
+  &#40;set-opened! &#91;this account&#93;&#41;
+  &#40;set-closed! &#91;this account&#93;&#41;&#41;
+
+&#40;defn sql-&gt;account &#91;sql-entity&#93;
+  &#40;when &#40;:id sql-entity&#41;
+    #:account {:id &#40;:id sql-entity&#41;
+               :status &#40;:status sql-entity&#41;
+               :created-at &#40;:created&#95;at sql-entity&#41;
+               :updated-at &#40;:updated&#95;at sql-entity&#41;}&#41;&#41;
+
+&#40;def opened-status &quot;open&quot;&#41;
+&#40;def closed-status &quot;closed&quot;&#41;
+
+&#40;extend-protocol AccountOps
+  Postgres
+  &#40;by-id &#91;store id&#93;
+    &#40;-&gt; &#40;sql/account-by-id &#40;:uri store&#41; {:id id}&#41;
+        sql-&gt;account&#41;&#41;
+
+  &#40;create! &#91;store status&#93;
+    &#40;let &#91;result &#40;sql/insert-account! &#40;:uri store&#41; {:status status}&#41;&#93;
+      &#40;by-id store &#40;:id result&#41;&#41;&#41;&#41;
+
+  &#40;set-opened! &#91;store account&#93;
+    &#40;sql/update-account! &#40;:uri store&#41; {:id &#40;:account/id account&#41;
+                                       :status opened-status}&#41;
+    &#40;by-id store &#40;:account/id account&#41;&#41;&#41;
+
+  &#40;set-closed! &#91;store account&#93;
+    &#40;sql/update-account! &#40;:uri store&#41; {:id &#40;:account/id account&#41;
+                                       :status closed-status}&#41;
+    &#40;by-id store &#40;:account/id account&#41;&#41;&#41;&#41;
+</code></pre><p>This namespace's sole responsibility is to provide a touchpoint for the rest of our app to <em>where</em> we're storing our accounts data. This is where we go when we need to fetch or update something in our database. The reason we defined the <code>AccountOps</code> protocol is that we may want to extend these operations over a different store, like an AtomStore, when we move on to writing tests for other pieces of the system.</p><blockquote><p> I think it's worth mentioning that I feel like there could be a good fit  for <a href='http://clojure.org/about/spec'>clojure.spec</a> here. I'll probably explore  this in a future post. </p></blockquote><p>To start we'll need some way to actually run our tests, both from the REPL and outside if it. For outside the REPL, we can just use <code>lein test</code>. For inside though, we're going to add a <code>test</code> method to <code>dev/user.clj</code> that uses the awesome <a href='https://github.com/weavejester/eftest'>Eftest</a> to find and run our tests.</p><pre><code class="clojure">; ... truncated ...
+&#40;defn test &#91;&#93;
+  &#40;let &#91;path &quot;test/postgres&#95;example/integration&quot;&#93;
+    &#40;eftest/run-tests &#40;eftest/find-tests path&#41;&#41;&#41;&#41;
+</code></pre><p>Note that I had to make some other changes here as well to ensure that we have a separate test database loaded up and migrated to the same version we're developing against. For the full list of changes to this file, see [this commit](https://github.com/mcramm/postgres-example/commit/0c1fbe527b442ebdbc342385cc75b0beef2171fc#diff-f83d20da641ba06134b62eab278aa907).</p><p>Let's make sure this is working with a dummy test. Create a file at <code>test/postgres&#95;example/integration/entities/accounts.clj</code> and add the following content:</p><pre><code class="clojure">&#40;ns postgres-example.integration.entities.accounts
+  &#40;:require &#91;clojure.test :refer :all&#93;&#41;&#41;
+
+&#40;deftest foo-test
+  &#40;testing &quot;our setup&quot;
+    &#40;is &#40;= 1 2&#41;&#41;&#41;&#41;
+</code></pre><p>Running <code>&#40;test&#41;</code> at the REPL should display a failure. If it didn't, then you should stop here and figure out why. If the test failed successfully, we can move on to writing something a little more useful. We're going to write this test <em>first</em>, then figure out some of the missing pieces in a minute.</p><pre><code class="clojure">&#40;ns postgres-example.integration.entities.accounts
+  &#40;:require &#91;clojure.test :refer :all&#93;
+            &#91;postgres-example.entities.accounts :refer :all&#93;&#41;&#41;
+
+&#40;deftest create!-test
+  &#40;testing &quot;create! creates and returns an account&quot;
+    &#40;let &#91;account &#40;create! store &quot;open&quot;&#41;&#93;
+      &#40;is &#40;not &#40;nil? &#40;:account/id account&#41;&#41;&#41;&#41;
+      &#40;is &#40;= &quot;open&quot; &#40;:account/status account&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>Pretty easy right? All we're doing with this test is ensuring that the result of calling <code>create!</code> returns a map that has an <code>:account/id</code> set, and was assigned the correct status. But as I said, we're missing a couple of things. First, we haven't defined what <code>store</code> is in this context. Second, we should be cleaning up any data we create once the test is completed.</p><p>To handle both of these problem we're going to create a <code>test-helpers</code> namespace that our tests can reference to get a copy of the <code>store</code> (that we'll point at our test database), and we'll create a <a href='https://clojuredocs.org/clojure.test/use-fixtures'>fixture</a> that will execute some code to clean up any test data:</p><pre><code class="clojure">&#40;ns postgres-example.test-helpers
+  &#40;:require &#91;clojure.java.jdbc :as jdbc&#93;
+            &#91;environ.core :refer &#91;env&#93;&#93;
+            &#91;postgres-example.components.postgres :as postgres&#93;&#41;&#41;
+
+&#40;def &#94;:dynamic store nil&#41;
+
+&#40;def test-db-uri &#40;str &#40;:database-url env&#41; &quot;&#95;test&quot;&#41;&#41;
+
+&#40;defn db-transaction-fixture &#91;f&#93;
+  &#40;jdbc/with-db-transaction &#91;conn test-db-uri&#93;
+    &#40;jdbc/db-set-rollback-only! conn&#41;
+    &#40;binding &#91;store &#40;postgres/build conn&#41;&#93;
+      &#40;f&#41;&#41;&#41;&#41;
+</code></pre><p>From the top down, we create a dynamic var for <code>store</code> that we'll re-bind to a new connection for every test. That connection will happen to be a database transaction that we'll instruct to rollback when it's complete, instead of simply comitting.</p><blockquote><p> Credit to [this post by Eric  Normand](http://www.lispcast.com/clojure-database-test-faster). Prior to this I  had been using an <code>atom</code> instead of a dynamic var and was pulling my hair out  trying to get my tests to run without hitting concurrency issues. Changing it to  a dynamic var and leveraging <code>binding</code> made things quite a bit nicer. (and quite a bit faster too) </p></blockquote><p>We'll need to require this namespace in our test, and tell our tests to use this <code>db-transaction-fixture</code> fixture:</p><pre><code class="clojure">&#40;ns postgres-example.integration.entities.accounts
+  &#40;:require &#91;clojure.test :refer :all&#93;
+            &#91;postgres-example.test-helpers :refer &#91;store db-transaction-fixture&#93;&#93;
+            &#91;postgres-example.entities.accounts :refer :all&#93;&#41;&#41;
+
+&#40;use-fixtures :each db-transaction-fixture&#41;
+
+&#40;deftest create!-test
+  &#40;testing &quot;create! creates and returns an account&quot;
+    &#40;let &#91;account &#40;create! store &quot;open&quot;&#41;&#93;
+      &#40;is &#40;not &#40;nil? &#40;:account/id account&#41;&#41;&#41;&#41;
+      &#40;is &#40;= &quot;open&quot; &#40;:account/status account&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>Running <code>&#40;test&#41;</code> at the repl should be successful now. Let's fill out the rest of our tests. I'm going to include the whole thing since it's so short:</p><pre><code class="clojure">
+&#40;ns postgres-example.integration.entities.accounts
+  &#40;:require &#91;clojure.test :refer :all&#93;
+            &#91;postgres-example.test-helpers :refer &#91;store db-transaction-fixture&#93;&#93;
+            &#91;postgres-example.entities.accounts :refer :all&#93;&#41;&#41;
+
+&#40;use-fixtures :each db-transaction-fixture&#41;
+
+&#40;deftest create!-test
+  &#40;testing &quot;create! creates and returns an account&quot;
+    &#40;let &#91;account &#40;create! store &quot;open&quot;&#41;&#93;
+      &#40;is &#40;not &#40;nil? &#40;:account/id account&#41;&#41;&#41;&#41;
+      &#40;is &#40;= &quot;open&quot; &#40;:account/status account&#41;&#41;&#41;&#41;&#41;&#41;
+
+&#40;deftest by-id-test
+  &#40;testing &quot;by-id returns the correct account by id&quot;
+    &#40;let &#91;account &#40;create! store &quot;open&quot;&#41;&#93;
+      &#40;is &#40;= account
+             &#40;by-id store &#40;:account/id account&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+
+&#40;deftest set-opened!-test
+  &#40;testing &quot;set-opened! sets an account's status to opened-status&quot;
+    &#40;let &#91;account &#40;create! store &quot;closed&quot;&#41;&#93;
+      &#40;set-opened! store account&#41;
+      &#40;is &#40;= opened-status
+             &#40;:account/status &#40;by-id store &#40;:account/id account&#41;&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+
+&#40;deftest set-closed!-test
+  &#40;testing &quot;set-closed! sets an account's status to closed-status&quot;
+    &#40;let &#91;account &#40;create! store &quot;open&quot;&#41;&#93;
+      &#40;set-closed! store account&#41;
+      &#40;is &#40;= closed-status
+             &#40;:account/status &#40;by-id store &#40;:account/id account&#41;&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>These 4 tests run in about 0.022 seconds on my machine. If you check your local postgres database, you should (hopefully) see that your accounts table is empty:</p><pre><code class="bash">$ psql -U postgres&#95;example postgres&#95;example&#95;test
+
+postgres&#95;example&#95;test=# select &#42; from accounts;
+┌────┬────────┬────────────┬────────────┐
+│ id │ status │ created&#95;at │ updated&#95;at │
+├────┼────────┼────────────┼────────────┤
+└────┴────────┴────────────┴────────────┘
+&#40;0 rows&#41;
+
+Time: 1.330 ms
+</code></pre><p>The <code>id</code> column is an auto-incrementing sequence though, so you should still see that changing:</p><pre><code class="bash">
+postgres&#95;example&#95;test=# select currval&#40;'accounts&#95;id&#95;seq'::regclass&#41;;
+┌─────────┐
+│ currval │
+├─────────┤
+│      47 │
+└─────────┘
+&#40;1 row&#41;
+
+Time: 1.910 ms
+</code></pre><p>I'll reiterate that integration tests should be used sparingly, and only in critical places where two or more <em>things</em> are interacting together. This pattern is the same one I apply to all Clojure projects that interact with Postgres.</p><p>Hopefully this has been helpful to someone :). If you notice any errors in this post, <a href='https://twitter.com/cramm'>please let me know</a>.</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>https://mcramm.com/off-the-ground-with-clojure-and-postgres.html</id>
+    <link href="https://mcramm.com/off-the-ground-with-clojure-and-postgres.html"/>
+    <title>Off the ground with Clojure and Postgres</title>
+    <updated>2016-12-12T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>I've been writing a few apps in my spare time, most notably <a href='https://mailfeedapp.com'>Mailfeed</a>, and I've developed a simple pattern whenever I need to pull data out of the database.  This pattern could be be applied to any database you're interacting with, but in this case I'll be showing how I <em>tend</em> to do it with Postrges.</p><p>I should say that none of this is groundbreaking stuff.  If you're an experienced developer then you'll probably be saying "duh" a lot, but if your playing with Clojure and are struggling to come up with a good structure on how to do this kind of thing, then maybe this is something you could apply.</p><p>This is going to be pretty quick. Lets say you're tracking user accounts with a status. We'd like to be able to do the following:</p><pre><code class="clojure">&#40;accounts/by-id store 1&#41;
+; =&gt; nil
+
+&#40;accounts/create! store &quot;open&quot;&#41;
+; =&gt; #:account{:id 1,
+;              :status &quot;open&quot;,
+;              :created-at &quot;&lt;some-instant-in-time&gt;&quot;,
+;              :updated-at &quot;&lt;some-instant-in-time&gt;&quot;}
+
+&#40;accounts/set-closed! store &#40;accounts/by-id store 1&#41;&#41;
+; =&gt; #:account{:id 1,
+;              :status &quot;closed&quot;,
+;              :created-at &quot;&lt;some-instant-in-time&gt;&quot;,
+;              :updated-at &quot;&lt;some-instant-in-time&gt;&quot;}
+</code></pre><p>Note that the resulting representation of accounts and invoices is a namespaced map, which is new to Clojure 1.9. It's exactly the same as:</p><pre><code class="clojure">{:account/id 1
+ :account/status &quot;closed&quot;
+ :account/created-at &quot;&lt;some-instant-in-time&gt;&quot;
+ :account/updated-at &quot;&lt;some-instant-in-time&gt;&quot;}
+</code></pre><p>Let's tackle this top-down by defining a protocol for the operations we're performing.</p><pre><code class="clojure">&#40;ns my-project.entities.accounts&#41;
+
+&#40;defprotocol AccountOps
+  &#40;by-id &#91;this id&#93;&#41;
+  &#40;create! &#91;this status&#93;&#41;
+  &#40;set-opened! &#91;this account&#93;&#41;
+  &#40;set-closed! &#91;this account&#93;&#41;&#41;
+</code></pre><p>Okay that was easy, but what the heck is <code>this</code> going to be in the context of the final implementations of these methods? At this point it doesn't <em>really</em> matter. We could define a new record called <code>AtomStore</code> and extend our protocol over it, but that isn't the point of this post. I'll leave that as an exercise for the reader.</p><p>We're going to jump right in and create a <code>Postgres</code> component that will be passed a connection string to a running postgres instance, with a database already created. <a href='https://github.com/mcramm/postgres-example'>I have a full example here</a> that also sets up <a href='https://github.com/weavejester/ragtime'>Ragtime</a> to ensure the necessary schema exists.</p><pre><code class="clojure">&#40;ns my-project.components.postgres&#41;
+
+&#40;defrecord Postgres &#91;uri&#93;&#41;
+
+&#40;defn build &#91;uri&#93;
+  &#40;-&gt;Postgres uri&#41;&#41;
+</code></pre><p>At this point we could switch back to our accounts namespace and extend the AccountOps protocol over it, but we still need some way of actually querying our database. For that we're going to use <a href='http://www.hugsql.org'>HugSQL</a> which will will let us define our queries in raw sql.</p><p>Let's start with writing a query to look up an account by an id. Open a new file at <code>resources/sql/accounts.sql</code> and add the following content:<pre><code class="sql">-- :name account-by-id :? :1
+-- :doc Get an account by id
+SELECT &#42;
+FROM accounts
+WHERE id = :id
+</code></pre></p><p>HugSQL will parse this file and define a new function called <code>account-by-id</code> in whatever namespace we load it in. The <code>:?</code> marks it as a query and the <code>:1</code> will cause it to only return 1 result.</p><p>Now we'll create a namespace to define this function in:</p><pre><code class="clojure">&#40;ns my-project.sql
+  &#40;:require &#91;hugsql.core :as hugsql&#93;&#41;&#41;
+
+&#40;hugsql/def-db-fns &quot;sql/accounts.sql&quot;&#41;
+</code></pre><p>After loading this namespace, we'll then have a function we can call to load an account by an id:</p><pre><code class="clojure">&#40;require '&#91;my-project.sql :as sql&#93;&#41;
+&#40;sql/account-by-id &quot;your-database-uri&quot; {:id 123}&#41;
+; =&gt; nil
+</code></pre><p>Hurray! It worked... kinda. Let's define a way to create a new account with an initial status:</p><pre><code class="sql">-- :name insert-account! :&lt;! :1
+-- :doc Inserts an account and returns the id
+INSERT INTO accounts &#40;status&#41;
+VALUES &#40;:status&#41;
+RETURNING id
+</code></pre><p>You'll have to reload your REPL if you're following along at one. This will define a new method called <code>insert-account!</code> and return the id of the row that was just inserted. Now you can do the following:<pre><code class="clojure">&#40;require '&#91;my-project.sql :as sql&#93;&#41;
+&#40;sql/insert-account! &quot;your-database-uri&quot; {:status &quot;open&quot;}&#41;
+; =&gt; {:id 1}
+&#40;sql/account-by-id &quot;your-database-uri&quot; {:id 1}&#41;
+; =&gt; {:id 1, :status &quot;open&quot;, :created&#95;at #inst &quot;2016-12-12T00:00:00.000000000-00:00&quot;, :updated&#95;at #inst &quot;2016-12-12T00:00:00.000000000-00:00&quot;}
+</code></pre></p><blockquote><p> Your database uri should look something like  <code>postgresql://postgres&#95;example:secret@localhost:5432/postgres&#95;example</code>,  assuming you've created a user <code>postgres&#95;example</code> with the password <code>secret</code>,  and a dabaase with the same name. This dosen't <em>have</em> to be a connection  string, but it's the most straightforward way of specifying the connection  details that I've encountered so far. </p></blockquote><p>Switch back to our accounts namespace and use these functions in our AccountOps protocol:</p><pre><code class="clojure">&#40;ns my-project.entities.accounts
+  &#40;:require &#91;my-project.components.postgres&#93;
+            &#91;my-project.sql :as sql&#93;&#41;
+  &#40;:import &#91;my&#95;project.components.postgres Postgres&#93;&#41;&#41;
+
+&#40;defprotocol AccountOps
+  &#40;by-id &#91;this id&#93;&#41;
+  &#40;create! &#91;this status&#93;&#41;
+  &#40;set-opened! &#91;this account&#93;&#41;
+  &#40;set-closed! &#91;this account&#93;&#41;&#41;
+
+&#40;extend-protocol AccountOps
+  Postgres
+  &#40;by-id &#91;this id&#93;
+    &#40;sql/account-by-id &#40;:db-spec this&#41; {:id id}&#41;&#41;
+
+  &#40;create! &#91;this status&#93;
+    &#40;let &#91;result &#40;sql/insert-account! &#40;:db-spec this&#41; {:status status}&#41;&#93;
+      &#40;by-id this &#40;:id result&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>Note that I haven't implemented the <code>set-closed!</code> or <code>set-opened!</code> protocols yet. We'll get to them in a minute.</p><p>Because this example is a little contrived, the solution here seems almost too straightforward. The only interesting piece is that <code>create!</code> passes it's result immediately to <code>by-id</code> for re-fetching. This is a design decision I'm making; your needs may vary.</p><p>We're missing something though. Remember our example at the beginning of this article returned us a namespaced map, but we're getting back just a regular one. To do this we're going to pass every result of <code>sql/account-by-id</code> through a function <code>sql-&gt;account</code>:</p><pre><code class="clojure">&#40;ns my-project.entities.accounts
+  &#40;:require &#91;my-project.components.postgres&#93;
+            &#91;my-project.sql :as sql&#93;&#41;
+  &#40;:import &#91;my&#95;project.components.postgres Postgres&#93;&#41;&#41;
+
+&#40;defprotocol AccountOps
+  &#40;by-id &#91;this id&#93;&#41;
+  &#40;create! &#91;this status&#93;&#41;
+  &#40;set-opened! &#91;this account&#93;&#41;
+  &#40;set-closed! &#91;this account&#93;&#41;&#41;
+
+&#40;defn sql-&gt;account &#91;sql-entity&#93;
+  &#40;when &#40;:id sql-entity&#41;
+    #:account{:id         &#40;:id sql-entity&#41;
+              :status     &#40;:status sql-entity&#41;
+              :created-at &#40;:created&#95;at sql-entity&#41;
+              :updated-at &#40;:updated&#95;at sql-entity&#41;}&#41;&#41;
+
+&#40;extend-protocol AccountOps
+  Postgres
+  &#40;by-id &#91;this id&#93;
+    &#40;-&gt; &#40;sql/account-by-id &#40;:db-spec this&#41; {:id id}&#41;
+        sql-&gt;account&#41;&#41;
+
+  &#40;create! &#91;this status&#93;
+    &#40;let &#91;result &#40;sql/insert-account! &#40;:db-spec this&#41; {:status status}&#41;&#93;
+      &#40;by-id this &#40;:id result&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>It's usually a good idea to insulate your code from outside dependencies like the database. Here we're taking the raw result returned to us from HugSQL and mapping it to our own internal representation of it. This also gives us a place to manipulate the data to suite our needs as it comes out of the database.</p><p>There is one more thing I would recommend doing at this point, and it would be to require <code>clj-time.jdbc</code> in our accounts namespace:</p><pre><code class="clojure">&#40;ns my-project.entities.accounts
+  &#40;:require &#91;clj-time.jdbc&#93;
+
+            &#91;my-project.components.postgres&#93;
+            &#91;my-project.sql :as sql&#93;&#41;
+  &#40;:import &#91;my&#95;project.components.postgres Postgres&#93;&#41;&#41;
+</code></pre><p>The <a href='https://github.com/clj-time/clj-time'>clj-time</a> library is great on it's own, and including this namespace will ensure that as the JDBC library pulls dates out of the database, that they're mapped to JodaTime instances.</p><p>Now we're finally ready to give these a try:</p><pre><code class="clojure">&#40;accounts/by-id store 1&#41;
+; =&gt; nil
+
+&#40;accounts/create! store &quot;open&quot;&#41;
+; =&gt; #:account{:id 1,
+;              :status &quot;open&quot;,
+;              :created-at #object&#91;org.joda.time.DateTime 0x17dffb5 &quot;2016-12-12T00:00:00.000Z&quot;&#93;,
+;              :updated-at #object&#91;org.joda.time.DateTime 0x7e0ac645 &quot;2016-12-12T00:00:00.000Z&quot;&#93;}
+
+&#40;accounts/by-id store 1&#41;
+; =&gt; #:account{:id 1,
+;              :status &quot;open&quot;,
+;              :created-at #object&#91;org.joda.time.DateTime 0x17dffb5 &quot;2016-12-12T00:00:00.000Z&quot;&#93;,
+;              :updated-at #object&#91;org.joda.time.DateTime 0x7e0ac645 &quot;2016-12-12T00:00:00.000Z&quot;&#93;}
+</code></pre><p>Success! The last thing we'll do is implement our <code>set-&#42;</code> functions.</p><pre><code class="clojure">
+;; ========================================
+;; in my-project.entities.accounts
+
+&#40;def opened-status &quot;open&quot;&#41;
+&#40;def closed-status &quot;closed&quot;&#41;
+
+&#40;extend-protocol AccountOps
+  Postgres
+  ;; ... truncated ...
+  &#40;set-closed! &#91;store account&#93;
+    &#40;sql/update-account! &#40;:uri store&#41; {:id &#40;:account/id account&#41;
+                                       :status closed-status}&#41;
+    &#40;by-id store &#40;:account/id account&#41;&#41;&#41;&#41;
+  &#40;set-open! &#91;store account&#93;
+    &#40;sql/update-account! &#40;:uri store&#41; {:id &#40;:account/id account&#41;
+                                       :status opened-status}&#41;
+    &#40;by-id store &#40;:account/id account&#41;&#41;&#41;&#41;
+</code></pre><pre><code class="sql">
+-- ========================================
+-- in resources/sql/accounts.sql
+
+-- :name update-account! :&lt; :1
+-- :doc Updates an account by id
+UPDATE accounts
+SET status = :status,
+    updated&#95;at = now&#40;&#41;
+WHERE id = :id
+RETURNING id
+
+</code></pre><p>And let's try them out:</p><pre><code class="clojure">
+&#40;def my-account &#40;accounts/by-id store 1&#41;&#41;
+
+&#40;:account/status my-account&#41;
+; =&gt; &quot;open&quot;
+
+&#40;accounts/set-closed! store my-account&#41;
+; =&gt; #:account{:id 1,
+;              :status &quot;closed&quot;,
+;              :created-at #object&#91;org.joda.time.DateTime 0x17dffb5 &quot;2016-12-12T00:00:00.000Z&quot;&#93;,
+;              :updated-at #object&#91;org.joda.time.DateTime 0x7e0ac645 &quot;2016-12-12T00:00:00.000Z&quot;&#93;}
+
+;; Note that `my-account` hasen't changed
+&#40;:account/status my-account&#41;
+; =&gt; &quot;open&quot;
+
+&#40;accounts/set-opened! store my-account&#41;
+; =&gt; #:account{:id 1,
+;              :status &quot;open&quot;,
+;              :created-at #object&#91;org.joda.time.DateTime 0x17dffb5 &quot;2016-12-12T00:00:00.000Z&quot;&#93;,
+;              :updated-at #object&#91;org.joda.time.DateTime 0x7e0ac645 &quot;2016-12-12T00:00:00.000Z&quot;&#93;}
+</code></pre><p>And bam! That's it.</p><p>As I said before, this example is a little small and contrived, but I've found it to be a good jumping off point for most projects to start with.</p><p>If you notice any errors in this post, <a href='https://twitter.com/cramm'>please let me know</a>.</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>https://mcramm.com/datomic-setup.html</id>
+    <link href="https://mcramm.com/datomic-setup.html"/>
+    <title>Datomic Setup</title>
+    <updated>2015-07-22T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>I've recently been exploring Datomic more seriously and have found myself jumping through the same hoops as I have in the past *just to get things up and running*. I've also encountered slight deficiencies in the documentation that I've had to re-investigate since the exploratory project I created was deleted quite a while ago.</p><p>I'm tired of retracing my same steps over and over again so I thought I'd create a quick post with some of the basic steps to get setup and using Datomic in a Clojure application.</p><p>This is just going to cover the basics. Datomic does some crazy things I haven't had a chance to try yet, like using <a href='http://docs.datomic.com/query.html#rules'>rules</a>, querying the database at a [particular instant in time](http://docs.datomic.com/tutorial.html#working-with-time), or <a href='http://stackoverflow.com/questions/11025434/in-datomic-how-do-i-get-a-timeline-view-of-the-changes-made-to-the-values-of-a'>getting a list of changes to an entity</a>.</p><h2>Installing Datomic</h2><p>You do not need to install Datomic to get started, you can use the in-memory database.</p><p>Go here: <a href='https://my.datomic.com/downloads/free'>https://my.datomic.com/downloads/free</a> and find the latest version.</p><p>Then add <code>&#91;com.datomic/datomic-free &quot;&lt;the-latest-version&gt;&quot;&#93;</code> to your Leiningen project.</p><h2>Component Setup</h2><p>This is pretty easy, but you should have something like this:</p><pre><code class="clojure">&#40;ns my-project.components.datomic
+  &#40;:require &#91;com.stuartsierra.component :as component&#93;
+            &#91;datomic.api :as datomic&#93;&#41;&#41;
+
+&#40;defrecord DatomicComponent &#91;uri conn&#93;
+  component/Lifecycle
+  &#40;start &#91;this&#93;
+    &#40;if &#40;:conn this&#41;
+      this
+      &#40;do
+        &#40;assoc this :conn &#40;datomic/connect uri&#41;&#41;&#41;&#41;&#41;
+  &#40;stop &#91;this&#93;
+    &#40;assoc this :conn nil&#41;&#41;&#41;
+</code></pre><h2>Schema</h2><p>Schema should be ideally be kept in an EDN file and loaded on demand:</p><pre><code class="clojure">&#40;def schema
+  &#40;delay
+    &#40;read-string
+      &#40;slurp &#40;io/resource &quot;my&#95;project/schema.edn&quot;&#41;&#41;&#41;&#41;
+
+&#40;defn create-schema &#91;conn&#93;
+  &#40;datomic/transact conn @schema&#41;&#41;
+</code></pre><p>Here is what your schema might look like:</p><pre><code class="clojure">; resources/my&#95;project/schema.edn
+
+&#91;
+  {:db/id #db/id&#91;:db.part/db&#93;
+   :db/ident :cake/name
+   :db/valueType :db.type/string
+   :db/cardinality :db.cardinality/one
+   :db/fulltext true
+   :db/doc &quot;The name of a cake&quot;
+   :db.install/&#95;attribute :db.part/db}
+
+  {:db/id #db/id&#91;:db.part/db&#93;
+   :db/ident :cake/owner
+   :db/valueType :db.type/ref
+   :db/cardinality :db.cardinality/one
+   :db/doc &quot;The owner of a cake&quot;
+   :db.install/&#95;attribute :db.part/db}
+
+  {:db/id #db/id&#91;:db.part/db&#93;
+   :db/ident :user/email
+   :db/unique :db.unique/value
+   :db/valueType :db.type/string
+   :db/cardinality :db.cardinality/one
+   :db/doc &quot;Email address of a user&quot;
+   :db.install/&#95;attribute :db.part/db}
+
+  {:db/id #db/id&#91;:db.part/db&#93;
+   :db/ident :user/phone-numbers
+   :db/valueType :db.type/string
+   :db/cardinality :db.cardinality/many
+   :db/doc &quot;Contact numbers for a user&quot;
+   :db.install/&#95;attribute :db.part/db}
+&#93;
+</code></pre><p>Information on defining your schema and all the options available is documented <a href='http://docs.datomic.com/schema.html'>here</a>.</p><h2>Seed Data</h2><p>Like your schema, any seed data should be kept in a separate file:</p><pre><code class="clojure">&#40;def seed-data
+  &#40;delay
+    &#40;read-string
+      &#40;slurp &#40;io/resource &quot;my&#95;project/seed.edn&quot;&#41;&#41;&#41;&#41;
+
+&#40;defn seed-db &#91;conn&#93;
+  &#40;datomic/transact conn @seed-data&#41;&#41;
+</code></pre><p>Here is what your seed data might look like:</p><pre><code class="clojure">; resources/my&#95;project/seed.edn
+&#91;
+  ;; Users
+  {:db/id #db/id&#91;:db.part/user -1000001&#93;
+   :user/email &quot;sally@test.com&quot;
+   :user/password &quot;supersecret&quot;
+   :user/phones &#91;&quot;8469481047&quot;, &quot;9471038596&quot;&#93;}
+
+  {:db/id #db/id&#91;:db.part/user -1000002&#93;
+   :user/email &quot;bob@test.com&quot;
+   :user/password &quot;secret&quot;
+   :user/phones &#91;&quot;1234567890&quot;, &quot;0987654321&quot;&#93;}
+
+  ;; Cakes
+  {:db/id #db/id&#91;:db.part/user&#93;
+   :cake/owner #db/id &#91;:db.part/user -1000001&#93;
+   :cake/name &quot;Carrot&quot;}
+  {:db/id #db/id&#91;:db.part/user&#93;
+   :cake/owner #db/id &#91;:db.part/user -1000001&#93;
+   :cake/name &quot;Cheese&quot;}
+  {:db/id #db/id&#91;:db.part/user&#93;
+   :cake/owner #db/id &#91;:db.part/user -1000002&#93;
+   :cake/name &quot;Carrot&quot;}
+&#93;
+</code></pre><h2>Queries & Updates</h2><p>The operations to be performed on an entity should be confined to it's own namespace:</p><pre><code class="clojure">&#40;ns my-project.users
+  &#40;:require &#91;datomic.api :as datomic&#93;
+            &#91;my-project.component.datomic&#93;&#41;
+  ; Note the change from using a dash to an underscore
+  &#40;:import &#91;my&#95;project.component.datomic DatomicComponent&#93;&#41;&#41;
+
+&#40;defprotocol UserOps
+  &#40;all &#91;this&#93;&#41;
+  &#40;by-email &#91;this email&#93;&#41;
+  &#40;save! &#91;this user&#93;&#41;
+
+&#40;extend-type DatomicComponent
+  UserOps
+  &#40;all &#91;this&#93;
+    &#40;datomic/q '&#91;:find &#91;&#40;pull ?user &#91;&#42;&#93;&#41; ...&#93;
+                 :where &#91;?user :user/email&#93;&#93;
+               &#40;datomic/db &#40;:conn this&#41;&#41;&#41;&#41;
+  &#40;by-email &#91;this email&#93;
+    &#40;datomic/q '&#91;:find &#91;&#40;pull ?user &#91;&#42;&#93;&#41;&#93;
+                 :in $ ?email
+                 :where &#91;?user :user/email ?email&#93;&#93;
+               &#40;datomic/db &#40;:conn this&#41;&#41;
+               email&#41;&#41;
+  &#40;save! &#91;this user&#93;
+    &#40;datomic/transact &#40;:conn this&#41; user&#41;
+
+</code></pre><p>The <code>&#91;&#40;pull ?user &#91;&#42;&#93;&#41; ...&#93;</code> is an example of <a href='http://docs.datomic.com/pull.html'>Datomic's pull syntax</a>. This basically says "after all <code>?user</code>s, bring in all of their attributes. Be careful when using the wildcard <code>&#42;</code> as this will recursively pull any component attributes.</p><h2>Traversing refs forwards and backwards</h2><p>It's possible to pull in <code>refs</code> by specifying them in the pull pattern. If you wanted cakes with their owners:</p><pre><code class="clojure">&#40;datomic/q '&#91;:find &#91;&#40;pull ?cake &#91;&#42; {:cake/owner &#91;&#42;&#93;}&#93;&#41; ...&#93;
+             :where &#91;?cake :cake/owner&#93;&#93;
+           db&#41;
+</code></pre><p>If however you wanted the reverse, users and their cakes:</p><pre><code class="clojure">&#40;datomic/q '&#91;:find &#91;&#40;pull ?user &#91;&#42; {:cake/&#95;owner &#91;&#42;&#93;}&#93;&#41; ...&#93;
+             :where &#91;?user :user/email&#93;&#93;
+           db&#41;
+</code></pre><h2>Recursive (graph) queries</h2><p>This is one I haven't found a good real world use case for yet, but it is possible. Read the following if you're looking at doing these kinds of queries:</p><p><a href='http://docs.datomic.com/query.html#rules'>http://docs.datomic.com/query.html#rules</a></p><p><a href='http://hashrocket.com/blog/posts/using-datomic-as-a-graph-database'>http://hashrocket.com/blog/posts/using-datomic-as-a-graph-database</a></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>https://mcramm.com/rack-and-ring-basics.html</id>
+    <link href="https://mcramm.com/rack-and-ring-basics.html"/>
+    <title>Rack and Ring Basics</title>
+    <updated>2015-04-15T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>In the Clojure world, when you want to write a web app, you will almost certainly be using <a href='https://github.com/ring-clojure/ring'>Ring</a>. Ring is directly inspired by <a href='https://rack.github.io/'>Rack</a>, the defacto webserver abstraction for frameworks in Ruby.</p><p>The two are conceptually very similar, but there are some slight differences (aside from language) that might be interesting to highlight. I won't be going too in depth with this post, and will focus instead on the basics of using Rack and Ring. I thought I would just get that out of the way before your expectations got too high.</p><p>It's worth noting that most apps won't actually use either Rack or Ring directly like we will here. It would be a lot faster and safer to use something like <a href='http://www.sinatrarb.com/'>Sinatra</a> or <a href='http://rubyonrails.org/'>Rails</a> for Rack, and <a href='https://github.com/technomancy/compojure'>Compojure</a> or <a href='http://www.luminusweb.net/'>Luminus</a> for Ring.</p><p>If you want to see the final versions of these examples in their full forms please click:</p><ul><li><a href='https://github.com/mcramm/rack-basics'>Here for the Rack example</a></li><li><a href='https://github.com/mcramm/ring-basics'>Here for the Ring example</a></li></ul><h2>The Minimal First Step</h2><p>Let's start with Rack, since it's obviously the more popular of the two. I'm going to assume that you can <a href='https://github.com/rack/rack#installing-with-rubygems'>read</a> and get Rack installed if you don't already have it. If you can't read, then I have nothing to worry about because this will all look like gobbledygook to you. I hope ASCII art will serve as an appropriate apology  :-).</p><p>The first step in getting either application off the ground is to create a entry point. In the case of Rack this is will be an object with a <code>call</code> method. This method needs to return the basic structure required for a Rack response, which is an array containing the response status, headers and body:</p><pre><code class="ruby">    # my&#95;rack&#95;app.rb
+    class MyRackApp
+      def call&#40;env&#41;
+        &#91;'200', {'Content-Type' =&gt; 'text/html'}, &#91;'Hello World'&#93;&#93;
+      end
+    end
+</code></pre><p>Note how simple this is. This is just a regular old ruby object with a method that returns a triplet. It knows nothing about Rack or anything else that might be using it.</p><p>Unfortunately this does absolutely <em>nothing</em>, which is pretty boring.  To boot this app up, we'll add a <code>config.ru</code> to the current directory:</p><pre><code class="ruby"># config.ru
+require 'rack'
+require&#95;relative 'my&#95;rack&#95;app'
+
+run MyRackApp.new
+</code></pre><p>We can now run <code>rackup</code> from our current directory and, navigating to <a href='http://localhost:9292/'>http://localhost:9292</a>, we should see our "Hello World" response.</p><p>Getting our Ring app off the ground requires a little bit more setup, but we'll be using <a href='http://leiningen.org/'>Leiningen</a> to do most of the trivial stuff for us.</p><p>First let's create a new project with <code>lein new app my-ring-app</code>. Add <code>&#91;ring &quot;1.3.2&quot;&#93;</code> to the list of dependencies in <code>project.clj</code>. You might need to run <code>lein deps</code> to download the Ring library if you don't already have it.</p><p>Ring is similar to Rack in that we need to give it a function that returns some standard response. Ring expects a map instead of an array:</p><pre><code class="clojure">    &#40;ns my-ring-app.app&#41;
+
+    &#40;defn handler &#91;request&#93;
+      {:status 200
+       :headers {&quot;Content-Type&quot; &quot;text/html&quot;}
+       :body &quot;Hello World&quot;}&#41;
+</code></pre><p>Calling the function "handler" above is simply the convention in Clojure-land. Like the Rack example, we need some way to boot this app up. Some examples will mash this boot process together with the code we wrote above but I prefer to keep this separate. Plus it makes it similar to our Rack example so win-win,      right?</p><pre><code class="clojure">    &#40;ns my-ring-app.core
+      &#40;:require &#91;ring.adapter.jetty :refer &#91;run-jetty&#93;&#93;
+                &#91;my-ring-app.app :as app&#41;
+      &#40;:gen-class&#41;&#41;
+
+    &#40;defn -main &#91;&amp; args&#93;
+      &#40;run-jetty app/handler {:port 3000}&#41;&#41;
+</code></pre><p> Now we can just do <code>lein run</code> from our project root. Navigating to  <a href='http://localhost:3000/'>http://localhost:3000</a> should display a very familiar page.</p><h2>Middleware</h2><p> Middleware is essentially a series a steps a request has to go through in order  to generate a response. Once a response is generated, it will return the  response back up through any middleware in reverse order.</p><p> We're going to introduce some middleware to both of our applications that translates "Hello" to it's French counterpart "Bonjour". Why French? Well I'm Canadian, and if I don't provide some kind of French content, then the CRTC might come and yell at me for not being fair.</p><p>I also don't know how to say "Hello" in any other language off the top of my head and I'm too lazy to do any more research so we are going to stick with "Bonjour".</p><p>In Rack our middleware is going to be another ruby object, except that we will actually be doing something with that <code>env</code> parameter we saw in our earlier example. You will notice that our middleware bears some resemblance to our running <code>MyRackApp</code></p><pre><code class="ruby">    # hello&#95;translator.rb
+    class HelloTranslator
+      def initialize&#40;app&#41;
+        @app = app
+      end
+
+      def translate&#95;hello&#40;str&#41;
+        str.gsub&#40;/Hello/, 'Bonjour'&#41;
+      end
+
+      def call&#40;env&#41;
+        status, headers, body = @app.call&#40;env&#41;
+        body.map! { |str| translate&#95;hello&#40;str&#41; }
+        &#91;status, headers, body&#93;
+      end
+    end
+</code></pre><p>First we initialize the middleware with our running application. Calling <code>@app.call&#40;env&#41;</code> simply passes the request down the stack. If there was another piece of middleware beneath us, then it would be the next reciever of our <code>env</code> parameter. This would keep going until a response is generated, which in our case will be from <code>MyRackApp</code> that we defined earlier. Our return value needs to be the same status, headers and body array in order for Rack to be able to serve the response.</p><p>If you ran <code>rackup</code> right now, then you wouldn't see any change. This is because we actually need to <em>tell</em> Rack about this is middleware. To accomplish this we need to require and <code>use</code> it in our <code>config.ru</code>:</p><pre><code class="ruby">    # config.ru
+    require 'rack'
+    require&#95;relative 'my&#95;rack&#95;app'
+    require&#95;relative 'hello&#95;translator'
+
+    use HelloTranslator
+    run MyRackApp.new
+</code></pre><p>Running <code>rackup</code> and refreshing the previous page will now show a lovely greeting in the famously romantic French language.</p><p>Again Ring is very similar. The biggest difference is that the middleware is just a function instead of an object:</p><pre><code class="clojure">    &#40;ns my-ring-app.middleware
+      &#40;:require &#91;clojure.string :as s&#93;&#41;&#41;
+
+    &#40;defn translate-hello &#91;body&#93;
+     &#40;s/replace body &quot;Hello&quot; &quot;Bonjour&quot;&#41;&#41;
+
+    &#40;defn wrap-hello-translator &#91;handler&#93;
+      &#40;fn &#91;request&#93;
+        &#40;let &#91;response &#40;handler request&#41;&#93;
+          &#40;update-in response &#91;:body&#93; translate-hello&#41;&#41;&#41;&#41;
+</code></pre><p>Again, prefixing our middleware with <code>wrap</code> is convention.  As before we will need to require and use this middleware in the namespace responsible for booting the app:</p><pre><code class="clojure">    &#40;ns my-ring-app.core
+      &#40;:require &#91;ring.adapter.jetty :refer &#91;run-jetty&#93;&#93;
+                &#91;my-ring-app.app :as app&#93;
+                &#91;my-ring-app.middleware :refer &#91;wrap-hello-translator&#93;&#93;&#41;
+      &#40;:gen-class&#41;&#41;
+
+    &#40;defn -main &#91;&amp; args&#93;
+      &#40;run-jetty &#40;-&gt; app/handler
+                     wrap-hello-translator&#41;
+                 {:port 3000}&#41;&#41;
+</code></pre><h2>Dealing With Query Params</h2><p>I was originally going to end the post here with an amazingly concise, beautifully written conclusion to tie a nice little bow over everything. Instead I'm going to take this comparison one step further and really phone in the whole "wrapping things up" section that is structurally necessary.</p><p>I want to show something that is <em>much</em> more common than our mostly pointless "Hello" to "Bonjour" translation app that we've written. I'm going to show you how Ring and Rack each let you access any query parameters that may have come along with the request.</p><p>Let's say that we want to let the request specify who we want to say "Bonjour" to, and "World" if nothing is provided. The request can tell us what name to use by simply providing a <code>name</code> parameter.</p><p>With the Rack example, we aren't going to touch anything except for our base application:</p><pre><code class="ruby">    # my&#95;rack&#95;app.rb
+    class MyRackApp
+      def call&#40;env&#41;
+        request = Rack::Request.new&#40;env&#41;
+        subject = request.params.fetch&#40;'name', 'World'&#41;
+        body = &#91;&quot;Hello #{subject}&quot;&#93;
+
+        &#91;'200', {'Content-Type' =&gt; 'text/html'}, body&#93;
+      end
+    end
+</code></pre><p>The change here is that we wrap the <code>env</code> parameter in a <code>Rack::Request</code> object, then attempt to fetch the <code>'name'</code> parameter. If one isn't provided, then we default to <code>'World'</code>. Our response is essentially the same.</p><p>Opening <a href='http://localhost:9292?name=Pierre'>http://localhost:9292?name=Pierre</a>, we should see "Bonjour Pierre". If we omit the <code>name</code> parameter entirely, then we should see "Bonjour World" as before.</p><p>Ring's approach is slightly different. Instead of wrapping the request in another object, there is a set of very common default middleware that we can choose to include. One of these is <code>wrap-params</code>, which will add a <code>:params</code> key to the request and take any parameters out of the query string and put into a map at that key.</p><p>I've included full-versions of each file here to keep things easy to follow. Additions to <code>my-ring-app.core</code> are noted:</p><pre><code class="clojure">    &#40;ns my-ring-app.core
+      &#40;:require &#91;ring.adapter.jetty :refer &#91;run-jetty&#93;&#93;
+                &#91;ring.middleware.params :refer &#91;wrap-params&#93;&#93; ; NEW
+                &#91;my-ring-app.app :as app&#93;
+                &#91;my-ring-app.middleware :refer &#91;wrap-hello-translator&#93;&#93;&#41;
+      &#40;:gen-class&#41;&#41;
+
+    &#40;defn -main &#91;&amp; args&#93;
+      &#40;run-jetty &#40;-&gt; app/handler
+                     wrap-params ; NEW
+                     wrap-hello-translator&#41; {:port 3000}&#41;&#41;
+</code></pre><pre><code class="clojure">    &#40;ns my-ring-app.app&#41;
+
+    &#40;defn handler &#91;request&#93;
+      &#40;let &#91;subject &#40;get-in request &#91;:params &quot;name&quot;&#93; &quot;World&quot;&#41;&#93;
+        {:status 200
+         :headers  {&quot;Content-Type&quot; &quot;text/html&quot;}
+         :body &#40;format &quot;Hello %s&quot; subject&#41;}&#41;&#41;
+</code></pre><p>The difference between the two examples is the fact that the query string processing is handled in middleware with Ring, while with Rack I wrapped it. I tried to find a similar piece of middleware for Rack but after an hour of clicking around I came up short. There is some stuff in <a href='https://github.com/rack/rack-contrib'>rack-contrib</a> that comes close, but not close enough.  I'm sure one exists and I'll update this post if I can find something analogous to Ring's <code>wrap-params</code>.<h2></h2></p><p>I hope this been at least a little bit enlightening. I found the basics of Ring and Rack to be <em>so similiar</em> that I couldn't help but write a post about the two. The differences in application structure and methodologies become more pronounced the  more complicated your stack becomes, but this is usually due to stuff built <em>on top</em> of them.</p><p>In future posts I hope to show something a bit more useful built with Ring.</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>https://mcramm.com/composing-functions.html</id>
+    <link href="https://mcramm.com/composing-functions.html"/>
+    <title>Composing Functions</title>
+    <updated>2015-04-11T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>Let's look at the different flavors of function composition in Clojure.</p><h2>Comp</h2><p>There is a function in clojure.core called <code>comp</code> that takes a set of functions and returns a function that is a composition of those functions:</p><pre><code class="clojure">    &#40;defn doubler &#91;x&#93;
+      &#40;&#42; x 2&#41;&#41;
+
+    &#40;defn incrementer &#91;x&#93;
+      &#40;+ x 1&#41;&#41;
+
+    &#40;def doubler-and-incrementer &#40;comp incrementer doubler&#41;&#41;
+
+    &#40;map doubler-and-incrementer &#91;1 2 3 4&#93;&#41; ; =&gt; &#91;3 5 7 9&#93;
+</code></pre><blockquote><p> <code>clojure.core/inc</code> exists, but I recreate it here to be explicit </p></blockquote><p>Note that when composing functions with comp, they are applied right to left to their arguments:</p><pre><code class="clojure">    &#40;def incrementer-and-doubler &#40;comp doubler incrementer&#41;&#41;
+
+    &#40;map incrementer-and-doubler &#91;1 2 3 4&#93;&#41; ; =&gt; &#91;4 6 8 10&#93;
+</code></pre><h2>Partial</h2><p>Another function in clojure.core is <code>partial</code> that takes a function and some arguments to that function and returns a new function that will accept the remaining number of arguments. This can be useful when combined with comp and writing a custom reducer:</p><pre><code class="clojure">    &#40;def incrementer-and-doubler &#40;comp &#40;partial map doubler&#41;
+                                       &#40;partial map incrementer&#41;&#41;&#41;
+
+    &#40;incrementer-and-doubler &#91;1 2 3 4&#93;&#41; ; =&gt; &#91;4 6 8 10&#93;
+</code></pre><blockquote><p> Clojure 1.7 will introduce transducers, which will likely become the idiomatic  way of accomplishing this same task. </p></blockquote><h2>Threading Macros</h2><p>A more popular method of composition are the thread-first and thread-last macros.</p><p>The thread-first macro evaluates the first expression then passes the result into first argument of the next form, and the result of that into the first argument of the next form and so on.</p><p>In other words, this:</p><pre><code class="clojure">    &#40;doubler &#40;incrementer 2&#41;&#41;
+</code></pre><p>Is the same as this:</p><pre><code class="clojure">    &#40;-&gt; 2 incrementer doubler&#41;
+</code></pre><p>Thread-last works the same way, but it passes the result of each expression into the last element of each successive form.</p><pre><code class="clojure">    &#40;-&gt;&gt; &#91;1 2 3 4&#93;
+         &#40;map incrementer&#41;
+         &#40;map doubler&#41;&#41;
+</code></pre><p>Is the same as:</p><pre><code class="clojure">    &#40;map doubler &#40;map incrementer &#91;1 2 3 4&#93;&#41;&#41;
+</code></pre>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>https://mcramm.com/om-comparison.html</id>
+    <link href="https://mcramm.com/om-comparison.html"/>
+    <title>Om Comparison</title>
+    <updated>2014-02-01T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>In my <a href='http://mcramm.com/2014/01/26/react-intro.html'>last post</a> I built a simple text manipulation widget with <a href='http://facebook.github.io/react/'>React</a>. I recommend reading through that post first, before this one. As promised, I've built the same widget in <a href='https://github.com/swannodette/om'>Om</a>, a ClojureScript library that sits on top of React.</p><p><!&ndash;more&ndash;></p><p>If you want to follow along, you'll need to install Leiningen and run:</p><pre><code class="bash">    lein new mies-om om-intro
+</code></pre><p><code>cd</code> into the new directory and make your <code>project.clj</code> look like the following:<pre><code class="clojure">    &#40;defproject om-intro &quot;0.1.0-SNAPSHOT&quot;
+      :description &quot;FIXME: write this!&quot;
+      :url &quot;http://example.com/FIXME&quot;
+
+      :dependencies &#91;&#91;org.clojure/clojure &quot;1.5.1&quot;&#93;
+                     &#91;org.clojure/clojurescript &quot;0.0-2138&quot;&#93;
+                     &#91;org.clojure/core.async &quot;0.1.267.0-0d7780-alpha&quot;&#93;
+                     &#91;om &quot;0.3.1&quot;&#93;
+                     &#91;com.facebook/react &quot;0.8.0.1&quot;&#93;&#93;
+
+      :plugins &#91;&#91;lein-cljsbuild &quot;1.0.1&quot;&#93;&#93;
+
+      :source-paths &#91;&quot;src&quot;&#93;
+
+      :cljsbuild {
+        :builds &#91;{:id &quot;dev&quot;
+                  :source-paths &#91;&quot;src&quot;&#93;
+                  :compiler {
+                    :output-to &quot;om&#95;intro.js&quot;
+                    :output-dir &quot;out&quot;
+                    :optimizations :none
+                    :source-map true}}&#93;}&#41;
+</code></pre></p><p>You will also want to update your <code>index.html</code> look like this:</p><pre><code class="html">    &lt;html&gt;
+        &lt;body&gt;
+            &lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
+            &lt;script src=&quot;http://fb.me/react-0.8.0.js&quot;&gt;&lt;/script&gt;
+            &lt;script src=&quot;out/goog/base.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+            &lt;script src=&quot;om&#95;intro.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+            &lt;script type=&quot;text/javascript&quot;&gt;goog.require&#40;&quot;om&#95;intro.core&quot;&#41;;&lt;/script&gt;
+        &lt;/body&gt;
+    &lt;/html&gt;
+</code></pre><p>Get any missing dependencies with <code>lein deps</code>, then build the project with `lein cljsbuild once dev<code>. Open </code>index.html` in a browser and you should see the bare-bones example that comes with this template.</p><p>For the rest of this tutorial, I recommend running <code>lein cljsbuild auto dev</code> in a separate terminal. The first time the project gets built takes a second or two, but after the JVM has warmed up, it takes just milliseconds.</p><p>The snippets above are for a development build of the project. The final example I link to at the end of this post contains a release build, that generates a single JavaScript file.</p><p>With the setup out of the way we can start rebuilding this widget.</p><pre><code class="clojure">    &#40;ns om-intro.core
+      &#40;:require &#91;om.core :as om :include-macros true&#93;
+                &#91;om.dom :as dom :include-macros true&#93;&#41;&#41;
+
+    &#40;def app-state &#40;atom {:text &quot;Some Text&quot;}&#41;&#41;
+
+    &#40;defn my-widget &#91;app owner&#93;
+      &#40;reify
+        om/IRender
+        &#40;render &#91;this&#93;
+          &#40;dom/div nil &#40;:text app&#41;&#41;&#41;&#41;&#41;
+
+    &#40;om/root
+      app-state
+      my-widget
+      &#40;. js/document &#40;getElementById &quot;app&quot;&#41;&#41;&#41;
+</code></pre><p>This is analogous to the first example in the React version; all we're doing is defining a component that renders a <code>div</code> containing the value of <code>:text</code> from our application state.</p><p>There are already a differences though. First, we've moved all of our state into an atom. Components are given <em>cursors</em> into this application state that they can use to read/update.</p><p>Second, our <code>my-widget</code> component is returning a reified object that satisfies the <code>om/IRender</code> interface. The <code>render</code> method simply returns the aforementioned <code>div</code>.</p><p>You should see something like this:</p><p><div class='highlight example' id="ex1"> </div></p><p>Like our first example in the React version, this is pretty boring. Let's add in the text input.</p><p>We're going to be using <a href='https://github.com/clojure/core.async'>core.async</a> at the edges of our components, wherever our users will be interacting with the various <code>input</code>s we'll eventually have.</p><p>Change the namespace declaration to the following:</p><pre><code class="clojure">    &#40;ns om-intro.core
+      &#40;:require-macros &#91;cljs.core.async.macros :refer &#91;go&#93;&#93;&#41;
+      &#40;:require &#91;om.core :as om :include-macros true&#93;
+                &#91;om.dom :as dom :include-macros true&#93;
+                &#91;cljs.core.async :refer &#91;put! chan &lt;!&#93;&#93;&#41;&#41;
+</code></pre><p>Then we'll update the widget. We're going to walk through this step-by-step in a minute, but here is what it should look like:</p><pre><code class="clojure">    &#40;defn my-widget &#91;app owner&#93;
+      &#40;reify
+        om/IInitState
+        &#40;init-state &#91;this&#93;
+          {:comm {:string &#40;chan&#41;}}&#41;
+
+        om/IWillMount
+        &#40;will-mount &#91;this&#93;
+          &#40;let &#91;{:keys &#91;string&#93;} &#40;om/get-state owner :comm&#41;&#93;
+            &#40;go &#40;while true
+                  &#40;let &#91;value &#40;&lt;! string&#41;&#93;
+                    &#40;om/transact! app :text &#40;fn &#91;&#95;&#93; value&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+
+        om/IRenderState
+        &#40;render-state &#91;this {:keys &#91;comm&#93;}&#93;
+          &#40;dom/div nil
+                   &#40;dom/input #js {:type &quot;text&quot;
+                                   :ref &quot;text&quot;
+                                   :value &#40;:text app&#41;
+                                   :onChange #&#40;put!
+                                                &#40;:string comm&#41;
+                                                &#40;-&gt; &#40;om/get-node owner &quot;text&quot;&#41;
+                                                    .-value&#41;&#41;}&#41;
+
+                   &#40;dom/div nil &#40;:text app&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>We've changed our widget to satisfy a few more Om interfaces that take advantage of the <a href='http://facebook.github.io/react/docs/component-specs.html'>React life cycles</a>.</p><p>The first is <code>om/IInitState</code> which sets up some initial, local state for the component. Here we are creating a map with a channel assigned to the <code>:string</code> key. <code>init-state</code> is called once on a component.</p><p>In <code>om/IWillMount</code>, we setup a go loop that blocks on the channel assigned to <code>:string</code> earlier, then sets the <code>:text</code> attribute in our application state to the value we get off of that channel. Once it's done it goes back to waiting on the channel.</p><blockquote><p> If you're new to Clojure, then the destructuring we do in the <code>let</code> binding can  be a little confusing. The gist of what we're doing is creating a local  <code>string</code> variable for our go block that is based on a key in the map returned by  <code>&#40;om/get-state owner :comm&#41;</code>. In other words, it takes the map we created  earlier and creates a local variable that is assigned the value of the  <code>:string</code> key. </p></blockquote><p>We use <code>om/transact!</code> here since updating an atom needs to occur within a transaction. We could have also used <code>swap!</code> here to modify the <code>atom</code> manually.</p><p><code>will-mount</code> is called once, before the component is mounted into the DOM.</p><p>Finally, we've changed <code>om/IRender</code> to <code>om/IRenderState</code>. Every component needs to satisfy one of these interfaces, but not both. The difference between the two is that <code>IRenderState</code> is passed the component state as it's second argument. We need it so that we can have access to the channel we created earlier.</p><p>Finally we create the <code>input</code>:</p><pre><code class="clojure">    &#40;dom/input #js {:type &quot;text&quot;
+                    :ref &quot;text&quot;
+                    :value &#40;:text app&#41;
+                    :onChange #&#40;put!
+                                &#40;:string comm&#41;
+                                &#40;-&gt; &#40;om/get-node owner &quot;text&quot;&#41;
+                                    .-value&#41;&#41;}&#41;
+</code></pre><p>The element is actually only taking a single argument, though it looks like two. <code>#js</code> is a reader literal for Clojurscript that transforms the following object into literal JavaScript object. The map that we pass is setting some attributes on the component. In this case, we want a text input that contains the value of the <code>:text</code> key from our application state. We assign it the ref <code>text</code> so that we can refer to it from the <code>onChange</code> callback via <code>om/get-node</code>.</p><p>This callback is really simple, and is one of the reasons why core.async is so attractive. All it does is take the value of the <code>text</code> node and put it onto the <code>string</code> channel.</p><p>If you've been following along, then you should see the following:</p><p><div class='highlight example' id="ex2"> </div></p><p>The next step is to add in the text-size slider. First, let's add the size to our application state:</p><pre><code class="clojure">    &#40;def app-state &#40;atom {:text &quot;Some Text&quot;
+                          :size 15}&#41;&#41;
+</code></pre><p>Next we'll create another channel for manipulating this size:</p><pre><code class="clojure">    om/IInitState
+    &#40;init-state &#91;this&#93;
+      {:comm {:string &#40;chan&#41;
+              :size &#40;chan&#41;}}&#41;
+</code></pre><p>We'll create another go block to update <code>:size</code> whenever we get a value off of this channel:</p><pre><code class="clojure">    om/IWillMount
+    &#40;will-mount &#91;this&#93;
+      &#40;let &#91;{:keys &#91;string size&#93; :as comm} &#40;om/get-state owner :comm&#41;&#93;
+        &#40;go &#40;while true
+              &#40;let &#91;value &#40;&lt;! string&#41;&#93;
+                &#40;om/transact! app :text &#40;fn &#91;&#95;&#93; value&#41;&#41;&#41;&#41;&#41;
+        &#40;go &#40;while true
+              &#40;let &#91;value &#40;&lt;! size&#41;&#93;
+                &#40;om/transact! app :size &#40;fn &#91;&#95;&#93; value&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>And then we'll add the input. Since we're getting the value off in the input in a similar way as before, I created a small helper to do this. I would place this function at the top of your source file, underneath the atom:</p><pre><code class="clojure">    &#40;defn get-value &#91;owner ref&#93;
+      &#40;-&gt; &#40;om/get-node owner ref&#41;
+          .-value&#41;&#41;
+</code></pre><pre><code class="clojure">    &#40;dom/div nil
+            &#40;dom/input #js {:type &quot;range&quot;
+                            :min 10
+                            :max 50
+                            :step 0.2
+                            :ref &quot;size&quot;
+                            :value &#40;:size app&#41;
+                            :onChange #&#40;put!
+                                        &#40;:size comm&#41;
+                                        &#40;get-value owner &quot;size&quot;&#41;&#41;}&#41;
+            &#40;dom/label nil &#40;str &#40;:size app&#41; &quot;px&quot;&#41;&#41;&#41;
+</code></pre><p>Note that you may want to update the text input as well.</p><p>Finally, we want to modify our <code>div</code> to have it's font-size restyled whenever this changes. Right now it looks like this:</p><pre><code class="clojure">    &#40;dom/div nil &#40;:text app&#41;&#41;
+</code></pre><p>Change it to this:</p><pre><code class="clojure">    &#40;dom/div #js {:style #js {:font-size &#40;str &#40;:size app&#41; &quot;px&quot;&#41;}}
+          &#40;:text app&#41;&#41;
+</code></pre><p>Again, <code>#js</code> turns the following object into a JavaScript object. It's shallow, so we need to do it twice to set <code>:style</code> correctly.</p><p>You should see this now:</p><p><div class='highlight example' id="ex3"> </div></p><p>Now for the color sliders. First, we'll add in the new state:</p><pre><code class="clojure">    &#40;def app-state &#40;atom {:text &quot;Some Text&quot;
+                          :size 15
+                          :colors {:red 0
+                                   :green 0
+                                   :blue 0}}&#41;&#41;
+</code></pre><p>As in the React widget, we'll create a more general <code>color-slider</code>:</p><pre><code class="clojure">    &#40;defn color-slider &#91;colors owner {:keys &#91;label onChange color-key&#93;}&#93;
+      &#40;reify
+        om/IRenderState
+        &#40;render-state &#91;this {:keys &#91;comm&#93;}&#93;
+          &#40;dom/div nil
+                   &#40;dom/input #js {:type &quot;range&quot;
+                                   :min 0
+                                   :max 255
+                                   :step 1
+                                   :ref &quot;color&quot;
+                                   :value &#40;color-key colors&#41;
+                                   :onChange #&#40;onChange color-key owner&#41;}&#41;
+                   &#40;dom/label nil &#40;str label &quot;: &quot; &#40;color-key colors&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>The important bit here is extra map of attributes we'll be passing to this component. We're going to give it a label, a color key to pull from the application state, and an onChange function.</p><p>Next we'll create a channel for the changing colors:</p><pre><code class="clojure">    om/IInitState
+    &#40;init-state &#91;this&#93;
+      {:comm {:string &#40;chan&#41;
+              :size &#40;chan&#41;
+              :colors &#40;chan&#41;}}&#41;
+</code></pre><p>And a go block:<pre><code class="clojure">    &#40;go &#40;while true
+          &#40;let &#91;&#91;c value&#93; &#40;&lt;! colors&#41;&#93;
+            &#40;om/update! app assoc-in &#91;:colors c&#93; value&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre></p><p>This looks slightly different than the previous go blocks because we're dealing with a map of colors in the application state instead of a straight value.</p><pre><code class="clojure">    &#40;let &#91;putfn &#40;fn &#91;k o&#93;
+                 &#40;put! &#40;:colors comm&#41; &#91;k &#40;get-value o &quot;color&quot;&#41;&#93;&#41;&#41;&#93;
+        &#40;apply dom/div nil
+             &#40;map &#40;fn &#91;&#91;label color-key&#93;&#93;
+                    &#40;om/build color-slider
+                              &#40;:colors app&#41;
+                              {:opts {:label label
+                                      :color-key color-key
+                                      :onChange putfn}}&#41;&#41;
+                  &#91;&#91;&quot;Red&quot; :red&#93; &#91;&quot;Green&quot; :green&#93; &#91;&quot;Blue&quot; :blue&#93;&#93;&#41;&#41;&#41;
+</code></pre><p>Next we'll add the inputs right below the text size slider. We use some high level functions here to avoid having to write three calls to <code>om/build</code>.</p><p>Finally we can modify the <code>div</code> to re-color our text:</p><pre><code class="clojure">    &#40;let &#91;size &#40;:size app&#41;
+          text &#40;:text app&#41;
+          {:keys &#91;red green blue&#93;} &#40;:colors app&#41;&#93;
+     &#40;dom/div #js {:style #js {:font-size &#40;str size &quot;px&quot;&#41;
+                               :color &#40;str &quot;rgb&#40;&quot; red &quot;,&quot; green &quot;,&quot; blue &quot;&#41;&quot;&#41;}}
+              text&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>Here is the final product, for the second time: <div class='highlight example' id="final"> </div></p><p>The full source for this example can be found <a href='https://gist.github.com/mcramm/8755952'>here</a>.</p><p>Om is still very new, and changing rapidly. If you're interested, then I recommend running through the <a href='https://github.com/swannodette/om/wiki/Tutorial'>Tutorial</a> in LightTable.</p><p><script src="/assets/js/om-intro.js" type="text/javascript"></script></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>https://mcramm.com/react-intro.html</id>
+    <link href="https://mcramm.com/react-intro.html"/>
+    <title>React Intro</title>
+    <updated>2014-01-26T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><a href='http://facebook.github.io/react/'>React</a> is a new-ish library from Facebook/Instagram that is designed to make building user interfaces easy.</p><p>I thought it would be fun to build a basic example in React, and then contrast it with the same example in Om.</p><p>First let's setup the page where our example will live. We're going to want a container for the React root component, which we'll give the id <code>app</code>, and we'll include the React library and the JSX transformer.</p><pre><code class="html">    &lt;html&gt;
+        &lt;body&gt;
+            &lt;div id='app'&gt;&lt;/div&gt;
+            &lt;script src=&quot;http://fb.me/react-0.8.0.js&quot;&gt;&lt;/script&gt;
+            &lt;script src=&quot;http://fb.me/JSXTransformer-0.8.0.js&quot;&gt;&lt;/script&gt;
+            &lt;script type='text/jsx'&gt;
+                /&#42;&#42;
+                &#42; @jsx React.DOM
+                &#42;/
+                // Your code goes here
+            &lt;/script&gt;
+        &lt;/body&gt;
+    &lt;/html&gt;
+</code></pre><p>Note the <code>@jsx React.DOM</code> in the block comment at the top of the script tag where our code will go. This is required for the JSX transformer to be able to process elements in our components from this:</p><pre><code class="html">    &lt;a href=&quot;http://google.com&quot;&gt;Click Me&lt;/a&gt;
+</code></pre><p>Into this:</p><pre><code class="javascript">    React.DOM.a&#40; {href:&quot;http://google.com&quot;}, &quot;Click Me&quot;&#41;
+</code></pre><p>JSX is completely optional, but it is a little bit easier to visualize the arrangement of nodes, so I'll be using it for this example.</p><p>Let's start writing some code. Our first goal is to create a text input where any entered text is rendered out to some node.</p><p>First we'll create our root component and pass it some initial state:</p><pre><code class="javascript">    var VariableText = React.createClass&#40;{
+        render: function&#40;&#41; {
+            return &#40;
+                &lt;p&gt;{this.props.defaultText}&lt;/p&gt;
+            &#41;;
+        }
+    }&#41;;
+    React.renderComponent&#40;
+        &lt;VariableText defaultText=&quot;Some text&quot; /&gt;,
+        document.getElementById&#40;'app'&#41;
+    &#41;;
+</code></pre><p>What we're doing here is create a component called <code>VariableText</code> that knows how to render itself. <code>render</code> simply creates a <code>&lt;p&gt;</code> tag and inserts <code>defaultText</code> inside of it. The second argument to <code>renderComponent</code> is simply explaining where to insert our component on our page.</p><p>This is great, but kinda boring. Let's create our text input and change the content of the <code>&lt;p&gt;</code> tag when we type into it. This next snippet will be a little bit bigger, but all we really want to do is create a <code>TextInput</code> component that renders an <code>input</code> tag and responds to changes. We'll also want to pass it our default text to set the input's initial value.</p><pre><code class="javascript">    var TextInput = React.createClass&#40;{
+        handleChange: function&#40;&#41; {
+            var text = this.refs.text.getDOMNode&#40;&#41;.value;
+            this.props.onTextChanged&#40;text&#41;;
+            return false;
+        },
+        render: function&#40;&#41; {
+            return &#40;
+                &lt;div&gt;
+                    &lt;input
+                        ref=&quot;text&quot;
+                        onChange={this.handleChange}
+                        type='text'
+                        value={this.props.inputValue}
+                    /&gt;
+                &lt;/div&gt;
+            &#41;;
+        }
+    }&#41;;
+
+    var VariableText = React.createClass&#40;{
+        getInitialState: function&#40;&#41; {
+            return {
+                text: this.props.defaultText
+           }
+        },
+        handleTextChange: function&#40;text&#41; {
+            this.setState&#40;{text: text}&#41;;
+        },
+        render: function&#40;&#41; {
+            return &#40;
+                &lt;div&gt;
+                    &lt;TextInput
+                        onTextChanged={this.handleTextChange}
+                        inputValue={this.state.text}
+                    /&gt;
+                    &lt;p&gt;{this.state.text}&lt;/p&gt;
+                &lt;/div&gt;
+            &#41;;
+        }
+    }&#41;;
+</code></pre><p>We've had to change our <code>VariableText</code> component since we'll need to introduce some mutable state, the value of the text input, into our app. The <code>getInitialState</code> function is called once, before the component is mounted. The return value of this function will set the initial value of the <code>state</code> attribute for this component. Here we're setting it to the default text property. <code>VariableText</code> is going to be our root component, and will coordinate any state changes based on events triggered on its children.</p><p>Our first child component is <code>TextInput</code>. As mentioned before this component renders an input tag and calls the component's <code>handleChange</code> function whenever the value changes. <code>handleChange</code> gets the value from the input via the <code>refs</code> attribute. When we create components in <code>render</code>, we can attach a special property <code>ref</code> to it that lets us refer back to it later. Once we get the value, we execute a callback that was assigned in our root component. This is the typical way a child communicates with its parent, and we'll see this pattern occur throughout the rest of the example.</p><p>If you're following along on your own, this is what you should have so far: <div class='highlight example' id="ex1"> </div></p><p>Now let's introduce a slider to change the font size of our output text. We'll create a <code>FontSizeSlider</code> component that again renders an <code>input</code> tag.<pre><code class="javascript">    var FontSizeSlider = React.createClass&#40;{
+        handleChange: function&#40;&#41; {
+            var value = this.refs.slider.getDOMNode&#40;&#41;.value;
+            this.props.onSliderChanged&#40;value&#41;;
+            return false;
+        },
+        render: function&#40;&#41; {
+            return &#40;
+                &lt;div&gt;
+                    &lt;input
+                        ref=&quot;slider&quot;
+                        onChange={this.handleChange}
+                        value={this.props.size}
+                        type='range'
+                        min=&quot;9&quot;
+                        max=&quot;50&quot;
+                        step=&quot;0.2&quot; 
+                    /&gt;
+                    &lt;span&gt; Font Size: {this.props.size} &lt;/span&gt;
+                &lt;/div&gt;
+            &#41;;
+        }
+    }&#41;;
+</code></pre></p><p>This should look very similar to the <code>TextInput</code> component. Here is what changed on <code>VariableText</code>:</p><pre><code class="javascript">    getInitialState: function&#40;&#41; {
+        return {
+            size: this.props.defaultSize,
+            text: this.props.defaultText,
+        }
+    },
+    handleFontSizeChange: function&#40;size&#41; {
+        this.setState&#40;{size: size}&#41;;
+        this.refs.outputText.getDOMNode&#40;&#41;.style.fontSize = size + &quot;px&quot;;
+    },
+    render: function&#40;&#41; {
+        return &#40;
+            &lt;div&gt;
+                &lt;TextInput
+                    onTextChanged={this.handleTextChange}
+                    inputValue={this.state.text}
+                /&gt;
+                &lt;FontSizeSlider
+                    onSliderChanged={this.handleFontSizeChange}
+                    size={this.state.size}
+                /&gt;
+                &lt;p ref='outputText'&gt;{this.state.text}&lt;/p&gt;
+            &lt;/div&gt;
+        &#41;;
+    }
+</code></pre><p>Again this should look similar to the previous change. All we've done is add another child component and react to it changing it the same way as <code>TextInput</code>.</p><p>The <code>defaultSize</code> prop will also need to be passed into the root component:<pre><code class="html">    &lt;VariableText defaultText=&quot;Some text&quot; defaultSize={15}/&gt;,
+</code></pre></p><p>You should now see something like the following: <div class='highlight example' id="ex2"> </div></p><p>Let's create a few more sliders and see how React gives you the ability to reduce code duplication. These sliders will control the red, green, and blue levels of our output text.</p><p>Since these sliders will respond to change similarly to our <code>FontSizeSlider</code> component, we'll create a mixin: </p><pre><code class="javascript">    var HandleSliderChangeMixin = {
+        handleChange: function&#40;&#41; {
+            var value = this.refs.slider.getDOMNode&#40;&#41;.value;
+            this.props.onSliderChanged&#40;value&#41;;
+            return false;
+        }
+    };
+</code></pre><p>Each of these color sliders will be pretty similar. They will all range from 0 to 255, and have a label to display its value. Let's create a generic component first:</p><pre><code class="javascript">    var FontColorSlider = React.createClass&#40;{
+        mixins: &#91;HandleSliderChangeMixin&#93;,
+        render: function&#40;&#41; {
+            return &#40;
+                &lt;div&gt;
+                    &lt;input
+                        ref=&quot;slider&quot;
+                        onChange={this.handleChange}
+                        value={this.props.value}
+                        type='range'
+                        min=&quot;0&quot;
+                        max=&quot;255&quot;
+                        step=&quot;1&quot;
+                    /&gt;
+                    &lt;label&gt;{this.props.label}: {this.props.value}&lt;/label&gt;
+                &lt;/div&gt;
+            &#41;;
+        }
+    }&#41;;
+</code></pre><p>Note that we use the <code>HandleSliderChangeMixin</code> here. We'll also want to update <code>FontSizeSlider</code> to use this mixin.</p><p>Next we'll create a component that will create a <code>FontColorSlider</code> for each color value and communicate to our root component with the new values.</p><pre><code class="javascript">    var FontColorSliders = React.createClass&#40;{
+        handleChange: function&#40;r, g, b&#41; {
+            this.props.onColorsChanged&#40;{r: r, g: g, b: b}&#41;;
+        },
+        handleRedChange: function&#40;value&#41; {
+            this.handleChange&#40;value, this.props.colors.g, this.props.colors.b&#41;;
+        },
+        handleGreenChange: function&#40;value&#41; {
+            this.handleChange&#40;this.props.colors.r, value, this.props.colors.b&#41;;
+        },
+        handleBlueChange: function&#40;value&#41; {
+            this.handleChange&#40;this.props.colors.r, this.props.colors.g, value&#41;;
+        },
+        render: function&#40;&#41; {
+            return &#40;
+                &lt;div&gt;
+                    &lt;FontColorSlider
+                        onSliderChanged={this.handleRedChange}
+                        label=&quot;Red&quot;
+                        value={this.props.colors.r}
+                    /&gt;
+                    &lt;FontColorSlider
+                        onSliderChanged={this.handleGreenChange}
+                        label=&quot;Green&quot;
+                        value={this.props.colors.g}
+                    /&gt;
+                    &lt;FontColorSlider
+                        onSliderChanged={this.handleBlueChange}
+                        label=&quot;Blue&quot;
+                        value={this.props.colors.b}
+                    /&gt;
+                &lt;/div&gt;
+            &#41;;
+        }
+    }&#41;;
+</code></pre><p>Here are the changes to <code>VariableText</code> that we'll need to make:<pre><code class="javascript">    getInitialState: function&#40;&#41; {
+        return {
+            size: this.props.defaultSize,
+            text: this.props.defaultText,
+            colors: {r:0, g:0, b:0}
+        }
+    },
+    colorsToRGB: function&#40;colors&#41; {
+        return &quot;rgb&#40;&quot; + colors.r + &quot;,&quot; + colors.g + &quot;,&quot; + colors.b + &quot;&#41;&quot;;
+    },
+    handleColorsChange: function&#40;colors&#41; {
+        this.setState&#40;{colors: colors}&#41;;
+        this.refs.outputText.getDOMNode&#40;&#41;.style.color = this.colorsToRGB&#40;colors&#41;;
+    }
+</code></pre></p><p>Don't forget to add our new component to the <code>render</code> method:<pre><code class="html">    &lt;FontColorSliders
+        onColorsChanged={this.handleColorsChange}
+        colors={this.state.colors}
+    /&gt;
+</code></pre></p><p>Here is the final product: <div class='highlight example' id="ex3"> </div></p><p>The full source for this example can be found <a href='https://gist.github.com/mcramm/8636822'>here</a>.</p><p>Most of this should be pretty straight forward. Again, the goal here was to create something simple to get your feet wet with. There are a few opportunities to make things even simpler, but I'll leave that as an exercise for the reader.</p><p>If you plan on exploring more of React, then I recommend going through their <a href='http://facebook.github.io/react/docs/tutorial.html'>tutorial</a>, and checking out the different <a href='http://facebook.github.io/react/docs/component-specs.html'>life cycle methods</a>.</p><p>In an upcoming post, I'll be creating a similar app in <a href='https://github.com/swannodette/om'>Om</a>.</p><p><script src="https://fb.me/react-0.13.3.min.js"></script> <script src="/assets/js/react_intro/build/ex1.js"></script> <script src="/assets/js/react_intro/build/ex2.js"></script> <script src="/assets/js/react_intro/build/ex3.js"></script></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>https://mcramm.com/leiningen-templates.html</id>
+    <link href="https://mcramm.com/leiningen-templates.html"/>
+    <title>Leiningen Templates</title>
+    <updated>2014-01-06T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>Getting started with Clojurescript can be tough if you've never done it before, and once you do you might find yourself running through the same steps to get new projects into a structure that makes sense. In either case, the solution is to use a Leiningen template. My goal here is to show how easy it can be to create one of your own. Most templates are built for Clojure, but we'll be creating one for Clojurescript. On top of that we'll get ourselves started off with the new Om library.</p><p>Before beginning I want to make it clear that this isn't meant as an introduction to Clojurescript, <a href='https://github.com/swannodette/om'>Om</a>, or the framework it acts as an interface to (<a href='http://facebook.github.io/react/'>React</a>). This is meant to help you through creating a Leiningen template that will get you going quickly on a new project. If you want a bare-bones template for a new Clojurescript project, then I recommend <a href='https://clojars.org/mies/lein-template'>mies</a>.</p><p>Using Leiningen you can create new templates with a default project structure through the <code>new</code> task: <code>lein new &lt;template&gt; &lt;name&gt;</code>.</p><p>Let's create one together. Since we're creating one for the Om library, we'll call it 'Hum':</p><pre><code class="bash">    lein new template hum
+</code></pre><p>To install this template locally, <code>cd</code> into it and run <code>lein install</code>. Let's see what a project based off this bare template looks like. Run <code>lein new hum my-app</code>. You should get a directory tree with one file like this: <code>my-app/src/my&#95;app/foo.clj</code>.</p><p>The contents of this file should simply be <code>&#40;def my-app :foo&#41;</code>.</p><p>Open up <code>src/leiningen/new/hum.clj</code> and look at the <code>hum</code> function:</p><pre><code class="clojure">    &#40;defn hum
+      &quot;FIXME: write documentation&quot;
+      &#91;name&#93;
+      &#40;let &#91;data {:name name
+                  :sanitized &#40;name-to-path name&#41;}&#93;
+        &#40;main/info &quot;Generating fresh 'lein new' hum project.&quot;&#41;
+        &#40;-&gt;files data
+                 &#91;&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/foo.clj&quot; &#40;render &quot;foo.clj&quot; data&#41;&#93;&#41;&#41;&#41;
+</code></pre><p>Let's go through this line by line.  This function takes a name then creates a map, <code>data</code>, that contains this name and a sanitized version of it.  <code>name-to-path</code> simply takes a name and first replaces any dashes with underscores, then any periods with directory separators.  So a name like <code>lawrence-of.arabia</code> becomes <code>lawrence&#95;of/arabia</code>. For us, <code>hum</code> will remain unchanged.</p><p>The <code>main/info</code> line is simply printing some info to the user.</p><p><code>-&gt;files</code> is where the action happens. This function takes a map containing at least the key <code>name</code> and a variable number of "paths". Each path is a vector containing a string representing the path to a file, and some content for that file.</p><p>To understand the <code>render</code> call a little better, we need to look at the definition right above this function:</p><pre><code class="clojure">    &#40;def render &#40;renderer &quot;hum&quot;&#41;&#41;
+</code></pre><p>All this does is create a renderer that will process one of our templates and replace the appropriate variables. This templating is based off of mustache which you'll see in a moment. For now, all you need to know is that <code>render</code> will take the name of a file in <code>src/leiningen/new/hum</code> and replaces certain areas that we specify with our supplied <code>data</code>. If we don't supply any data then the file remains unchanged.</p><p>Keeping with our example, using this line:<pre><code class="clojure">    &#91;&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/foo.clj&quot; &#40;render &quot;foo.clj&quot; data&#41;&#93;
+</code></pre></p><p>Will create a file at <code>src/hum/foo.clj</code> with the content of the file <code>foo.clj</code>. Let's open that file up and see this templating in action:</p><pre><code class="clojure">    &#40;def {{site.lcbs}}name{{site.rcbs}} :foo&#41;
+</code></pre><p>Remember that the <code>:name</code> key in <code>data</code> is set the unsanitized value we supply.</p><p>Now lets start making some changes. Create a file at <code>src/leiningen/new/hum/project.clj</code> and give it the following content:</p><pre><code class="clojure">    &#40;defproject {{site.lcbs}}name{{site.rcbs}} &quot;0.1.0-SNAPSHOT&quot;
+      :description &quot;FIXME: write this!&quot;
+      :url &quot;http://example.com/FIXME&quot;
+
+      :dependencies &#91;&#91;org.clojure/clojure &quot;1.5.1&quot;&#93;
+                     &#91;org.clojure/clojurescript &quot;0.0-2138&quot;&#93;
+                     &#91;om &quot;0.1.4&quot;&#93;&#93;
+
+      :plugins &#91;&#91;lein-cljsbuild &quot;1.0.1&quot;&#93;&#93;
+
+      :cljsbuild {
+        :builds &#91;{:id &quot;dev&quot;
+                  :source-paths &#91;&quot;src&quot;&#93;
+                  :compiler {
+                    :output-to &quot;{{site.lcbs}}sanitized{{site.rcbs}}.js&quot;
+                    :output-dir &quot;out&quot;
+                    :optimizations :none
+                    :source-map true
+                    :externs &#91;&quot;om/externs/react.js&quot;&#93;}}&#93;}&#41;
+</code></pre><p>This is doing a bunch of stuff, but is a reasonably standard starting point. The main differences is that I've included the Om library as a dependency.</p><p>Now add this to the list of processed files in <code>hum.clj</code>:<pre><code class="clojure">    &#40;-&gt;files data
+             &#91;&quot;project.clj&quot; &#40;render &quot;project.clj&quot; data&#41;&#93;
+             &#91;&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/foo.clj&quot; &#40;render &quot;foo.clj&quot; data&#41;&#93;&#41;&#41;&#41;
+</code></pre></p><p>To test it out, run <code>lein new hum my-app</code>. Remember to remove the previous test first, and make sure you are in the root of the template project. Open up <code>my-app/project.clj</code> and marvel at the magic.</p><p>There are few more things we need to add to finish this off. First let's get rid of <code>foo.clj</code> by renaming it to a Clojurescript file, like <code>core.cljs</code>. Change the content of the file to this:</p><pre><code class="clojure">    &#40;ns {{site.lcbs}}name{{site.rcbs}}.core
+      &#40;:require &#91;om.core :as om :include-macros true&#93;
+                &#91;om.dom :as dom :include-macros true&#93;&#41;&#41;
+
+    &#40;enable-console-print!&#41;
+
+    &#40;def app-state
+      &#40;atom {:clicks 0}&#41;&#41;
+
+    &#40;defn button &#91;data owner&#93;
+      &#40;om/component
+        &#40;dom/div nil
+                 &#40;dom/button
+                   #js {:onClick #&#40;om/transact! data :clicks inc&#41;}
+                   &quot;Click Me&quot;&#41;
+                 &#40;dom/span #js {} &#40;:clicks data&#41;&#41;&#41;&#41;&#41;
+
+    &#40;defn my-app &#91;app owner&#93;
+      &#40;reify
+        om/IRender
+        &#40;render &#91;&#95;&#93;
+          &#40;om/build button app {}&#41;&#41;&#41;&#41;
+
+    &#40;om/root app-state my-app js/document.body&#41;
+</code></pre><p>Again the intent here is not to introduce you to Om, or Clojurescript. All you need to know for now is that this creates a button and counter that tracks how many times the button has been clicked.</p><p>Your list of processed files should look something like this:</p><pre><code class="clojure">    &#91;&quot;project.clj&quot; &#40;render &quot;project.clj&quot; data&#41;&#93;
+    &#91;&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/core.cljs&quot; &#40;render &quot;core.cljs&quot; data&#41;&#93;
+</code></pre><p>Let's add in one more file, <code>index.html</code>:</p><pre><code class="html">    &lt;html&gt;
+        &lt;body&gt;
+            &lt;script src=&quot;http://fb.me/react-0.8.0.js&quot;&gt;&lt;/script&gt;
+            &lt;script src=&quot;out/goog/base.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+            &lt;script src=&quot;{{site.lcbs}}sanitized{{site.rcbs}}.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+            &lt;script type=&quot;text/javascript&quot;&gt;goog.require&#40;&quot;{{site.lcbs}}sanitized{{site.rcbs}}.core&quot;&#41;;&lt;/script&gt;
+        &lt;/body&gt;
+    &lt;/html&gt;
+</code></pre><p>And to the list of processed files:</p><pre><code class="clojure">    &#91;&quot;index.html&quot; &#40;render &quot;index.html&quot; data&#41;&#93;
+    &#91;&quot;project.clj&quot; &#40;render &quot;project.clj&quot; data&#41;&#93;
+    &#91;&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/core.cljs&quot; &#40;render &quot;core.cljs&quot; data&#41;&#93;
+</code></pre><p>The full <code>hum</code> function should look similar to this:</p><pre><code class="clojure">    &#40;defn hum &#91;name&#93;
+      &#40;let &#91;data {:name name
+                  :sanitized &#40;name-to-path name&#41;}&#93;
+        &#40;main/info &quot;Generating a new Om project using the Hum template&quot;&#41;
+        &#40;-&gt;files data
+                 &#91;&quot;index.html&quot; &#40;render &quot;index.html&quot; data&#41;&#93;
+                 &#91;&quot;project.clj&quot; &#40;render &quot;project.clj&quot; data&#41;&#93;
+                 &#91;&quot;src/{{site.lcbs}}sanitized{{site.rcbs}}/core.cljs&quot; &#40;render &quot;core.cljs&quot; data&#41;&#93;&#41;&#41;&#41;
+</code></pre><p>Now we're done. Run <code>lein new hum my-app</code> again and <code>cd</code> into it. Run <code>lein deps</code> to get any dependencies, then <code>lein cljsbuild once dev</code>. Open up <code>index.html</code> and voila! You should see something like the following:</p><p><div class='highlight example' id="lein-templates-example"> </div></p><p><br /></p><p>If you're looking for more about creating templates, then I recommend the excellent [Leiningen docs](https://github.com/technomancy/leiningen/blob/stable/doc/TEMPLATES.md).</p><p>The full source for this template can be found <a href='https://github.com/mcramm/hum'>here</a>.</p><p><script src="/assets/js/lein-templates.js"></script></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>https://mcramm.com/specificity-in-clojurescript.html</id>
+    <link href="https://mcramm.com/specificity-in-clojurescript.html"/>
+    <title>Specificity in Clojurescript</title>
+    <updated>2014-01-02T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><a href='https://github.com/clojure/clojurescript/commit/571e156d2daa223dcef273106827e932283e2f93'>This commit</a> was pushed up to Clojurescript core recently, adding a new macro <code>specify</code>. This means we can now have instance-level implementations of protocols on specific values:</p><p><!&ndash;more&ndash;></p><pre><code class="clojure">    &#40;ns example1&#41;
+    &#40;enable-console-print!&#41;
+
+    &#40;defprotocol Listable
+      &#40;render &#91;items&#93;&#41;&#41;
+
+
+    &#40;def elements
+     &#40;specify &#91;&quot;one&quot; &quot;two&quot; &quot;three&quot;&#93;
+       Listable
+       &#40;render &#91;items&#93;
+         &#40;str
+           &quot;&lt;ul&gt;&quot;
+           &#40;apply str &#40;map #&#40;str &quot;&lt;li&gt;&quot; % &quot;&lt;/li&gt;&quot;&#41; items&#41;&#41;
+           &quot;&lt;/ul&gt;&quot;&#41;&#41;&#41;&#41;
+
+    &#40;println &#40;satisfies? Listable elements&#41;&#41;
+    ; true
+
+    &#40;println &#40;satisfies? Listable &#91;&quot;one&quot; &quot;two&quot; &quot;three&quot;&#93;&#41;&#41; ; false
+    ; false
+
+    &#40;println &#40;render elements&#41;&#41;
+    ; &lt;ul&gt;&lt;li&gt;one&lt;/li&gt;&lt;li&gt;two&lt;/li&gt;&lt;li&gt;three&lt;/li&gt;&lt;/ul&gt;
+
+    &#40;println elements&#41;
+    ; &#91;one two three&#93;
+
+    &#40;println &#40;= elements &#91;&quot;one&quot; &quot;two&quot; &quot;three&quot;&#93;&#41;&#41;
+    ; true
+    &#40;println &#40;identical? elements &#91;&quot;one&quot; &quot;two&quot; &quot;three&quot;&#93;&#41;&#41;
+    ; false
+</code></pre><p>This is pretty important feature for Clojurescript. <code>extend-type</code> is still powerful, but there is the odd time where you want to make a specific value conform to an interface. Because we're on Javascript, we can get this level of modularity without a huge performance cost.</p><p>Note that this relies on version <code>0.0-2138</code> of Clojurescript.</p><p>This change was authored by the indomitable <a href='http://swannodette.github.io/'>David Nolen</a> whose <a href='https://github.com/swannodette/om'>latest open source offering</a> in a Clojurescript interface over Facebook's <a href='http://facebook.github.io/react/'>React</a>.</p>]]>
+    </content>
+  </entry>
+</feed>

@@ -1,63 +1,47 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmnls="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>http://mcramm.com/</loc>
-    <lastmod>2017-04-15T13:21:00-07:00</lastmod>
+    <lastmod>2022-01-08T19:01:44+00:00</lastmod>
   </url>
-  
   <url>
-    <loc>http://mcramm.com/post/mailfeed-in-retrospect/</loc>
-    <lastmod>2017-04-15T13:21:00-07:00</lastmod>
+    <loc>https://mcramm.com/mailfeed-in-retrospect.html</loc>
+    <lastmod>2017-04-15T23:59:59+00:00</lastmod>
   </url>
-  
   <url>
-    <loc>http://mcramm.com/post/integration-tests-for-clojure-and-postgres/</loc>
-    <lastmod>2016-12-14T14:33:00-06:00</lastmod>
+    <loc>https://mcramm.com/integration-tests-for-clojure-and-postgres.html</loc>
+    <lastmod>2016-12-14T23:59:59+00:00</lastmod>
   </url>
-  
   <url>
-    <loc>http://mcramm.com/post/off-the-ground-with-clojure-and-postgres/</loc>
-    <lastmod>2016-12-12T20:10:00-06:00</lastmod>
+    <loc>https://mcramm.com/off-the-ground-with-clojure-and-postgres.html</loc>
+    <lastmod>2016-12-12T23:59:59+00:00</lastmod>
   </url>
-  
   <url>
-    <loc>http://mcramm.com/post/datomic-setup/</loc>
-    <lastmod>2015-07-22T20:10:00-06:00</lastmod>
+    <loc>https://mcramm.com/datomic-setup.html</loc>
+    <lastmod>2015-07-22T23:59:59+00:00</lastmod>
   </url>
-  
   <url>
-    <loc>http://mcramm.com/post/rack-and-ring-basics/</loc>
-    <lastmod>2015-04-15T18:04:47-06:00</lastmod>
+    <loc>https://mcramm.com/rack-and-ring-basics.html</loc>
+    <lastmod>2015-04-15T23:59:59+00:00</lastmod>
   </url>
-  
   <url>
-    <loc>http://mcramm.com/post/composing-functions/</loc>
-    <lastmod>2015-04-11T18:04:47-06:00</lastmod>
+    <loc>https://mcramm.com/composing-functions.html</loc>
+    <lastmod>2015-04-11T23:59:59+00:00</lastmod>
   </url>
-  
   <url>
-    <loc>http://mcramm.com/post/om-comparison/</loc>
-    <lastmod>2014-02-01T18:04:47-06:00</lastmod>
+    <loc>https://mcramm.com/om-comparison.html</loc>
+    <lastmod>2014-02-01T23:59:59+00:00</lastmod>
   </url>
-  
   <url>
-    <loc>http://mcramm.com/post/react-intro/</loc>
-    <lastmod>2014-01-26T18:04:47-06:00</lastmod>
+    <loc>https://mcramm.com/react-intro.html</loc>
+    <lastmod>2014-01-26T23:59:59+00:00</lastmod>
   </url>
-  
   <url>
-    <loc>http://mcramm.com/post/leiningen-templates/</loc>
-    <lastmod>2014-01-06T18:04:47-06:00</lastmod>
+    <loc>https://mcramm.com/leiningen-templates.html</loc>
+    <lastmod>2014-01-06T23:59:59+00:00</lastmod>
   </url>
-  
   <url>
-    <loc>http://mcramm.com/post/specificity-in-clojurescript/</loc>
-    <lastmod>2014-01-02T18:04:47-06:00</lastmod>
+    <loc>https://mcramm.com/specificity-in-clojurescript.html</loc>
+    <lastmod>2014-01-02T23:59:59+00:00</lastmod>
   </url>
-  
-  <url>
-    <loc>http://mcramm.com/projects/</loc>
-  </url>
-  
 </urlset>

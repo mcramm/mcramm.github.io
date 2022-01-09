@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>mcramm.com</title>
+    <meta charset="utf-8"/>
+    <meta name="title" content="http://mcramm.com/">
+    <link rel="canonical" href="http://mcramm.com/">
+    <meta property="og:title" content="mcrammm.com"/>
+    <meta property="og:url" content="http://mcramm.com/"/>
+    <meta property="og:site_name" content="mcrammm.com">
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/normalize.css" />
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-CXZL3L7461');
+    </script>
+  </head>
+  <body>
+    <div class="nav">
+      <a href="/">mcramm.com</a>
+      <a href="https://twitter.com/cramm" target="_blank" rel="noopener">twitter</a>
+      <a href="mailto:mike@mcramm.com" target="_blank" rel="noopener">email</a>
+      <a href="https://github.com/mcramm" target="_blank" rel="noopener">github</a>
+      <a href="/atom.xml" target="_blank" rel="noopener">rss</a>
+    </div>
+    <div class="wrapper">
+      <h1>Integration Testing with Clojure and Postgres</h1>
+<p>If you're writing a non-trivial application that will run in production, it's usually a good idea to have some automated way to make sure that all the pieces are working together correctly. On a lot of projects this is going to mean integration tests. How granular these tests become will depend on your level of paranoia and <em>how</em> critical those integration points are to your application as a whole.</p><p>In this post I'm going to use an example [from a previous article](http://mcramm.com/post/off-the-ground-with-clojure-and-postgres/) and add some integration tests to ensure that we're creating and updating accounts correctly.</p><p>It's worth noting that my opinion on integration tests is that they should act as <em>smoke</em> tests, except in some extreme cases. If you find yourself testing complex business logic and needing to integrate with the database to do so, then chances are you're doing something wrong. Integration tests should not be a replacement for QA or to compensate for bad design. But the world isn't perfect, and sometimes a convoluted, slow running set of integration tests is the best you can do.</p><p>Alright, enough postulating. Let's move on.  Here is the namespace that we'll be targeting for our tests:</p><pre><code class="clojure">&#40;ns postgres-example.entities.accounts
+  &#40;:require &#91;clj-time.jdbc&#93;
+
+            &#91;postgres-example.sql :as sql&#93;
+            &#91;postgres-example.components.postgres&#93;&#41;
+  &#40;:import &#91;postgres&#95;example.components.postgres Postgres&#93;&#41;&#41;
+
+
+&#40;defprotocol AccountOps
+  &#40;by-id &#91;this id&#93;&#41;
+  &#40;create! &#91;this status&#93;&#41;
+  &#40;set-opened! &#91;this account&#93;&#41;
+  &#40;set-closed! &#91;this account&#93;&#41;&#41;
+
+&#40;defn sql-&gt;account &#91;sql-entity&#93;
+  &#40;when &#40;:id sql-entity&#41;
+    #:account {:id &#40;:id sql-entity&#41;
+               :status &#40;:status sql-entity&#41;
+               :created-at &#40;:created&#95;at sql-entity&#41;
+               :updated-at &#40;:updated&#95;at sql-entity&#41;}&#41;&#41;
+
+&#40;def opened-status &quot;open&quot;&#41;
+&#40;def closed-status &quot;closed&quot;&#41;
+
+&#40;extend-protocol AccountOps
+  Postgres
+  &#40;by-id &#91;store id&#93;
+    &#40;-&gt; &#40;sql/account-by-id &#40;:uri store&#41; {:id id}&#41;
+        sql-&gt;account&#41;&#41;
+
+  &#40;create! &#91;store status&#93;
+    &#40;let &#91;result &#40;sql/insert-account! &#40;:uri store&#41; {:status status}&#41;&#93;
+      &#40;by-id store &#40;:id result&#41;&#41;&#41;&#41;
+
+  &#40;set-opened! &#91;store account&#93;
+    &#40;sql/update-account! &#40;:uri store&#41; {:id &#40;:account/id account&#41;
+                                       :status opened-status}&#41;
+    &#40;by-id store &#40;:account/id account&#41;&#41;&#41;
+
+  &#40;set-closed! &#91;store account&#93;
+    &#40;sql/update-account! &#40;:uri store&#41; {:id &#40;:account/id account&#41;
+                                       :status closed-status}&#41;
+    &#40;by-id store &#40;:account/id account&#41;&#41;&#41;&#41;
+</code></pre><p>This namespace's sole responsibility is to provide a touchpoint for the rest of our app to <em>where</em> we're storing our accounts data. This is where we go when we need to fetch or update something in our database. The reason we defined the <code>AccountOps</code> protocol is that we may want to extend these operations over a different store, like an AtomStore, when we move on to writing tests for other pieces of the system.</p><blockquote><p> I think it's worth mentioning that I feel like there could be a good fit  for <a href='http://clojure.org/about/spec'>clojure.spec</a> here. I'll probably explore  this in a future post. </p></blockquote><p>To start we'll need some way to actually run our tests, both from the REPL and outside if it. For outside the REPL, we can just use <code>lein test</code>. For inside though, we're going to add a <code>test</code> method to <code>dev/user.clj</code> that uses the awesome <a href='https://github.com/weavejester/eftest'>Eftest</a> to find and run our tests.</p><pre><code class="clojure">; ... truncated ...
+&#40;defn test &#91;&#93;
+  &#40;let &#91;path &quot;test/postgres&#95;example/integration&quot;&#93;
+    &#40;eftest/run-tests &#40;eftest/find-tests path&#41;&#41;&#41;&#41;
+</code></pre><p>Note that I had to make some other changes here as well to ensure that we have a separate test database loaded up and migrated to the same version we're developing against. For the full list of changes to this file, see [this commit](https://github.com/mcramm/postgres-example/commit/0c1fbe527b442ebdbc342385cc75b0beef2171fc#diff-f83d20da641ba06134b62eab278aa907).</p><p>Let's make sure this is working with a dummy test. Create a file at <code>test/postgres&#95;example/integration/entities/accounts.clj</code> and add the following content:</p><pre><code class="clojure">&#40;ns postgres-example.integration.entities.accounts
+  &#40;:require &#91;clojure.test :refer :all&#93;&#41;&#41;
+
+&#40;deftest foo-test
+  &#40;testing &quot;our setup&quot;
+    &#40;is &#40;= 1 2&#41;&#41;&#41;&#41;
+</code></pre><p>Running <code>&#40;test&#41;</code> at the REPL should display a failure. If it didn't, then you should stop here and figure out why. If the test failed successfully, we can move on to writing something a little more useful. We're going to write this test <em>first</em>, then figure out some of the missing pieces in a minute.</p><pre><code class="clojure">&#40;ns postgres-example.integration.entities.accounts
+  &#40;:require &#91;clojure.test :refer :all&#93;
+            &#91;postgres-example.entities.accounts :refer :all&#93;&#41;&#41;
+
+&#40;deftest create!-test
+  &#40;testing &quot;create! creates and returns an account&quot;
+    &#40;let &#91;account &#40;create! store &quot;open&quot;&#41;&#93;
+      &#40;is &#40;not &#40;nil? &#40;:account/id account&#41;&#41;&#41;&#41;
+      &#40;is &#40;= &quot;open&quot; &#40;:account/status account&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>Pretty easy right? All we're doing with this test is ensuring that the result of calling <code>create!</code> returns a map that has an <code>:account/id</code> set, and was assigned the correct status. But as I said, we're missing a couple of things. First, we haven't defined what <code>store</code> is in this context. Second, we should be cleaning up any data we create once the test is completed.</p><p>To handle both of these problem we're going to create a <code>test-helpers</code> namespace that our tests can reference to get a copy of the <code>store</code> (that we'll point at our test database), and we'll create a <a href='https://clojuredocs.org/clojure.test/use-fixtures'>fixture</a> that will execute some code to clean up any test data:</p><pre><code class="clojure">&#40;ns postgres-example.test-helpers
+  &#40;:require &#91;clojure.java.jdbc :as jdbc&#93;
+            &#91;environ.core :refer &#91;env&#93;&#93;
+            &#91;postgres-example.components.postgres :as postgres&#93;&#41;&#41;
+
+&#40;def &#94;:dynamic store nil&#41;
+
+&#40;def test-db-uri &#40;str &#40;:database-url env&#41; &quot;&#95;test&quot;&#41;&#41;
+
+&#40;defn db-transaction-fixture &#91;f&#93;
+  &#40;jdbc/with-db-transaction &#91;conn test-db-uri&#93;
+    &#40;jdbc/db-set-rollback-only! conn&#41;
+    &#40;binding &#91;store &#40;postgres/build conn&#41;&#93;
+      &#40;f&#41;&#41;&#41;&#41;
+</code></pre><p>From the top down, we create a dynamic var for <code>store</code> that we'll re-bind to a new connection for every test. That connection will happen to be a database transaction that we'll instruct to rollback when it's complete, instead of simply comitting.</p><blockquote><p> Credit to [this post by Eric  Normand](http://www.lispcast.com/clojure-database-test-faster). Prior to this I  had been using an <code>atom</code> instead of a dynamic var and was pulling my hair out  trying to get my tests to run without hitting concurrency issues. Changing it to  a dynamic var and leveraging <code>binding</code> made things quite a bit nicer. (and quite a bit faster too) </p></blockquote><p>We'll need to require this namespace in our test, and tell our tests to use this <code>db-transaction-fixture</code> fixture:</p><pre><code class="clojure">&#40;ns postgres-example.integration.entities.accounts
+  &#40;:require &#91;clojure.test :refer :all&#93;
+            &#91;postgres-example.test-helpers :refer &#91;store db-transaction-fixture&#93;&#93;
+            &#91;postgres-example.entities.accounts :refer :all&#93;&#41;&#41;
+
+&#40;use-fixtures :each db-transaction-fixture&#41;
+
+&#40;deftest create!-test
+  &#40;testing &quot;create! creates and returns an account&quot;
+    &#40;let &#91;account &#40;create! store &quot;open&quot;&#41;&#93;
+      &#40;is &#40;not &#40;nil? &#40;:account/id account&#41;&#41;&#41;&#41;
+      &#40;is &#40;= &quot;open&quot; &#40;:account/status account&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>Running <code>&#40;test&#41;</code> at the repl should be successful now. Let's fill out the rest of our tests. I'm going to include the whole thing since it's so short:</p><pre><code class="clojure">
+&#40;ns postgres-example.integration.entities.accounts
+  &#40;:require &#91;clojure.test :refer :all&#93;
+            &#91;postgres-example.test-helpers :refer &#91;store db-transaction-fixture&#93;&#93;
+            &#91;postgres-example.entities.accounts :refer :all&#93;&#41;&#41;
+
+&#40;use-fixtures :each db-transaction-fixture&#41;
+
+&#40;deftest create!-test
+  &#40;testing &quot;create! creates and returns an account&quot;
+    &#40;let &#91;account &#40;create! store &quot;open&quot;&#41;&#93;
+      &#40;is &#40;not &#40;nil? &#40;:account/id account&#41;&#41;&#41;&#41;
+      &#40;is &#40;= &quot;open&quot; &#40;:account/status account&#41;&#41;&#41;&#41;&#41;&#41;
+
+&#40;deftest by-id-test
+  &#40;testing &quot;by-id returns the correct account by id&quot;
+    &#40;let &#91;account &#40;create! store &quot;open&quot;&#41;&#93;
+      &#40;is &#40;= account
+             &#40;by-id store &#40;:account/id account&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+
+&#40;deftest set-opened!-test
+  &#40;testing &quot;set-opened! sets an account's status to opened-status&quot;
+    &#40;let &#91;account &#40;create! store &quot;closed&quot;&#41;&#93;
+      &#40;set-opened! store account&#41;
+      &#40;is &#40;= opened-status
+             &#40;:account/status &#40;by-id store &#40;:account/id account&#41;&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+
+&#40;deftest set-closed!-test
+  &#40;testing &quot;set-closed! sets an account's status to closed-status&quot;
+    &#40;let &#91;account &#40;create! store &quot;open&quot;&#41;&#93;
+      &#40;set-closed! store account&#41;
+      &#40;is &#40;= closed-status
+             &#40;:account/status &#40;by-id store &#40;:account/id account&#41;&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>These 4 tests run in about 0.022 seconds on my machine. If you check your local postgres database, you should (hopefully) see that your accounts table is empty:</p><pre><code class="bash">$ psql -U postgres&#95;example postgres&#95;example&#95;test
+
+postgres&#95;example&#95;test=# select &#42; from accounts;
+┌────┬────────┬────────────┬────────────┐
+│ id │ status │ created&#95;at │ updated&#95;at │
+├────┼────────┼────────────┼────────────┤
+└────┴────────┴────────────┴────────────┘
+&#40;0 rows&#41;
+
+Time: 1.330 ms
+</code></pre><p>The <code>id</code> column is an auto-incrementing sequence though, so you should still see that changing:</p><pre><code class="bash">
+postgres&#95;example&#95;test=# select currval&#40;'accounts&#95;id&#95;seq'::regclass&#41;;
+┌─────────┐
+│ currval │
+├─────────┤
+│      47 │
+└─────────┘
+&#40;1 row&#41;
+
+Time: 1.910 ms
+</code></pre><p>I'll reiterate that integration tests should be used sparingly, and only in critical places where two or more <em>things</em> are interacting together. This pattern is the same one I apply to all Clojure projects that interact with Postgres.</p><p>Hopefully this has been helpful to someone :). If you notice any errors in this post, <a href='https://twitter.com/cramm'>please let me know</a>.</p>
+<div><em>Published: 2016-12-14</em></div>
+
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          hljs.highlightElement(el);
+        });
+      });
+    </script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>mcramm.com</title>
+    <meta charset="utf-8"/>
+    <meta name="title" content="http://mcramm.com/">
+    <link rel="canonical" href="http://mcramm.com/">
+    <meta property="og:title" content="mcrammm.com"/>
+    <meta property="og:url" content="http://mcramm.com/"/>
+    <meta property="og:site_name" content="mcrammm.com">
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/normalize.css" />
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-CXZL3L7461');
+    </script>
+  </head>
+  <body>
+    <div class="nav">
+      <a href="/">mcramm.com</a>
+      <a href="https://twitter.com/cramm" target="_blank" rel="noopener">twitter</a>
+      <a href="mailto:mike@mcramm.com" target="_blank" rel="noopener">email</a>
+      <a href="https://github.com/mcramm" target="_blank" rel="noopener">github</a>
+      <a href="/atom.xml" target="_blank" rel="noopener">rss</a>
+    </div>
+    <div class="wrapper">
+      <h1>Rack and Ring Basics</h1>
+<p>In the Clojure world, when you want to write a web app, you will almost certainly be using <a href='https://github.com/ring-clojure/ring'>Ring</a>. Ring is directly inspired by <a href='https://rack.github.io/'>Rack</a>, the defacto webserver abstraction for frameworks in Ruby.</p><p>The two are conceptually very similar, but there are some slight differences (aside from language) that might be interesting to highlight. I won't be going too in depth with this post, and will focus instead on the basics of using Rack and Ring. I thought I would just get that out of the way before your expectations got too high.</p><p>It's worth noting that most apps won't actually use either Rack or Ring directly like we will here. It would be a lot faster and safer to use something like <a href='http://www.sinatrarb.com/'>Sinatra</a> or <a href='http://rubyonrails.org/'>Rails</a> for Rack, and <a href='https://github.com/technomancy/compojure'>Compojure</a> or <a href='http://www.luminusweb.net/'>Luminus</a> for Ring.</p><p>If you want to see the final versions of these examples in their full forms please click:</p><ul><li><a href='https://github.com/mcramm/rack-basics'>Here for the Rack example</a></li><li><a href='https://github.com/mcramm/ring-basics'>Here for the Ring example</a></li></ul><h2>The Minimal First Step</h2><p>Let's start with Rack, since it's obviously the more popular of the two. I'm going to assume that you can <a href='https://github.com/rack/rack#installing-with-rubygems'>read</a> and get Rack installed if you don't already have it. If you can't read, then I have nothing to worry about because this will all look like gobbledygook to you. I hope ASCII art will serve as an appropriate apology  :-).</p><p>The first step in getting either application off the ground is to create a entry point. In the case of Rack this is will be an object with a <code>call</code> method. This method needs to return the basic structure required for a Rack response, which is an array containing the response status, headers and body:</p><pre><code class="ruby">    # my&#95;rack&#95;app.rb
+    class MyRackApp
+      def call&#40;env&#41;
+        &#91;'200', {'Content-Type' =&gt; 'text/html'}, &#91;'Hello World'&#93;&#93;
+      end
+    end
+</code></pre><p>Note how simple this is. This is just a regular old ruby object with a method that returns a triplet. It knows nothing about Rack or anything else that might be using it.</p><p>Unfortunately this does absolutely <em>nothing</em>, which is pretty boring.  To boot this app up, we'll add a <code>config.ru</code> to the current directory:</p><pre><code class="ruby"># config.ru
+require 'rack'
+require&#95;relative 'my&#95;rack&#95;app'
+
+run MyRackApp.new
+</code></pre><p>We can now run <code>rackup</code> from our current directory and, navigating to <a href='http://localhost:9292/'>http://localhost:9292</a>, we should see our "Hello World" response.</p><p>Getting our Ring app off the ground requires a little bit more setup, but we'll be using <a href='http://leiningen.org/'>Leiningen</a> to do most of the trivial stuff for us.</p><p>First let's create a new project with <code>lein new app my-ring-app</code>. Add <code>&#91;ring &quot;1.3.2&quot;&#93;</code> to the list of dependencies in <code>project.clj</code>. You might need to run <code>lein deps</code> to download the Ring library if you don't already have it.</p><p>Ring is similar to Rack in that we need to give it a function that returns some standard response. Ring expects a map instead of an array:</p><pre><code class="clojure">    &#40;ns my-ring-app.app&#41;
+
+    &#40;defn handler &#91;request&#93;
+      {:status 200
+       :headers {&quot;Content-Type&quot; &quot;text/html&quot;}
+       :body &quot;Hello World&quot;}&#41;
+</code></pre><p>Calling the function "handler" above is simply the convention in Clojure-land. Like the Rack example, we need some way to boot this app up. Some examples will mash this boot process together with the code we wrote above but I prefer to keep this separate. Plus it makes it similar to our Rack example so win-win,      right?</p><pre><code class="clojure">    &#40;ns my-ring-app.core
+      &#40;:require &#91;ring.adapter.jetty :refer &#91;run-jetty&#93;&#93;
+                &#91;my-ring-app.app :as app&#41;
+      &#40;:gen-class&#41;&#41;
+
+    &#40;defn -main &#91;&amp; args&#93;
+      &#40;run-jetty app/handler {:port 3000}&#41;&#41;
+</code></pre><p> Now we can just do <code>lein run</code> from our project root. Navigating to  <a href='http://localhost:3000/'>http://localhost:3000</a> should display a very familiar page.</p><h2>Middleware</h2><p> Middleware is essentially a series a steps a request has to go through in order  to generate a response. Once a response is generated, it will return the  response back up through any middleware in reverse order.</p><p> We're going to introduce some middleware to both of our applications that translates "Hello" to it's French counterpart "Bonjour". Why French? Well I'm Canadian, and if I don't provide some kind of French content, then the CRTC might come and yell at me for not being fair.</p><p>I also don't know how to say "Hello" in any other language off the top of my head and I'm too lazy to do any more research so we are going to stick with "Bonjour".</p><p>In Rack our middleware is going to be another ruby object, except that we will actually be doing something with that <code>env</code> parameter we saw in our earlier example. You will notice that our middleware bears some resemblance to our running <code>MyRackApp</code></p><pre><code class="ruby">    # hello&#95;translator.rb
+    class HelloTranslator
+      def initialize&#40;app&#41;
+        @app = app
+      end
+
+      def translate&#95;hello&#40;str&#41;
+        str.gsub&#40;/Hello/, 'Bonjour'&#41;
+      end
+
+      def call&#40;env&#41;
+        status, headers, body = @app.call&#40;env&#41;
+        body.map! { |str| translate&#95;hello&#40;str&#41; }
+        &#91;status, headers, body&#93;
+      end
+    end
+</code></pre><p>First we initialize the middleware with our running application. Calling <code>@app.call&#40;env&#41;</code> simply passes the request down the stack. If there was another piece of middleware beneath us, then it would be the next reciever of our <code>env</code> parameter. This would keep going until a response is generated, which in our case will be from <code>MyRackApp</code> that we defined earlier. Our return value needs to be the same status, headers and body array in order for Rack to be able to serve the response.</p><p>If you ran <code>rackup</code> right now, then you wouldn't see any change. This is because we actually need to <em>tell</em> Rack about this is middleware. To accomplish this we need to require and <code>use</code> it in our <code>config.ru</code>:</p><pre><code class="ruby">    # config.ru
+    require 'rack'
+    require&#95;relative 'my&#95;rack&#95;app'
+    require&#95;relative 'hello&#95;translator'
+
+    use HelloTranslator
+    run MyRackApp.new
+</code></pre><p>Running <code>rackup</code> and refreshing the previous page will now show a lovely greeting in the famously romantic French language.</p><p>Again Ring is very similar. The biggest difference is that the middleware is just a function instead of an object:</p><pre><code class="clojure">    &#40;ns my-ring-app.middleware
+      &#40;:require &#91;clojure.string :as s&#93;&#41;&#41;
+
+    &#40;defn translate-hello &#91;body&#93;
+     &#40;s/replace body &quot;Hello&quot; &quot;Bonjour&quot;&#41;&#41;
+
+    &#40;defn wrap-hello-translator &#91;handler&#93;
+      &#40;fn &#91;request&#93;
+        &#40;let &#91;response &#40;handler request&#41;&#93;
+          &#40;update-in response &#91;:body&#93; translate-hello&#41;&#41;&#41;&#41;
+</code></pre><p>Again, prefixing our middleware with <code>wrap</code> is convention.  As before we will need to require and use this middleware in the namespace responsible for booting the app:</p><pre><code class="clojure">    &#40;ns my-ring-app.core
+      &#40;:require &#91;ring.adapter.jetty :refer &#91;run-jetty&#93;&#93;
+                &#91;my-ring-app.app :as app&#93;
+                &#91;my-ring-app.middleware :refer &#91;wrap-hello-translator&#93;&#93;&#41;
+      &#40;:gen-class&#41;&#41;
+
+    &#40;defn -main &#91;&amp; args&#93;
+      &#40;run-jetty &#40;-&gt; app/handler
+                     wrap-hello-translator&#41;
+                 {:port 3000}&#41;&#41;
+</code></pre><h2>Dealing With Query Params</h2><p>I was originally going to end the post here with an amazingly concise, beautifully written conclusion to tie a nice little bow over everything. Instead I'm going to take this comparison one step further and really phone in the whole "wrapping things up" section that is structurally necessary.</p><p>I want to show something that is <em>much</em> more common than our mostly pointless "Hello" to "Bonjour" translation app that we've written. I'm going to show you how Ring and Rack each let you access any query parameters that may have come along with the request.</p><p>Let's say that we want to let the request specify who we want to say "Bonjour" to, and "World" if nothing is provided. The request can tell us what name to use by simply providing a <code>name</code> parameter.</p><p>With the Rack example, we aren't going to touch anything except for our base application:</p><pre><code class="ruby">    # my&#95;rack&#95;app.rb
+    class MyRackApp
+      def call&#40;env&#41;
+        request = Rack::Request.new&#40;env&#41;
+        subject = request.params.fetch&#40;'name', 'World'&#41;
+        body = &#91;&quot;Hello #{subject}&quot;&#93;
+
+        &#91;'200', {'Content-Type' =&gt; 'text/html'}, body&#93;
+      end
+    end
+</code></pre><p>The change here is that we wrap the <code>env</code> parameter in a <code>Rack::Request</code> object, then attempt to fetch the <code>'name'</code> parameter. If one isn't provided, then we default to <code>'World'</code>. Our response is essentially the same.</p><p>Opening <a href='http://localhost:9292?name=Pierre'>http://localhost:9292?name=Pierre</a>, we should see "Bonjour Pierre". If we omit the <code>name</code> parameter entirely, then we should see "Bonjour World" as before.</p><p>Ring's approach is slightly different. Instead of wrapping the request in another object, there is a set of very common default middleware that we can choose to include. One of these is <code>wrap-params</code>, which will add a <code>:params</code> key to the request and take any parameters out of the query string and put into a map at that key.</p><p>I've included full-versions of each file here to keep things easy to follow. Additions to <code>my-ring-app.core</code> are noted:</p><pre><code class="clojure">    &#40;ns my-ring-app.core
+      &#40;:require &#91;ring.adapter.jetty :refer &#91;run-jetty&#93;&#93;
+                &#91;ring.middleware.params :refer &#91;wrap-params&#93;&#93; ; NEW
+                &#91;my-ring-app.app :as app&#93;
+                &#91;my-ring-app.middleware :refer &#91;wrap-hello-translator&#93;&#93;&#41;
+      &#40;:gen-class&#41;&#41;
+
+    &#40;defn -main &#91;&amp; args&#93;
+      &#40;run-jetty &#40;-&gt; app/handler
+                     wrap-params ; NEW
+                     wrap-hello-translator&#41; {:port 3000}&#41;&#41;
+</code></pre><pre><code class="clojure">    &#40;ns my-ring-app.app&#41;
+
+    &#40;defn handler &#91;request&#93;
+      &#40;let &#91;subject &#40;get-in request &#91;:params &quot;name&quot;&#93; &quot;World&quot;&#41;&#93;
+        {:status 200
+         :headers  {&quot;Content-Type&quot; &quot;text/html&quot;}
+         :body &#40;format &quot;Hello %s&quot; subject&#41;}&#41;&#41;
+</code></pre><p>The difference between the two examples is the fact that the query string processing is handled in middleware with Ring, while with Rack I wrapped it. I tried to find a similar piece of middleware for Rack but after an hour of clicking around I came up short. There is some stuff in <a href='https://github.com/rack/rack-contrib'>rack-contrib</a> that comes close, but not close enough.  I'm sure one exists and I'll update this post if I can find something analogous to Ring's <code>wrap-params</code>.<h2></h2></p><p>I hope this been at least a little bit enlightening. I found the basics of Ring and Rack to be <em>so similiar</em> that I couldn't help but write a post about the two. The differences in application structure and methodologies become more pronounced the  more complicated your stack becomes, but this is usually due to stuff built <em>on top</em> of them.</p><p>In future posts I hope to show something a bit more useful built with Ring.</p>
+<div><em>Published: 2015-04-15</em></div>
+
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          hljs.highlightElement(el);
+        });
+      });
+    </script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/main.js"></script>
+  </body>
+</html>

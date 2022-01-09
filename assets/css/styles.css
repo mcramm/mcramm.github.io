@@ -1,0 +1,85 @@
+@font-face {
+    font-family: 'Source Serif Pro';
+    src: url('/assets/fonts/SourceSerifPro-Regular.woff2') format('woff2'),
+        url('/assets/fonts/SourceSerifPro-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Source Serif Pro';
+    src: url('/assets/fonts/SourceSerifPro-Semibold.woff2') format('woff2'),
+        url('/assets/fonts/SourceSerifPro-Semibold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Source Serif Pro';
+    src: url('/assets/fonts/SourceSerifPro-Bold.woff2') format('woff2'),
+        url('/assets/fonts/SourceSerifPro-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+body {
+  width: 800px;
+  margin: 0 auto 0 5em;
+  font-family: 'Source Serif Pro';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 18px;
+  background-color: #FEFEFA;
+}
+
+a {
+  color: #2077B2;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+a:visited {
+  text-decoration: none;
+  color: #2077B2;
+  transition: all 0.2s ease;
+}
+
+a:hover {
+  color: #154D73;
+  text-decoration: underline;
+}
+
+ul.posts {
+  list-style-type: none;
+  margin: 0 0.5em;
+  padding: 0;
+}
+
+ul.posts li {
+  margin: 0.5em 0;
+}
+
+em.published-at {
+  font-size: 0.8em;
+  color: gray;
+}
+
+div.nav {
+  font-size: 0.8em;
+}
+
+div.nav a {
+  margin: 0 0.5em;
+}
+
+div.nav a:first-child {
+  margin: 0 0.5em 0 0;
+}
+
+div.nav a:last-child {
+  margin: 0 0 0 0.5em;
+}
+

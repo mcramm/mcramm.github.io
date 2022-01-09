@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>mcramm.com</title>
+    <meta charset="utf-8"/>
+    <meta name="title" content="http://mcramm.com/">
+    <link rel="canonical" href="http://mcramm.com/">
+    <meta property="og:title" content="mcrammm.com"/>
+    <meta property="og:url" content="http://mcramm.com/"/>
+    <meta property="og:site_name" content="mcrammm.com">
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/normalize.css" />
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-CXZL3L7461');
+    </script>
+  </head>
+  <body>
+    <div class="nav">
+      <a href="/">mcramm.com</a>
+      <a href="https://twitter.com/cramm" target="_blank" rel="noopener">twitter</a>
+      <a href="mailto:mike@mcramm.com" target="_blank" rel="noopener">email</a>
+      <a href="https://github.com/mcramm" target="_blank" rel="noopener">github</a>
+      <a href="/atom.xml" target="_blank" rel="noopener">rss</a>
+    </div>
+    <div class="wrapper">
+      <h1>Om Comparison</h1>
+<p>In my <a href='http://mcramm.com/2014/01/26/react-intro.html'>last post</a> I built a simple text manipulation widget with <a href='http://facebook.github.io/react/'>React</a>. I recommend reading through that post first, before this one. As promised, I've built the same widget in <a href='https://github.com/swannodette/om'>Om</a>, a ClojureScript library that sits on top of React.</p><p><!&ndash;more&ndash;></p><p>If you want to follow along, you'll need to install Leiningen and run:</p><pre><code class="bash">    lein new mies-om om-intro
+</code></pre><p><code>cd</code> into the new directory and make your <code>project.clj</code> look like the following:<pre><code class="clojure">    &#40;defproject om-intro &quot;0.1.0-SNAPSHOT&quot;
+      :description &quot;FIXME: write this!&quot;
+      :url &quot;http://example.com/FIXME&quot;
+
+      :dependencies &#91;&#91;org.clojure/clojure &quot;1.5.1&quot;&#93;
+                     &#91;org.clojure/clojurescript &quot;0.0-2138&quot;&#93;
+                     &#91;org.clojure/core.async &quot;0.1.267.0-0d7780-alpha&quot;&#93;
+                     &#91;om &quot;0.3.1&quot;&#93;
+                     &#91;com.facebook/react &quot;0.8.0.1&quot;&#93;&#93;
+
+      :plugins &#91;&#91;lein-cljsbuild &quot;1.0.1&quot;&#93;&#93;
+
+      :source-paths &#91;&quot;src&quot;&#93;
+
+      :cljsbuild {
+        :builds &#91;{:id &quot;dev&quot;
+                  :source-paths &#91;&quot;src&quot;&#93;
+                  :compiler {
+                    :output-to &quot;om&#95;intro.js&quot;
+                    :output-dir &quot;out&quot;
+                    :optimizations :none
+                    :source-map true}}&#93;}&#41;
+</code></pre></p><p>You will also want to update your <code>index.html</code> look like this:</p><pre><code class="html">    &lt;html&gt;
+        &lt;body&gt;
+            &lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
+            &lt;script src=&quot;http://fb.me/react-0.8.0.js&quot;&gt;&lt;/script&gt;
+            &lt;script src=&quot;out/goog/base.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+            &lt;script src=&quot;om&#95;intro.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+            &lt;script type=&quot;text/javascript&quot;&gt;goog.require&#40;&quot;om&#95;intro.core&quot;&#41;;&lt;/script&gt;
+        &lt;/body&gt;
+    &lt;/html&gt;
+</code></pre><p>Get any missing dependencies with <code>lein deps</code>, then build the project with `lein cljsbuild once dev<code>. Open </code>index.html` in a browser and you should see the bare-bones example that comes with this template.</p><p>For the rest of this tutorial, I recommend running <code>lein cljsbuild auto dev</code> in a separate terminal. The first time the project gets built takes a second or two, but after the JVM has warmed up, it takes just milliseconds.</p><p>The snippets above are for a development build of the project. The final example I link to at the end of this post contains a release build, that generates a single JavaScript file.</p><p>With the setup out of the way we can start rebuilding this widget.</p><pre><code class="clojure">    &#40;ns om-intro.core
+      &#40;:require &#91;om.core :as om :include-macros true&#93;
+                &#91;om.dom :as dom :include-macros true&#93;&#41;&#41;
+
+    &#40;def app-state &#40;atom {:text &quot;Some Text&quot;}&#41;&#41;
+
+    &#40;defn my-widget &#91;app owner&#93;
+      &#40;reify
+        om/IRender
+        &#40;render &#91;this&#93;
+          &#40;dom/div nil &#40;:text app&#41;&#41;&#41;&#41;&#41;
+
+    &#40;om/root
+      app-state
+      my-widget
+      &#40;. js/document &#40;getElementById &quot;app&quot;&#41;&#41;&#41;
+</code></pre><p>This is analogous to the first example in the React version; all we're doing is defining a component that renders a <code>div</code> containing the value of <code>:text</code> from our application state.</p><p>There are already a differences though. First, we've moved all of our state into an atom. Components are given <em>cursors</em> into this application state that they can use to read/update.</p><p>Second, our <code>my-widget</code> component is returning a reified object that satisfies the <code>om/IRender</code> interface. The <code>render</code> method simply returns the aforementioned <code>div</code>.</p><p>You should see something like this:</p><p><div class='highlight example' id="ex1"> </div></p><p>Like our first example in the React version, this is pretty boring. Let's add in the text input.</p><p>We're going to be using <a href='https://github.com/clojure/core.async'>core.async</a> at the edges of our components, wherever our users will be interacting with the various <code>input</code>s we'll eventually have.</p><p>Change the namespace declaration to the following:</p><pre><code class="clojure">    &#40;ns om-intro.core
+      &#40;:require-macros &#91;cljs.core.async.macros :refer &#91;go&#93;&#93;&#41;
+      &#40;:require &#91;om.core :as om :include-macros true&#93;
+                &#91;om.dom :as dom :include-macros true&#93;
+                &#91;cljs.core.async :refer &#91;put! chan &lt;!&#93;&#93;&#41;&#41;
+</code></pre><p>Then we'll update the widget. We're going to walk through this step-by-step in a minute, but here is what it should look like:</p><pre><code class="clojure">    &#40;defn my-widget &#91;app owner&#93;
+      &#40;reify
+        om/IInitState
+        &#40;init-state &#91;this&#93;
+          {:comm {:string &#40;chan&#41;}}&#41;
+
+        om/IWillMount
+        &#40;will-mount &#91;this&#93;
+          &#40;let &#91;{:keys &#91;string&#93;} &#40;om/get-state owner :comm&#41;&#93;
+            &#40;go &#40;while true
+                  &#40;let &#91;value &#40;&lt;! string&#41;&#93;
+                    &#40;om/transact! app :text &#40;fn &#91;&#95;&#93; value&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+
+        om/IRenderState
+        &#40;render-state &#91;this {:keys &#91;comm&#93;}&#93;
+          &#40;dom/div nil
+                   &#40;dom/input #js {:type &quot;text&quot;
+                                   :ref &quot;text&quot;
+                                   :value &#40;:text app&#41;
+                                   :onChange #&#40;put!
+                                                &#40;:string comm&#41;
+                                                &#40;-&gt; &#40;om/get-node owner &quot;text&quot;&#41;
+                                                    .-value&#41;&#41;}&#41;
+
+                   &#40;dom/div nil &#40;:text app&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>We've changed our widget to satisfy a few more Om interfaces that take advantage of the <a href='http://facebook.github.io/react/docs/component-specs.html'>React life cycles</a>.</p><p>The first is <code>om/IInitState</code> which sets up some initial, local state for the component. Here we are creating a map with a channel assigned to the <code>:string</code> key. <code>init-state</code> is called once on a component.</p><p>In <code>om/IWillMount</code>, we setup a go loop that blocks on the channel assigned to <code>:string</code> earlier, then sets the <code>:text</code> attribute in our application state to the value we get off of that channel. Once it's done it goes back to waiting on the channel.</p><blockquote><p> If you're new to Clojure, then the destructuring we do in the <code>let</code> binding can  be a little confusing. The gist of what we're doing is creating a local  <code>string</code> variable for our go block that is based on a key in the map returned by  <code>&#40;om/get-state owner :comm&#41;</code>. In other words, it takes the map we created  earlier and creates a local variable that is assigned the value of the  <code>:string</code> key. </p></blockquote><p>We use <code>om/transact!</code> here since updating an atom needs to occur within a transaction. We could have also used <code>swap!</code> here to modify the <code>atom</code> manually.</p><p><code>will-mount</code> is called once, before the component is mounted into the DOM.</p><p>Finally, we've changed <code>om/IRender</code> to <code>om/IRenderState</code>. Every component needs to satisfy one of these interfaces, but not both. The difference between the two is that <code>IRenderState</code> is passed the component state as it's second argument. We need it so that we can have access to the channel we created earlier.</p><p>Finally we create the <code>input</code>:</p><pre><code class="clojure">    &#40;dom/input #js {:type &quot;text&quot;
+                    :ref &quot;text&quot;
+                    :value &#40;:text app&#41;
+                    :onChange #&#40;put!
+                                &#40;:string comm&#41;
+                                &#40;-&gt; &#40;om/get-node owner &quot;text&quot;&#41;
+                                    .-value&#41;&#41;}&#41;
+</code></pre><p>The element is actually only taking a single argument, though it looks like two. <code>#js</code> is a reader literal for Clojurscript that transforms the following object into literal JavaScript object. The map that we pass is setting some attributes on the component. In this case, we want a text input that contains the value of the <code>:text</code> key from our application state. We assign it the ref <code>text</code> so that we can refer to it from the <code>onChange</code> callback via <code>om/get-node</code>.</p><p>This callback is really simple, and is one of the reasons why core.async is so attractive. All it does is take the value of the <code>text</code> node and put it onto the <code>string</code> channel.</p><p>If you've been following along, then you should see the following:</p><p><div class='highlight example' id="ex2"> </div></p><p>The next step is to add in the text-size slider. First, let's add the size to our application state:</p><pre><code class="clojure">    &#40;def app-state &#40;atom {:text &quot;Some Text&quot;
+                          :size 15}&#41;&#41;
+</code></pre><p>Next we'll create another channel for manipulating this size:</p><pre><code class="clojure">    om/IInitState
+    &#40;init-state &#91;this&#93;
+      {:comm {:string &#40;chan&#41;
+              :size &#40;chan&#41;}}&#41;
+</code></pre><p>We'll create another go block to update <code>:size</code> whenever we get a value off of this channel:</p><pre><code class="clojure">    om/IWillMount
+    &#40;will-mount &#91;this&#93;
+      &#40;let &#91;{:keys &#91;string size&#93; :as comm} &#40;om/get-state owner :comm&#41;&#93;
+        &#40;go &#40;while true
+              &#40;let &#91;value &#40;&lt;! string&#41;&#93;
+                &#40;om/transact! app :text &#40;fn &#91;&#95;&#93; value&#41;&#41;&#41;&#41;&#41;
+        &#40;go &#40;while true
+              &#40;let &#91;value &#40;&lt;! size&#41;&#93;
+                &#40;om/transact! app :size &#40;fn &#91;&#95;&#93; value&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>And then we'll add the input. Since we're getting the value off in the input in a similar way as before, I created a small helper to do this. I would place this function at the top of your source file, underneath the atom:</p><pre><code class="clojure">    &#40;defn get-value &#91;owner ref&#93;
+      &#40;-&gt; &#40;om/get-node owner ref&#41;
+          .-value&#41;&#41;
+</code></pre><pre><code class="clojure">    &#40;dom/div nil
+            &#40;dom/input #js {:type &quot;range&quot;
+                            :min 10
+                            :max 50
+                            :step 0.2
+                            :ref &quot;size&quot;
+                            :value &#40;:size app&#41;
+                            :onChange #&#40;put!
+                                        &#40;:size comm&#41;
+                                        &#40;get-value owner &quot;size&quot;&#41;&#41;}&#41;
+            &#40;dom/label nil &#40;str &#40;:size app&#41; &quot;px&quot;&#41;&#41;&#41;
+</code></pre><p>Note that you may want to update the text input as well.</p><p>Finally, we want to modify our <code>div</code> to have it's font-size restyled whenever this changes. Right now it looks like this:</p><pre><code class="clojure">    &#40;dom/div nil &#40;:text app&#41;&#41;
+</code></pre><p>Change it to this:</p><pre><code class="clojure">    &#40;dom/div #js {:style #js {:font-size &#40;str &#40;:size app&#41; &quot;px&quot;&#41;}}
+          &#40;:text app&#41;&#41;
+</code></pre><p>Again, <code>#js</code> turns the following object into a JavaScript object. It's shallow, so we need to do it twice to set <code>:style</code> correctly.</p><p>You should see this now:</p><p><div class='highlight example' id="ex3"> </div></p><p>Now for the color sliders. First, we'll add in the new state:</p><pre><code class="clojure">    &#40;def app-state &#40;atom {:text &quot;Some Text&quot;
+                          :size 15
+                          :colors {:red 0
+                                   :green 0
+                                   :blue 0}}&#41;&#41;
+</code></pre><p>As in the React widget, we'll create a more general <code>color-slider</code>:</p><pre><code class="clojure">    &#40;defn color-slider &#91;colors owner {:keys &#91;label onChange color-key&#93;}&#93;
+      &#40;reify
+        om/IRenderState
+        &#40;render-state &#91;this {:keys &#91;comm&#93;}&#93;
+          &#40;dom/div nil
+                   &#40;dom/input #js {:type &quot;range&quot;
+                                   :min 0
+                                   :max 255
+                                   :step 1
+                                   :ref &quot;color&quot;
+                                   :value &#40;color-key colors&#41;
+                                   :onChange #&#40;onChange color-key owner&#41;}&#41;
+                   &#40;dom/label nil &#40;str label &quot;: &quot; &#40;color-key colors&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>The important bit here is extra map of attributes we'll be passing to this component. We're going to give it a label, a color key to pull from the application state, and an onChange function.</p><p>Next we'll create a channel for the changing colors:</p><pre><code class="clojure">    om/IInitState
+    &#40;init-state &#91;this&#93;
+      {:comm {:string &#40;chan&#41;
+              :size &#40;chan&#41;
+              :colors &#40;chan&#41;}}&#41;
+</code></pre><p>And a go block:<pre><code class="clojure">    &#40;go &#40;while true
+          &#40;let &#91;&#91;c value&#93; &#40;&lt;! colors&#41;&#93;
+            &#40;om/update! app assoc-in &#91;:colors c&#93; value&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre></p><p>This looks slightly different than the previous go blocks because we're dealing with a map of colors in the application state instead of a straight value.</p><pre><code class="clojure">    &#40;let &#91;putfn &#40;fn &#91;k o&#93;
+                 &#40;put! &#40;:colors comm&#41; &#91;k &#40;get-value o &quot;color&quot;&#41;&#93;&#41;&#41;&#93;
+        &#40;apply dom/div nil
+             &#40;map &#40;fn &#91;&#91;label color-key&#93;&#93;
+                    &#40;om/build color-slider
+                              &#40;:colors app&#41;
+                              {:opts {:label label
+                                      :color-key color-key
+                                      :onChange putfn}}&#41;&#41;
+                  &#91;&#91;&quot;Red&quot; :red&#93; &#91;&quot;Green&quot; :green&#93; &#91;&quot;Blue&quot; :blue&#93;&#93;&#41;&#41;&#41;
+</code></pre><p>Next we'll add the inputs right below the text size slider. We use some high level functions here to avoid having to write three calls to <code>om/build</code>.</p><p>Finally we can modify the <code>div</code> to re-color our text:</p><pre><code class="clojure">    &#40;let &#91;size &#40;:size app&#41;
+          text &#40;:text app&#41;
+          {:keys &#91;red green blue&#93;} &#40;:colors app&#41;&#93;
+     &#40;dom/div #js {:style #js {:font-size &#40;str size &quot;px&quot;&#41;
+                               :color &#40;str &quot;rgb&#40;&quot; red &quot;,&quot; green &quot;,&quot; blue &quot;&#41;&quot;&#41;}}
+              text&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>Here is the final product, for the second time: <div class='highlight example' id="final"> </div></p><p>The full source for this example can be found <a href='https://gist.github.com/mcramm/8755952'>here</a>.</p><p>Om is still very new, and changing rapidly. If you're interested, then I recommend running through the <a href='https://github.com/swannodette/om/wiki/Tutorial'>Tutorial</a> in LightTable.</p><p><script src="/assets/js/om-intro.js" type="text/javascript"></script></p>
+<div><em>Published: 2014-02-01</em></div>
+
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          hljs.highlightElement(el);
+        });
+      });
+    </script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/main.js"></script>
+  </body>
+</html>

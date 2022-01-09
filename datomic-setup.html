@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>mcramm.com</title>
+    <meta charset="utf-8"/>
+    <meta name="title" content="http://mcramm.com/">
+    <link rel="canonical" href="http://mcramm.com/">
+    <meta property="og:title" content="mcrammm.com"/>
+    <meta property="og:url" content="http://mcramm.com/"/>
+    <meta property="og:site_name" content="mcrammm.com">
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/normalize.css" />
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-CXZL3L7461');
+    </script>
+  </head>
+  <body>
+    <div class="nav">
+      <a href="/">mcramm.com</a>
+      <a href="https://twitter.com/cramm" target="_blank" rel="noopener">twitter</a>
+      <a href="mailto:mike@mcramm.com" target="_blank" rel="noopener">email</a>
+      <a href="https://github.com/mcramm" target="_blank" rel="noopener">github</a>
+      <a href="/atom.xml" target="_blank" rel="noopener">rss</a>
+    </div>
+    <div class="wrapper">
+      <h1>Datomic Setup</h1>
+<p>I've recently been exploring Datomic more seriously and have found myself jumping through the same hoops as I have in the past *just to get things up and running*. I've also encountered slight deficiencies in the documentation that I've had to re-investigate since the exploratory project I created was deleted quite a while ago.</p><p>I'm tired of retracing my same steps over and over again so I thought I'd create a quick post with some of the basic steps to get setup and using Datomic in a Clojure application.</p><p>This is just going to cover the basics. Datomic does some crazy things I haven't had a chance to try yet, like using <a href='http://docs.datomic.com/query.html#rules'>rules</a>, querying the database at a [particular instant in time](http://docs.datomic.com/tutorial.html#working-with-time), or <a href='http://stackoverflow.com/questions/11025434/in-datomic-how-do-i-get-a-timeline-view-of-the-changes-made-to-the-values-of-a'>getting a list of changes to an entity</a>.</p><h2>Installing Datomic</h2><p>You do not need to install Datomic to get started, you can use the in-memory database.</p><p>Go here: <a href='https://my.datomic.com/downloads/free'>https://my.datomic.com/downloads/free</a> and find the latest version.</p><p>Then add <code>&#91;com.datomic/datomic-free &quot;&lt;the-latest-version&gt;&quot;&#93;</code> to your Leiningen project.</p><h2>Component Setup</h2><p>This is pretty easy, but you should have something like this:</p><pre><code class="clojure">&#40;ns my-project.components.datomic
+  &#40;:require &#91;com.stuartsierra.component :as component&#93;
+            &#91;datomic.api :as datomic&#93;&#41;&#41;
+
+&#40;defrecord DatomicComponent &#91;uri conn&#93;
+  component/Lifecycle
+  &#40;start &#91;this&#93;
+    &#40;if &#40;:conn this&#41;
+      this
+      &#40;do
+        &#40;assoc this :conn &#40;datomic/connect uri&#41;&#41;&#41;&#41;&#41;
+  &#40;stop &#91;this&#93;
+    &#40;assoc this :conn nil&#41;&#41;&#41;
+</code></pre><h2>Schema</h2><p>Schema should be ideally be kept in an EDN file and loaded on demand:</p><pre><code class="clojure">&#40;def schema
+  &#40;delay
+    &#40;read-string
+      &#40;slurp &#40;io/resource &quot;my&#95;project/schema.edn&quot;&#41;&#41;&#41;&#41;
+
+&#40;defn create-schema &#91;conn&#93;
+  &#40;datomic/transact conn @schema&#41;&#41;
+</code></pre><p>Here is what your schema might look like:</p><pre><code class="clojure">; resources/my&#95;project/schema.edn
+
+&#91;
+  {:db/id #db/id&#91;:db.part/db&#93;
+   :db/ident :cake/name
+   :db/valueType :db.type/string
+   :db/cardinality :db.cardinality/one
+   :db/fulltext true
+   :db/doc &quot;The name of a cake&quot;
+   :db.install/&#95;attribute :db.part/db}
+
+  {:db/id #db/id&#91;:db.part/db&#93;
+   :db/ident :cake/owner
+   :db/valueType :db.type/ref
+   :db/cardinality :db.cardinality/one
+   :db/doc &quot;The owner of a cake&quot;
+   :db.install/&#95;attribute :db.part/db}
+
+  {:db/id #db/id&#91;:db.part/db&#93;
+   :db/ident :user/email
+   :db/unique :db.unique/value
+   :db/valueType :db.type/string
+   :db/cardinality :db.cardinality/one
+   :db/doc &quot;Email address of a user&quot;
+   :db.install/&#95;attribute :db.part/db}
+
+  {:db/id #db/id&#91;:db.part/db&#93;
+   :db/ident :user/phone-numbers
+   :db/valueType :db.type/string
+   :db/cardinality :db.cardinality/many
+   :db/doc &quot;Contact numbers for a user&quot;
+   :db.install/&#95;attribute :db.part/db}
+&#93;
+</code></pre><p>Information on defining your schema and all the options available is documented <a href='http://docs.datomic.com/schema.html'>here</a>.</p><h2>Seed Data</h2><p>Like your schema, any seed data should be kept in a separate file:</p><pre><code class="clojure">&#40;def seed-data
+  &#40;delay
+    &#40;read-string
+      &#40;slurp &#40;io/resource &quot;my&#95;project/seed.edn&quot;&#41;&#41;&#41;&#41;
+
+&#40;defn seed-db &#91;conn&#93;
+  &#40;datomic/transact conn @seed-data&#41;&#41;
+</code></pre><p>Here is what your seed data might look like:</p><pre><code class="clojure">; resources/my&#95;project/seed.edn
+&#91;
+  ;; Users
+  {:db/id #db/id&#91;:db.part/user -1000001&#93;
+   :user/email &quot;sally@test.com&quot;
+   :user/password &quot;supersecret&quot;
+   :user/phones &#91;&quot;8469481047&quot;, &quot;9471038596&quot;&#93;}
+
+  {:db/id #db/id&#91;:db.part/user -1000002&#93;
+   :user/email &quot;bob@test.com&quot;
+   :user/password &quot;secret&quot;
+   :user/phones &#91;&quot;1234567890&quot;, &quot;0987654321&quot;&#93;}
+
+  ;; Cakes
+  {:db/id #db/id&#91;:db.part/user&#93;
+   :cake/owner #db/id &#91;:db.part/user -1000001&#93;
+   :cake/name &quot;Carrot&quot;}
+  {:db/id #db/id&#91;:db.part/user&#93;
+   :cake/owner #db/id &#91;:db.part/user -1000001&#93;
+   :cake/name &quot;Cheese&quot;}
+  {:db/id #db/id&#91;:db.part/user&#93;
+   :cake/owner #db/id &#91;:db.part/user -1000002&#93;
+   :cake/name &quot;Carrot&quot;}
+&#93;
+</code></pre><h2>Queries & Updates</h2><p>The operations to be performed on an entity should be confined to it's own namespace:</p><pre><code class="clojure">&#40;ns my-project.users
+  &#40;:require &#91;datomic.api :as datomic&#93;
+            &#91;my-project.component.datomic&#93;&#41;
+  ; Note the change from using a dash to an underscore
+  &#40;:import &#91;my&#95;project.component.datomic DatomicComponent&#93;&#41;&#41;
+
+&#40;defprotocol UserOps
+  &#40;all &#91;this&#93;&#41;
+  &#40;by-email &#91;this email&#93;&#41;
+  &#40;save! &#91;this user&#93;&#41;
+
+&#40;extend-type DatomicComponent
+  UserOps
+  &#40;all &#91;this&#93;
+    &#40;datomic/q '&#91;:find &#91;&#40;pull ?user &#91;&#42;&#93;&#41; ...&#93;
+                 :where &#91;?user :user/email&#93;&#93;
+               &#40;datomic/db &#40;:conn this&#41;&#41;&#41;&#41;
+  &#40;by-email &#91;this email&#93;
+    &#40;datomic/q '&#91;:find &#91;&#40;pull ?user &#91;&#42;&#93;&#41;&#93;
+                 :in $ ?email
+                 :where &#91;?user :user/email ?email&#93;&#93;
+               &#40;datomic/db &#40;:conn this&#41;&#41;
+               email&#41;&#41;
+  &#40;save! &#91;this user&#93;
+    &#40;datomic/transact &#40;:conn this&#41; user&#41;
+
+</code></pre><p>The <code>&#91;&#40;pull ?user &#91;&#42;&#93;&#41; ...&#93;</code> is an example of <a href='http://docs.datomic.com/pull.html'>Datomic's pull syntax</a>. This basically says "after all <code>?user</code>s, bring in all of their attributes. Be careful when using the wildcard <code>&#42;</code> as this will recursively pull any component attributes.</p><h2>Traversing refs forwards and backwards</h2><p>It's possible to pull in <code>refs</code> by specifying them in the pull pattern. If you wanted cakes with their owners:</p><pre><code class="clojure">&#40;datomic/q '&#91;:find &#91;&#40;pull ?cake &#91;&#42; {:cake/owner &#91;&#42;&#93;}&#93;&#41; ...&#93;
+             :where &#91;?cake :cake/owner&#93;&#93;
+           db&#41;
+</code></pre><p>If however you wanted the reverse, users and their cakes:</p><pre><code class="clojure">&#40;datomic/q '&#91;:find &#91;&#40;pull ?user &#91;&#42; {:cake/&#95;owner &#91;&#42;&#93;}&#93;&#41; ...&#93;
+             :where &#91;?user :user/email&#93;&#93;
+           db&#41;
+</code></pre><h2>Recursive (graph) queries</h2><p>This is one I haven't found a good real world use case for yet, but it is possible. Read the following if you're looking at doing these kinds of queries:</p><p><a href='http://docs.datomic.com/query.html#rules'>http://docs.datomic.com/query.html#rules</a></p><p><a href='http://hashrocket.com/blog/posts/using-datomic-as-a-graph-database'>http://hashrocket.com/blog/posts/using-datomic-as-a-graph-database</a></p>
+<div><em>Published: 2015-07-22</em></div>
+
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          hljs.highlightElement(el);
+        });
+      });
+    </script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/main.js"></script>
+  </body>
+</html>
