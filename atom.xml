@@ -2,15 +2,24 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
-  <link href="https://mcramm.com/"/>
-  <updated>2022-01-09T22:20:27+00:00</updated>
-  <id>https://mcramm.com/</id>
+  <link href="https://mcramm.com"/>
+  <updated>2022-01-15T22:03:07+00:00</updated>
+  <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
   <entry>
-    <id>https://mcramm.com/mailfeed-in-retrospect.html</id>
-    <link href="https://mcramm.com/mailfeed-in-retrospect.html"/>
+    <id>https://mcramm.com/posts/goodbye-hugo.html</id>
+    <link href="https://mcramm.com/posts/goodbye-hugo.html"/>
+    <title>Goodbye Hugo</title>
+    <updated>2021-01-14T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><a href='https://gohugo.io/'>Hugo</a> has been the backbone of my blog for over five years now, but it's time to say goodbye. I came to this decision after I wanted to try out a new, simpler site design and couldn't get even the most basic theme working with the older version of Hugo I was running. To use the design I wanted, it seemed I would have to start entirely from scratch and port my old posts over to whatever the "new" way was, then iterate on everything until I was happy with it.</p><p>All of this seemed like too much work. Instead, I decided to move on from Hugo and figure out how to generate a static site from scratch. I'm a big fan of Clojure, and I've been looking for some excuse to give <a href='https://babashka.org/'>Babashka</a> a try.</p><p>The site is now being generated entirely through Clojure via Babashka, including the post you're reading right now! This might sound like it was <em>more</em> work than just getting everything to work with Hugo, but it only took a few hours to write the appropriate methods to not only parse markdown into HTML but to:</p><ul><li>Be able to have a process running that can watch for any changes, recompiling  when needed.</li><li>Launch a web server to serve my local site</li><li>Render templates, static pages</li><li>Handle some custom routing</li></ul><p>On top of all this, everything feels much <em>simpler</em> to understand and straightforward to modify.</p><p><a href='https://github.com/mcramm/site'>Check it out</a>!</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>https://mcramm.com/posts/mailfeed-in-retrospect.html</id>
+    <link href="https://mcramm.com/posts/mailfeed-in-retrospect.html"/>
     <title>Mailfeed in Retrospect</title>
     <updated>2017-04-15T23:59:59+00:00</updated>
     <content type="html">
@@ -35,8 +44,8 @@
     </content>
   </entry>
   <entry>
-    <id>https://mcramm.com/integration-tests-for-clojure-and-postgres.html</id>
-    <link href="https://mcramm.com/integration-tests-for-clojure-and-postgres.html"/>
+    <id>https://mcramm.com/posts/integration-tests-for-clojure-and-postgres.html</id>
+    <link href="https://mcramm.com/posts/integration-tests-for-clojure-and-postgres.html"/>
     <title>Integration Testing with Clojure and Postgres</title>
     <updated>2016-12-14T23:59:59+00:00</updated>
     <content type="html">
@@ -185,8 +194,8 @@ Time: 1.910 ms
     </content>
   </entry>
   <entry>
-    <id>https://mcramm.com/off-the-ground-with-clojure-and-postgres.html</id>
-    <link href="https://mcramm.com/off-the-ground-with-clojure-and-postgres.html"/>
+    <id>https://mcramm.com/posts/off-the-ground-with-clojure-and-postgres.html</id>
+    <link href="https://mcramm.com/posts/off-the-ground-with-clojure-and-postgres.html"/>
     <title>Off the ground with Clojure and Postgres</title>
     <updated>2016-12-12T23:59:59+00:00</updated>
     <content type="html">
@@ -364,8 +373,8 @@ RETURNING id
     </content>
   </entry>
   <entry>
-    <id>https://mcramm.com/datomic-setup.html</id>
-    <link href="https://mcramm.com/datomic-setup.html"/>
+    <id>https://mcramm.com/posts/datomic-setup.html</id>
+    <link href="https://mcramm.com/posts/datomic-setup.html"/>
     <title>Datomic Setup</title>
     <updated>2015-07-22T23:59:59+00:00</updated>
     <content type="html">
@@ -489,8 +498,8 @@ RETURNING id
     </content>
   </entry>
   <entry>
-    <id>https://mcramm.com/rack-and-ring-basics.html</id>
-    <link href="https://mcramm.com/rack-and-ring-basics.html"/>
+    <id>https://mcramm.com/posts/rack-and-ring-basics.html</id>
+    <link href="https://mcramm.com/posts/rack-and-ring-basics.html"/>
     <title>Rack and Ring Basics</title>
     <updated>2015-04-15T23:59:59+00:00</updated>
     <content type="html">
@@ -593,8 +602,8 @@ run MyRackApp.new
     </content>
   </entry>
   <entry>
-    <id>https://mcramm.com/composing-functions.html</id>
-    <link href="https://mcramm.com/composing-functions.html"/>
+    <id>https://mcramm.com/posts/composing-functions.html</id>
+    <link href="https://mcramm.com/posts/composing-functions.html"/>
     <title>Composing Functions</title>
     <updated>2015-04-11T23:59:59+00:00</updated>
     <content type="html">
@@ -624,8 +633,8 @@ run MyRackApp.new
     </content>
   </entry>
   <entry>
-    <id>https://mcramm.com/om-comparison.html</id>
-    <link href="https://mcramm.com/om-comparison.html"/>
+    <id>https://mcramm.com/posts/om-comparison.html</id>
+    <link href="https://mcramm.com/posts/om-comparison.html"/>
     <title>Om Comparison</title>
     <updated>2014-02-01T23:59:59+00:00</updated>
     <content type="html">
@@ -792,8 +801,8 @@ run MyRackApp.new
     </content>
   </entry>
   <entry>
-    <id>https://mcramm.com/react-intro.html</id>
-    <link href="https://mcramm.com/react-intro.html"/>
+    <id>https://mcramm.com/posts/react-intro.html</id>
+    <link href="https://mcramm.com/posts/react-intro.html"/>
     <title>React Intro</title>
     <updated>2014-01-26T23:59:59+00:00</updated>
     <content type="html">
@@ -996,8 +1005,8 @@ run MyRackApp.new
     </content>
   </entry>
   <entry>
-    <id>https://mcramm.com/leiningen-templates.html</id>
-    <link href="https://mcramm.com/leiningen-templates.html"/>
+    <id>https://mcramm.com/posts/leiningen-templates.html</id>
+    <link href="https://mcramm.com/posts/leiningen-templates.html"/>
     <title>Leiningen Templates</title>
     <updated>2014-01-06T23:59:59+00:00</updated>
     <content type="html">
@@ -1084,8 +1093,8 @@ run MyRackApp.new
     </content>
   </entry>
   <entry>
-    <id>https://mcramm.com/specificity-in-clojurescript.html</id>
-    <link href="https://mcramm.com/specificity-in-clojurescript.html"/>
+    <id>https://mcramm.com/posts/specificity-in-clojurescript.html</id>
+    <link href="https://mcramm.com/posts/specificity-in-clojurescript.html"/>
     <title>Specificity in Clojurescript</title>
     <updated>2014-01-02T23:59:59+00:00</updated>
     <content type="html">

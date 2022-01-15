@@ -83,3 +83,6 @@ div.nav a:last-child {
   margin: 0 0 0 0.5em;
 }
 
+p {
+  line-height: 1.3em;
+}
