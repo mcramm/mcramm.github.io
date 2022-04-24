@@ -2,11 +2,15 @@
 <urlset xmnls="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>http://mcramm.com/</loc>
-    <lastmod>2022-04-17T19:21:56+00:00</lastmod>
+    <lastmod>2022-04-24T17:19:56+00:00</lastmod>
+  </url>
+  <url>
+    <loc>https://mcramm.com/posts/how-to-perform-a-simple-rebase-the-right-way.html</loc>
+    <lastmod>2022-04-25T23:59:59+00:00</lastmod>
   </url>
   <url>
     <loc>https://mcramm.com/posts/goodbye-hugo.html</loc>
-    <lastmod>2021-01-14T23:59:59+00:00</lastmod>
+    <lastmod>2022-01-14T23:59:59+00:00</lastmod>
   </url>
   <url>
     <loc>https://mcramm.com/posts/mailfeed-in-retrospect.html</loc>

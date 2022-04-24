@@ -87,6 +87,11 @@ p {
   line-height: 1.3em;
 }
 
+code {
+  background-color: #EEE;
+  padding: 1px 3px;
+}
+
 div#mc_embed_signup {
   background-color: #f4f4ed;
   margin-top: 10px;

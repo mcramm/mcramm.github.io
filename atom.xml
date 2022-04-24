@@ -3,16 +3,27 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2022-04-17T19:21:56+00:00</updated>
+  <updated>2022-04-24T17:19:56+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
   <entry>
+    <id>https://mcramm.com/posts/how-to-perform-a-simple-rebase-the-right-way.html</id>
+    <link href="https://mcramm.com/posts/how-to-perform-a-simple-rebase-the-right-way.html"/>
+    <title>How to Perform a Simple Rebase the Right Way</title>
+    <updated>2022-04-25T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>Here is a simple rebasing strategy you should use to keep your work up to date with new changes that have been introduced into another branch.</p><p><strong> TL;DR - <a href="#tldr">Click Here</a> to skip to the actual git commands you're looking for</strong></p><p>Let's say you are in this situation. First, you've started on your <code>master</code> branch:</p><p><div>   <img width="100%" src="/assets/images/git/simple-rebase/rebasing-1.png"></img> </div></p><p>Then you create a new branch called <code>user&#95;story</code> and add some commits:</p><p><div>   <img width="100%" src="/assets/images/git/simple-rebase/rebasing-2.png"></img> </div></p><p>And then you find out that someone else has added commits to <code>master</code> that you need!</p><p><div>   <img width="100%" src="/assets/images/git/simple-rebase/rebasing-3.png"></img> </div></p><p>To get these new commits onto your <code>user&#95;story</code> branch, you have a couple of options. One of them is to simply "rebase" your <code>user&#95;story</code> branch on top of <code>master</code> with the command <code>git rebase master</code>:</p><p><div>   <img width="100%" src="/assets/images/git/simple-rebase/rebasing-4.png"></img> </div></p><p>Note that your local copy of <code>master</code> will need to be up-to-dateg for this to work!</p><p><strong id="tldr">If you know that someone has added commits to <code>master</code>, but you don't see them locally, then the following set of commands is a fool-proof way of ensuring you're rebasing on top of the right commits:</strong></p><p>Assuming your remote is named <code>origin</code>:</p><pre><code>git fetch origin
+git rebase origin/master
+</code></pre><p><code>git fetch</code> will pull down any changes from the specified remote (<code>origin</code> in this case) <code>git rebase origin/master</code> will rebase your changes on top of whatever commit the <code>origin</code> remote is reporting that its <code>master</code> is pointing at.</p><p>I hope that helps! Stay tuned for more Git tips in the future!</p>]]>
+    </content>
+  </entry>
+  <entry>
     <id>https://mcramm.com/posts/goodbye-hugo.html</id>
     <link href="https://mcramm.com/posts/goodbye-hugo.html"/>
     <title>Goodbye Hugo</title>
-    <updated>2021-01-14T23:59:59+00:00</updated>
+    <updated>2022-01-14T23:59:59+00:00</updated>
     <content type="html">
       <![CDATA[<p><a href='https://gohugo.io/'>Hugo</a> has been the backbone of my blog for over five years now, but it's time to say goodbye. I came to this decision after I wanted to try out a new, simpler site design and couldn't get even the most basic theme working with the older version of Hugo I was running. To use the design I wanted, it seemed I would have to start entirely from scratch and port my old posts over to whatever the "new" way was, then iterate on everything until I was happy with it.</p><p>All of this seemed like too much work. Instead, I decided to move on from Hugo and figure out how to generate a static site from scratch. I'm a big fan of Clojure, and I've been looking for some excuse to give <a href='https://babashka.org/'>Babashka</a> a try.</p><p>The site is now being generated entirely through Clojure via Babashka, including the post you're reading right now! This might sound like it was <em>more</em> work than just getting everything to work with Hugo, but it only took a few hours to write the appropriate methods to not only parse markdown into HTML but to:</p><ul><li>Be able to have a process running that can watch for any changes, recompiling  when needed.</li><li>Launch a web server to serve my local site</li><li>Render templates, static pages</li><li>Handle some custom routing</li></ul><p>On top of all this, everything feels much <em>simpler</em> to understand and straightforward to modify.</p><p><a href='https://github.com/mcramm/site'>Check it out</a>!</p>]]>
     </content>
