@@ -67,6 +67,23 @@ em.published-at {
   color: gray;
 }
 
+div.tags {
+  margin: 2em 0.5em 0;
+  font-size: 0.7em;
+}
+
+div.tags ul {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  justify-content: space-between;
+}
+
+div.tags p {
+  margin: 0 0 0.5em;
+}
+
 div.nav {
   font-size: 0.8em;
 }
