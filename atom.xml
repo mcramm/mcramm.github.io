@@ -3,11 +3,20 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2023-01-14T22:39:01+00:00</updated>
+  <updated>2023-01-20T14:15:41+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
+  <entry>
+    <id>https://mcramm.com/posts/learning-to-make-games.html</id>
+    <link href="https://mcramm.com/posts/learning-to-make-games.html"/>
+    <title>I'm Learning to Make Games</title>
+    <updated>2023-01-20T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>One of my goals this year is to finally learn how to make a small video game. This is something I've been wanting to do since I was a teenager. I told my parents and they did two things:</p><p>First they enrolled me in a class where I learned a programming language called Q Basic. I don't remember much about the language, or the class, but I do remember that my resulting text-based adventure game involved finding three keys in a forest maze that also had large amount of unfair velociraptor and pit-related deaths. It was amazing.</p><p>The second thing they did was buy me a copy of Teach Yourself C++ in 21 days. I am pretty sure I read exactly one chapter before deciding it was too hard, and that programming wasn't for me. I decided instead to become a chef after that.</p><p>Video game development tooling has come a long way since 1999. It's now easier than ever to make and distribute video games.</p><p>So, a couple of days after New Years I bought a <a href='https://www.skillshare.com'>Skillshare</a> subscription, signed up for <a href='https://www.skillshare.com/en/classes/The-Ultimate-Guide-To-C-Unity-2D-Programming-2022/2067738593/'>a class</a> to learn Unity, and this is the result:</p><p><div>   <img width="100%" src="/assets/images/castle_conquest_2023_01_16.gif"></img> </div></p><p>This isn't anything groundbreaking, but I did get my feet wet with both the Unity editor, and C#. Both of which were brand new to me. My next mini project will be a clone of something I already know: Breakout. Let's see how much of the course actually stuck.</p><p>My goal for this year is to make something on my own, that isn't a blatant copy or the result of a walkthrough. I already have some ideas percolating that I think would be cool 😄.</p>]]>
+    </content>
+  </entry>
   <entry>
     <id>https://mcramm.com/posts/simple-cherry-pick.html</id>
     <link href="https://mcramm.com/posts/simple-cherry-pick.html"/>
