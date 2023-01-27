@@ -3,11 +3,20 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2023-01-20T14:24:07+00:00</updated>
+  <updated>2023-01-27T01:34:46+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
+  <entry>
+    <id>https://mcramm.com/posts/a-breakout-clone.html</id>
+    <link href="https://mcramm.com/posts/a-breakout-clone.html"/>
+    <title>A breakout clone</title>
+    <updated>2023-01-26T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>My first mini project is to build a Breakout clone. I don't want to go crazy with this, but I do want to do as much as possible for it to be a complete game.</p><p>What do I mean by "complete"? Well, I want the basic game to be in place:</p><ul><li>A ball is moving around in the game area. If it hits the bottom of the game  area, then the player users.</li><li>The player has control over a paddle that can move left and right to prevent  the ball from getting past.</li><li>If the ball interacts with one of the blocks at the top of the screen, the  block is "destroyed" and the player gets some points.</li><li>Destroying all the blocks progresses the player to the next level.</li></ul><p><div>   <img width="100%" src="/assets/images/breakout_clone_mockup.png"></img> </div></p><p>Doing all of that will require some minor assets like images for the blocks, paddle, and ball, possibly even the sides of the game area. I'll also need sound effects for the ball bouncing off the sides of the game area, the blocks, and the paddle itself.</p><p>If I can do all that, then I'll also want:</p><ul><li>A main menu where a player can choose to start a new game, or close the game  all together.</li><li>Some options (like muting audio)</li><li>Some music for the game.</li><li>A leader board (which means I'll also need to have a way for a player to enter  their initials)</li></ul>]]>
+    </content>
+  </entry>
   <entry>
     <id>https://mcramm.com/posts/learning-to-make-games.html</id>
     <link href="https://mcramm.com/posts/learning-to-make-games.html"/>
