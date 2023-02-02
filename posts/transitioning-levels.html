@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>mcramm.com</title>
+    <meta charset="utf-8"/>
+    <meta name="title" content="http://mcramm.com/">
+    <link rel="canonical" href="http://mcramm.com/">
+    <meta property="og:title" content="mcrammm.com"/>
+    <meta property="og:url" content="http://mcramm.com/"/>
+    <meta property="og:site_name" content="mcrammm.com">
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-02-02T01:08:58+00:00" />
+    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-02-02T01:08:58+00:00" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-CXZL3L7461');
+    </script>
+  </head>
+  <body>
+    <div class="nav">
+      <a href="/">mcramm.com</a>
+      <a href="https://twitter.com/cramm" target="_blank" rel="noopener">twitter</a>
+      <a href="mailto:mike@mcramm.com" target="_blank" rel="noopener">email</a>
+      <a href="https://github.com/mcramm" target="_blank" rel="noopener">github</a>
+      <a href="/atom.xml" target="_blank" rel="noopener">rss</a>
+    </div>
+    <div class="wrapper">
+      <h1>Transitioning Levels</h1>
+<p><div>   <img width="100%" src="/assets/images/transitioning_levels_2023_01_28.gif"></img> </div></p><p>To do this, we're going to create a long-lived object named, <code>GameSession</code>. Eventually we'll also use this object to track the players score, but for now it will only be responsible for scene transitions.</p><p>To ensure that there is only ever one <code>GameSession</code> object active at any given time, we'll employ a pattern I used in the <a href='https://mcramm.com/posts/learning-to-make-games.html'>previous tutorial I followed</a> in a SkillShare course.</p><pre><code class="cs">public class GameSession : MonoBehaviour
+{
+
+  void Awake&#40;&#41; {
+    int numGameSessions = FindObjectsOfType&lt;GameSession&gt;&#40;&#41;.Length;
+
+    if&#40;numGameSessions &gt; 1&#41; {
+      // destroy this object if there is already a GameSession active.
+      Destroy&#40;gameObject&#41;;
+    } else {
+      // Tell Unity to not destroy this object when unloading the current scene.
+      DontDestroyOnLoad&#40;gameObject&#41;;
+    }
+  }
+
+  public void LoadNextLevel&#40;&#41; {
+    int nextSceneIndex = SceneManager.GetActiveScene&#40;&#41;.buildIndex + 1;
+    SceneManager.LoadScene&#40;nextSceneIndex&#41;;
+  }
+}
+
+</code></pre><p>In my <code>DestroyBlockIfDead</code> method, I'll check to see if there are any other blocs remaining, and if not, I'll call the <code>LoadNextLevel</code> method on our <code>GameSession</code>.</p><pre><code class="cs">  private void DestroyBlockIfDead&#40;&#41; {
+    if &#40;currentHealth &gt; 0&#41; {
+      return;
+    }
+
+    GameSession gameSession = FindObjectOfType&lt;GameSession&gt;&#40;&#41;;
+
+    int numberOfBlocksRemaining = GameObject.FindGameObjectsWithTag&#40;&quot;Block&quot;&#41;.Length - 1;
+    if&#40;numberOfBlocksRemaining == 0&#41; {
+      gameSession.LoadNextLevel&#40;&#41;;
+    }
+
+    Destroy&#40;gameObject&#41;;
+  }
+</code></pre><p>The process for creating the next level is fairly simple. I created "prefabs" of the paddle, ball, block, and walls objects, created a new scene, (I just duplicated the current one,) and added some more blocks. Finally, I opened the build settings in Unity to moke sure the current scene was part of the build.</p><p>And voila! Multiple levels.</p>
+<div><em>Published: 2023-02-16</em></div>
+
+
+
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          hljs.highlightElement(el);
+        });
+      });
+    </script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/main.js"></script>
+  </body>
+</html>

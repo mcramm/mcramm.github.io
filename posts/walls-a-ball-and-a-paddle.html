@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
 
-    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-01-25T02:30:32+00:00" />
-    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-01-25T02:30:32+00:00" />
+    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-02-02T01:08:58+00:00" />
+    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-02-02T01:08:58+00:00" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
@@ -35,7 +35,7 @@
     </div>
     <div class="wrapper">
       <h1>Adding a ball, a paddle, and walls</h1>
-<p><div>   <img width="100%" src="/assets/images/walls_a_ball_and_a_paddle_2023_01_18.gif"></img> </div></p><p>The ball starts off with an initial velocity of 1, 1; up and to the right. Having it "bounce" off the walls and paddle is as simple as adding colliders to everything through Unity's interface, setting the <code>isTrigger</code> flag, and then adding an <code>OnTriggerEnter2D</code> method to a script attached to the Ball game object:</p><p><div>   <img width="100%" src="/assets/images/is_trigger_shot_2023_01_20.png"></img> </div></p><pre><code class="cs">  private void OnTriggerEnter2D &#40;Collider2D other&#41; {
+<p><div>   <img width="100%" src="/assets/images/walls_a_ball_and_a_paddle_2023_01_18.gif"></img> </div></p><p>The ball starts off with an initial velocity of (1, 1); up and to the right. Having it "bounce" off the walls and paddle is as simple as adding colliders to everything through Unity's interface, setting the <code>isTrigger</code> flag, and then adding an <code>OnTriggerEnter2D</code> method to a script attached to the Ball game object:</p><p><div>   <img width="100%" src="/assets/images/is_trigger_shot_2023_01_20.png"></img> </div></p><pre><code class="cs">  private void OnTriggerEnter2D &#40;Collider2D other&#41; {
     switch&#40;other.tag&#41; {
       case &quot;Left Wall&quot;:
         SideWallHit&#40;&#41;;
@@ -73,7 +73,7 @@
 
     rigidBody2D.velocity = vec;
   }
-</code></pre><p>This should theoretically work with a joystick on a controller as well, but I'm developing on my macbook, which is all USB-C, and my controllers are all USB type A 😬.</p>
+</code></pre><p>This should theoretically work with a joystick on a controller as well, but I'm developing on my Macbook, which is all USB-C, and my controllers are all USB type A 😬.</p>
 <div><em>Published: 2023-02-01</em></div>
 
 
