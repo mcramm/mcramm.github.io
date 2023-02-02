@@ -3,11 +3,58 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2023-02-02T01:09:50+00:00</updated>
+  <updated>2023-02-02T01:13:57+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
+  <entry>
+    <id>https://mcramm.com/posts/walls-a-ball-and-a-paddle.html</id>
+    <link href="https://mcramm.com/posts/walls-a-ball-and-a-paddle.html"/>
+    <title>Adding a ball, a paddle, and walls</title>
+    <updated>2023-02-01T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><div>   <img width="100%" src="/assets/images/walls_a_ball_and_a_paddle_2023_01_18.gif"></img> </div></p><p>The ball starts off with an initial velocity of (1, 1); up and to the right. Having it "bounce" off the walls and paddle is as simple as adding colliders to everything through Unity's interface, setting the <code>isTrigger</code> flag, and then adding an <code>OnTriggerEnter2D</code> method to a script attached to the Ball game object:</p><p><div>   <img width="100%" src="/assets/images/is_trigger_shot_2023_01_20.png"></img> </div></p><pre><code class="cs">  private void OnTriggerEnter2D &#40;Collider2D other&#41; {
+    switch&#40;other.tag&#41; {
+      case &quot;Left Wall&quot;:
+        SideWallHit&#40;&#41;;
+        break;
+      case &quot;Right Wall&quot;:
+        SideWallHit&#40;&#41;;
+        break;
+      case &quot;Top Wall&quot;:
+        TopWallHit&#40;&#41;;
+        break;
+      case &quot;Paddle&quot;:
+        PaddleHit&#40;&#41;;
+        break;
+      default:
+        BottomHit&#40;&#41;;
+        break;
+    }
+  }
+
+  private void SideWallHit&#40;&#41; {
+    rigidBody2D.velocity = rigidBody2D.velocity &#42; new Vector2&#40;-1, 1&#41;;
+  }
+
+  private void TopWallHit&#40;&#41; {
+    rigidBody2D.velocity = rigidBody2D.velocity &#42; new Vector2&#40;1, -1&#41;;
+  }
+
+  private void PaddleHit&#40;&#41; {
+    rigidBody2D.velocity = rigidBody2D.velocity &#42; new Vector2&#40;1, -1&#41;;
+  }
+</code></pre><p>This is extremely rough logic, and I'm very certain that there is a way to do this with colliders only. I can already foresee problems with this when I go to introduce blocks. The Ball can collide with a block on the top, bottom, or sides, and should bounce away in the appropriate direction. Even now, if the ball were to strike the right or left side of the paddle, it would reflect back up towards the middle of the game area.</p><p>Moving the paddle itself is much more straightforward:</p><pre><code class="cs">  void Update&#40;&#41; {
+    int horizontal = 0;
+    horizontal = &#40;int&#41; Input.GetAxisRaw&#40;&quot;Horizontal&quot;&#41;;
+    Vector2 vec = new Vector2&#40;horizontal &#42; paddleMoveSpeed, rigidBody2D.velocity.y&#41;;
+
+    rigidBody2D.velocity = vec;
+  }
+</code></pre><p>This should theoretically work with a joystick on a controller as well, but I'm developing on my Macbook, which is all USB-C, and my controllers are all USB type A 😬.</p>]]>
+    </content>
+  </entry>
   <entry>
     <id>https://mcramm.com/posts/a-breakout-clone.html</id>
     <link href="https://mcramm.com/posts/a-breakout-clone.html"/>
