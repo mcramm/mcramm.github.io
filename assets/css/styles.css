@@ -101,12 +101,16 @@ div.nav a:last-child {
 }
 
 p {
-  line-height: 1.3em;
+  line-height: 1.5em;
 }
 
 code {
   background-color: #EEE;
   padding: 1px 3px;
+}
+
+p code {
+  font-size: 13px;
 }
 
 div#mc_embed_signup {

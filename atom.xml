@@ -3,11 +3,39 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2023-02-02T01:13:57+00:00</updated>
+  <updated>2023-02-07T02:11:49+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
+  <entry>
+    <id>https://mcramm.com/posts/colliders.html</id>
+    <link href="https://mcramm.com/posts/colliders.html"/>
+    <title>Colliders!</title>
+    <updated>2023-02-06T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>Getting the ball to bounce correctly off blocks requires a bit more thinking than how we have it bouncing off of the walls or the top of the paddle. I also want to prevent the paddle from moving through walls so that it remains inside the play area.</p><p>The problem with the paddle is a tricky one. Both the paddle and the walls have colliders on them with the <code>isTrigger</code> flag set to true. This means that normal physics-based collisions, like one object being prevented from moving through another, will be ignored, and instead the <code>OnTriggerEnter2D</code> function will be called on the two objects. Since the ball in this game is the thing moving about the play area, interacting with other things, I attached this method to the ball object itself. See my  <a href='https://mcramm.com//posts/walls-a-ball-and-a-paddle.html'>previous post</a> where I used this method.</p><p>If I stick with my current approach, then I would need to add an <code>OnTriggerEnter2D</code> method to my paddle object, detect when the paddle is about to collide with the wall, and reset the paddle's position to just before that collision would occur. Since the position of the paddle object is at the center of the paddle itself, I would need to adjust the paddle position to be offset based on 50% of the width of the paddle, plus a little more space to ensure the colliders are out of the way. If I don't add a little extra space, then the objects will always be "colliding" and the paddle will essentially become frozen.</p><p>But wait! Isn't this what game engines are supposed to do for us?</p><p>In Unity, two game objects with the Rigidbody and Collider components will react in a relatively realistic manner. They'll even be affected by gravity. We don't need gravity in this game, but to get the collisions we want, I won't be able to use the <code>isTrigger</code> method anymore, which means I'll need to use a different method when detecting that ball is colliding with different surfaces. Thankfully Unity supports this, and instead of registering the <code>OnTriggerEnter2D</code> method on my ball object, I'll need to instead use <code>OnCollisionEnter2D</code>:</p><pre><code class="cs">  void OnCollisionEnter2D&#40;Collision2D collision&#41; {
+    string tag = collision.gameObject.tag;
+
+    if &#40;tag == &quot;Block&quot; || tag == &quot;Wall&quot; || tag == &quot;Paddle&quot;&#41; {
+      Vector2 currentVelocity = rigidBody2D.velocity;
+
+      // A vector perpendicular to the surface we're colliding with
+      Vector2 normal = collision.GetContact&#40;0&#41;.normal;
+
+      // calculate the new, reflected velocity
+      Vector2 newVelocity = Vector2.Reflect&#40;currentVelocity, normal&#41;;
+
+      rigidBody2D.velocity = newVelocity;
+    }
+
+    if &#40;tag == &quot;Bottom Wall&quot;&#41; {
+      BottomHit&#40;&#41;; // Ends the game
+    }
+  }
+</code></pre><p>We'll also add in some reflection math so that the ball bounces off of surfaces appropriately depending on which side of that surface it collides with.</p><p>I can now set the walls to static: <div>   <img width="70%" src="/assets/images/wall_2023_01_21.png"></img> </div></p><p>The ball to kinematic:</p><p><div>   <img width="70%" src="/assets/images/ball_2023_01_21.png"></img> </div></p><p>And the paddle to dynamic: <div>   <img width="70%" src="/assets/images/paddle_2023_01_21.png"></img> </div></p><p>And everything collides as expected!</p><p>Next I added in a Block object with some colliders and made sure everything works:</p><p><div>   <img width="100%" src="/assets/images/colliders.gif"></img> </div></p><p>Next up: making our blocks destructible.</p>]]>
+    </content>
+  </entry>
   <entry>
     <id>https://mcramm.com/posts/walls-a-ball-and-a-paddle.html</id>
     <link href="https://mcramm.com/posts/walls-a-ball-and-a-paddle.html"/>
