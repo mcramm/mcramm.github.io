@@ -3,11 +3,66 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2023-02-07T02:11:49+00:00</updated>
+  <updated>2023-02-14T01:04:28+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
+  <entry>
+    <id>https://mcramm.com/posts/destructable-blocks.html</id>
+    <link href="https://mcramm.com/posts/destructable-blocks.html"/>
+    <title>Destructable Blocks</title>
+    <updated>2023-02-13T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><div>   <img width="100%" src="/assets/images/destrucable_blocks_2023_01_27.gif"></img> </div></p><p>This one is pretty easy. Every time the ball collides with a block, we call a method on that block that destroys it. I may want to have blocks that take multiple hits before they're destroyed, so I'll call this method <code>TakeHit</code> and pass it a value representing how much "health" to take away from it.</p><p>In my <code>Ball.cs</code> script:<pre><code class="cs">  void OnCollisionEnter2D&#40;Collision2D collision&#41; {
+    string tag = collision.gameObject.tag;
+
+    if &#40;tag == &quot;Block&quot; || tag == &quot;Wall&quot; || tag == &quot;Paddle&quot;&#41; {
+      Vector2 currentVelocity = rigidBody2D.velocity;
+
+      // A vector perpendicular to the surface we're colliding with
+      Vector2 normal = collision.GetContact&#40;0&#41;.normal;
+
+      // calculate the new, reflected velocity
+      Vector2 newVelocity = Vector2.Reflect&#40;currentVelocity, normal&#41;;
+
+      rigidBody2D.velocity = newVelocity;
+    }
+
+    if &#40;tag == &quot;Block&quot;&#41; {
+      collision.gameObject.GetComponent&lt;Block&gt;&#40;&#41;.TakeHit&#40;1&#41;;
+    }
+
+    if &#40;tag == &quot;Bottom Wall&quot;&#41; {
+      BottomHit&#40;&#41;;
+    }
+  }
+
+</code></pre></p><p>Then, in a new <code>Block.cs</code> script that is attached to the Block object:<pre><code class="cs">  public class Block : MonoBehaviour
+  {
+    &#91;SerializeField&#93; int initialHealth = 1;
+    private int currentHealth;
+
+    void Awake&#40;&#41; {
+      currentHealth = initialHealth;
+    }
+
+    public void TakeHit&#40;int hpToRemove&#41; {
+      currentHealth -= hpToRemove;
+      DestroyBlockIfDead&#40;&#41;;
+    }
+
+    private void DestroyBlockIfDead&#40;&#41; {
+      if &#40;currentHealth &gt; 0&#41; {
+        return
+      }
+
+      Destroy&#40;gameObject&#41;;
+    }
+  }
+</code></pre></p><p>Next I'm going to add a new level and transition to it when their are no blocks remaining in the current one. This is first time I'm going to need a singleton object that lives the entire length of game, so I'll call it <code>GameSession</code>.</p>]]>
+    </content>
+  </entry>
   <entry>
     <id>https://mcramm.com/posts/colliders.html</id>
     <link href="https://mcramm.com/posts/colliders.html"/>
