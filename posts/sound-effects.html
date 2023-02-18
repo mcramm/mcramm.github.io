@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
 
-    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-02-18T16:49:29+00:00" />
-    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-02-18T16:49:29+00:00" />
+    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-02-14T01:09:57+00:00" />
+    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-02-14T01:09:57+00:00" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
@@ -34,8 +34,8 @@
       <a href="/atom.xml" target="_blank" rel="noopener">rss</a>
     </div>
     <div class="wrapper">
-      <h1>Destructable Blocks</h1>
-<p><div>   <img width="100%" src="/assets/images/destrucable_blocks_2023_01_27.gif"></img> </div></p><p>This one is pretty easy. Every time the ball collides with a block, we call a method on that block that destroys it. I may want to have blocks that take multiple hits before they're destroyed, so I'll call this method <code>TakeHit</code> and pass it a value representing how much "health" to take away from it.</p><p>In my <code>Ball.cs</code> script:<pre><code class="cs">  void OnCollisionEnter2D&#40;Collision2D collision&#41; {
+      <h1>Sound Effects</h1>
+<p><pre><code class="cs"></code></pre></p><pre><code class="cs">  void OnCollisionEnter2D&#40;Collision2D collision&#41; {
     string tag = collision.gameObject.tag;
 
     if &#40;tag == &quot;Block&quot; || tag == &quot;Wall&quot; || tag == &quot;Paddle&quot;&#41; {
@@ -48,6 +48,8 @@
       Vector2 newVelocity = Vector2.Reflect&#40;currentVelocity, normal&#41;;
 
       rigidBody2D.velocity = newVelocity;
+
+      SoundManager.instance.PlayRandomSFX&#40;collisionClips&#41;; // &#42;NEW&#42;
     }
 
     if &#40;tag == &quot;Block&quot;&#41; {
@@ -58,31 +60,8 @@
       BottomHit&#40;&#41;;
     }
   }
-
-</code></pre></p><p>Then, in a new <code>Block.cs</code> script that is attached to the Block object:<pre><code class="cs">  public class Block : MonoBehaviour
-  {
-    &#91;SerializeField&#93; int initialHealth = 1;
-    private int currentHealth;
-
-    void Awake&#40;&#41; {
-      currentHealth = initialHealth;
-    }
-
-    public void TakeHit&#40;int hpToRemove&#41; {
-      currentHealth -= hpToRemove;
-      DestroyBlockIfDead&#40;&#41;;
-    }
-
-    private void DestroyBlockIfDead&#40;&#41; {
-      if &#40;currentHealth &gt; 0&#41; {
-        return
-      }
-
-      Destroy&#40;gameObject&#41;;
-    }
-  }
-</code></pre></p><p>Next I'm going to add a new level and transition to it when their are no blocks remaining in the current one. This is first time I'm going to need a singleton object that lives the entire length of game, so I'll call it <code>GameSession</code>.</p>
-<div><em>Published: 2023-02-13</em></div>
+</code></pre>
+<div><em>Published: 2023-02-18</em></div>
 
 
 

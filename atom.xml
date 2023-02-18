@@ -3,11 +3,55 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2023-02-14T01:04:28+00:00</updated>
+  <updated>2023-02-18T16:49:30+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
+  <entry>
+    <id>https://mcramm.com/posts/transitioning-levels.html</id>
+    <link href="https://mcramm.com/posts/transitioning-levels.html"/>
+    <title>Transitioning Levels</title>
+    <updated>2023-02-18T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><div>   <img width="100%" src="/assets/images/transitioning_levels_2023_01_28.gif"></img> </div></p><p>Alright, time to add another level and transition to it when all blocks on the current level are destroyed! To do this we're going to create a long-lived object named <code>GameSession</code>. Eventually we'll also use this object to track the players score, but for now it will only be responsible for scene transitions.</p><p>To ensure that there is only ever one <code>GameSession</code> object active at any given time, we'll employ a pattern I used in a <a href='https://mcramm.com/posts/learning-to-make-games.html'>SkillShare course that I took</a>.</p><pre><code class="cs">public class GameSession : MonoBehaviour
+{
+
+  void Awake&#40;&#41; {
+    int numGameSessions = FindObjectsOfType&lt;GameSession&gt;&#40;&#41;.Length;
+
+    if&#40;numGameSessions &gt; 1&#41; {
+      // destroy this object if there is already a GameSession active.
+      Destroy&#40;gameObject&#41;;
+    } else {
+      // Tell Unity to not destroy this object when unloading the current scene.
+      DontDestroyOnLoad&#40;gameObject&#41;;
+    }
+  }
+
+  public void LoadNextLevel&#40;&#41; {
+    int nextSceneIndex = SceneManager.GetActiveScene&#40;&#41;.buildIndex + 1;
+    SceneManager.LoadScene&#40;nextSceneIndex&#41;;
+  }
+}
+
+</code></pre><p>In my <code>DestroyBlockIfDead</code> method, I'll check to see if there are any other blocks remaining, and if not, I'll call the <code>LoadNextLevel</code> method on our <code>GameSession</code>.</p><pre><code class="cs">  private void DestroyBlockIfDead&#40;&#41; {
+    if &#40;currentHealth &gt; 0&#41; {
+      return;
+    }
+
+    GameSession gameSession = FindObjectOfType&lt;GameSession&gt;&#40;&#41;;
+
+    int numberOfBlocksRemaining = GameObject.FindGameObjectsWithTag&#40;&quot;Block&quot;&#41;.Length - 1;
+    if&#40;numberOfBlocksRemaining == 0&#41; {
+      gameSession.LoadNextLevel&#40;&#41;;
+    }
+
+    Destroy&#40;gameObject&#41;;
+  }
+</code></pre><p>The process for creating the next level is fairly simple. I created "prefabs" of the paddle, ball, block, and walls objects, created a new scene, (I just duplicated the current one,) and added some more blocks. Finally I opened the build settings in Unity to make sure the current scene was part of the build.</p><p>And voila! Multiple levels.</p>]]>
+    </content>
+  </entry>
   <entry>
     <id>https://mcramm.com/posts/destructable-blocks.html</id>
     <link href="https://mcramm.com/posts/destructable-blocks.html"/>
@@ -184,7 +228,7 @@ git rebase origin/master
     <title>Goodbye Hugo</title>
     <updated>2022-01-14T23:59:59+00:00</updated>
     <content type="html">
-      <![CDATA[<p><a href='https://gohugo.io/'>Hugo</a> has been the backbone of my blog for over five years now, but it's time to say goodbye. I came to this decision after I wanted to try out a new, simpler site design and couldn't get even the most basic theme working with the older version of Hugo I was running. To use the design I wanted, it seemed I would have to start entirely from scratch and port my old posts over to whatever the "new" way was, then iterate on everything until I was happy with it.</p><p>All of this seemed like too much work. Instead, I decided to move on from Hugo and figure out how to generate a static site from scratch. I'm a big fan of Clojure, and I've been looking for some excuse to give <a href='https://babashka.org/'>Babashka</a> a try.</p><p>The site is now being generated entirely through Clojure via Babashka, including the post you're reading right now! This might sound like it was <em>more</em> work than just getting everything to work with Hugo, but it only took a few hours to write the appropriate methods to not only parse markdown into HTML but to:</p><ul><li>Be able to have a process running that can watch for any changes, recompiling  when needed.</li><li>Launch a web server to serve my local site</li><li>Render templates, static pages</li><li>Handle some custom routing</li></ul><p>On top of all this, everything feels much <em>simpler</em> to understand and straightforward to modify.</p><p><a href='https://github.com/mcramm/site'>Check it out</a>!</p>]]>
+      <![CDATA[<p><a href='https://gohugo.io/'>Hugo</a> has been the backbone of my blog for over five years now, but it's time to say goodbye. I came to this decision after I wanted to try out a new, simpler site design and couldn't get even the most basic theme working with the older version of Hugo I was running. To use the design I wanted, it seemed I would have to start entirely from scratch and port my old posts over to whatever the "new" way was, then iterate on everything until I was happy with it.</p><p>All of this seemed like too much work. Instead, I decided to move on from Hugo and figure out how to generate a static site from scratch. I'm a big fan of Clojure, and I've been looking for some excuse to give <a href='https://babashka.org/'>Babashka</a> a try.</p><p>The site is now being generated entirely through Clojure via Babashka, including the post you're reading right now! This might sound like it was <em>more</em> work than just getting everything to work with Hugo, but it only took a few hours to write the appropriate methods to not only parse markdown into HTML but to:</p><ul><li>Be able to have a process running that can watch for any changes, recompiling  when needed.</li><li>Launch a web server to serve my local site</li><li>Render templates, static pages</li><li>Handle some custom routing</li></ul><p>On top of all this, everything feels much <em>simpler</em> to understand and straightforward to modify.</p>]]>
     </content>
   </entry>
   <entry>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>mcramm.com</title>
+    <meta charset="utf-8"/>
+    <meta name="title" content="http://mcramm.com/">
+    <link rel="canonical" href="http://mcramm.com/">
+    <meta property="og:title" content="mcrammm.com"/>
+    <meta property="og:url" content="http://mcramm.com/"/>
+    <meta property="og:site_name" content="mcrammm.com">
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-02-18T16:48:39+00:00" />
+    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-02-18T16:48:39+00:00" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-CXZL3L7461');
+    </script>
+  </head>
+  <body>
+    <div class="nav">
+      <a href="/">mcramm.com</a>
+      <a href="https://twitter.com/cramm" target="_blank" rel="noopener">twitter</a>
+      <a href="mailto:mike@mcramm.com" target="_blank" rel="noopener">email</a>
+      <a href="https://github.com/mcramm" target="_blank" rel="noopener">github</a>
+      <a href="/atom.xml" target="_blank" rel="noopener">rss</a>
+    </div>
+    <div class="wrapper">
+      <h1>Adding Some Sound</h1>
+<p>I often overlook the sound in games. I tend to notice things like the graphics, what the core gameplay is, or the writing of a game's characters, if they have any, before I notice the sound. Imagine playing a game like last year's God of War: Ragnarok, but there are no sound effects when Kratos' axe smashes into an enemy. It would be weird!</p><p>So let's add some sound effects. I think I'll start with a component similar to the <code>GameSession</code> component that responsible for playing sounds.</p><pre><code class="cs">using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class SoundManager : MonoBehaviour
+{
+  public AudioSource sfxSource;
+  public static SoundManager instance = null;
+
+  &#91;SerializeField&#93; float lowPitchRange = 0.95f;
+  &#91;SerializeField&#93; float highPitchRange = 1.05f;
+
+  void Awake&#40;&#41; {
+    if &#40;instance == null&#41; {
+      instance = this;
+    } else if &#40;instance != this&#41; {
+      Destroy&#40;gameObject&#41;;
+    }
+
+    DontDestroyOnLoad&#40;gameObject&#41;;
+  }
+
+  public void PlayRandomSFX&#40;AudioClip&#91;&#93; clips&#41; {
+    int index = Random.Range&#40;0, clips.Length&#41;;
+    // slightly alter the pitch every time so that there
+    // seems to be a little more variety than there actually is.
+    float randomPitch = Random.Range&#40;lowPitchRange, highPitchRange&#41;;
+
+    sfxSource.pitch = randomPitch;
+    sfxSource.clip = clips&#91;index&#93;;
+    sfxSource.Play&#40;&#41;;
+  }
+}
+
+</code></pre><p>I want to play a sound whenever the ball hits a wall, a block, or the paddle. I'm already doing collision detection in <code>Ball.cs</code> anyways, so I may as wall add it there:</p><pre><code class="cs">  &#91;SerializeField&#93; AudioClip&#91;&#93; collisionClips; // &#42;NEW&#42;
+
+  void OnCollisionEnter2D&#40;Collision2D collision&#41; {
+    string tag = collision.gameObject.tag;
+
+    if &#40;tag == &quot;Block&quot; || tag == &quot;Wall&quot; || tag == &quot;Paddle&quot;&#41; {
+      Vector2 currentVelocity = rigidBody2D.velocity;
+
+      // A vector perpendicular to the surface we're colliding with
+      Vector2 normal = collision.GetContact&#40;0&#41;.normal;
+
+      // calculate the new, reflected velocity
+      Vector2 newVelocity = Vector2.Reflect&#40;currentVelocity, normal&#41;;
+
+      rigidBody2D.velocity = newVelocity;
+
+      SoundManager.instance.PlayRandomSFX&#40;collisionClips&#41;; // &#42;NEW&#42;
+    }
+
+    if &#40;tag == &quot;Block&quot;&#41; {
+      collision.gameObject.GetComponent&lt;Block&gt;&#40;&#41;.TakeHit&#40;1&#41;;
+    }
+
+    if &#40;tag == &quot;Bottom Wall&quot;&#41; {
+      BottomHit&#40;&#41;;
+    }
+  }
+</code></pre><p>The <code>collisionClips</code> property is a list of audio clips that I'll associate through the Unity editor. I could probably have found some clips to use on <a href='https://opengameart.org'>OpenGameArt</a>, but I decided to create my own using <a href='https://www.audacityteam.org'>Audacity</a>. If you're curious you can find the list of effects here: <a href='https://opengameart.org/content/blinksblonks'>https://opengameart.org/content/blinksblonks</a>.</p><p>I don't have a gif to show off this time since, well, gifs don't have sound. Next time I'm going to go a step further and add some music that plays while the game running.</p>
+<div><em>Published: 2023-02-23</em></div>
+
+
+
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          hljs.highlightElement(el);
+        });
+      });
+    </script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/main.js"></script>
+  </body>
+</html>

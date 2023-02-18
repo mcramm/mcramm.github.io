@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
 
-    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-02-14T01:04:10+00:00" />
-    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-02-14T01:04:10+00:00" />
+    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-02-18T16:49:29+00:00" />
+    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-02-18T16:49:29+00:00" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
@@ -35,7 +35,7 @@
     </div>
     <div class="wrapper">
       <h1>Transitioning Levels</h1>
-<p><div>   <img width="100%" src="/assets/images/transitioning_levels_2023_01_28.gif"></img> </div></p><p>Alright, time to add another level and transition to it when all blocks on the current level are destroyed! To do this, we're going to create a long-lived object named, <code>GameSession</code>. Eventually we'll also use this object to track the players score, but for now it will only be responsible for scene transitions.</p><p>To ensure that there is only ever one <code>GameSession</code> object active at any given time, we'll employ a pattern I used in a <a href='https://mcramm.com/posts/learning-to-make-games.html'>SkillShare course that I took</a>.</p><pre><code class="cs">public class GameSession : MonoBehaviour
+<p><div>   <img width="100%" src="/assets/images/transitioning_levels_2023_01_28.gif"></img> </div></p><p>Alright, time to add another level and transition to it when all blocks on the current level are destroyed! To do this we're going to create a long-lived object named <code>GameSession</code>. Eventually we'll also use this object to track the players score, but for now it will only be responsible for scene transitions.</p><p>To ensure that there is only ever one <code>GameSession</code> object active at any given time, we'll employ a pattern I used in a <a href='https://mcramm.com/posts/learning-to-make-games.html'>SkillShare course that I took</a>.</p><pre><code class="cs">public class GameSession : MonoBehaviour
 {
 
   void Awake&#40;&#41; {
@@ -70,8 +70,8 @@
 
     Destroy&#40;gameObject&#41;;
   }
-</code></pre><p>The process for creating the next level is fairly simple. I created "prefabs" of the paddle, ball, block, and walls objects, created a new scene, (I just duplicated the current one,) and added some more blocks. Finally, I opened the build settings in Unity to make sure the current scene was part of the build.</p><p>And voila! Multiple levels.</p>
-<div><em>Published: 2023-02-16</em></div>
+</code></pre><p>The process for creating the next level is fairly simple. I created "prefabs" of the paddle, ball, block, and walls objects, created a new scene, (I just duplicated the current one,) and added some more blocks. Finally I opened the build settings in Unity to make sure the current scene was part of the build.</p><p>And voila! Multiple levels.</p>
+<div><em>Published: 2023-02-18</em></div>
 
 
 
