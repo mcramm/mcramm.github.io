@@ -3,7 +3,7 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2023-02-18T16:49:30+00:00</updated>
+  <updated>2023-02-19T19:22:47+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
@@ -11,7 +11,7 @@
   <entry>
     <id>https://mcramm.com/posts/transitioning-levels.html</id>
     <link href="https://mcramm.com/posts/transitioning-levels.html"/>
-    <title>Transitioning Levels</title>
+    <title>Breakout Clone 4: Transitioning Levels</title>
     <updated>2023-02-18T23:59:59+00:00</updated>
     <content type="html">
       <![CDATA[<p><div>   <img width="100%" src="/assets/images/transitioning_levels_2023_01_28.gif"></img> </div></p><p>Alright, time to add another level and transition to it when all blocks on the current level are destroyed! To do this we're going to create a long-lived object named <code>GameSession</code>. Eventually we'll also use this object to track the players score, but for now it will only be responsible for scene transitions.</p><p>To ensure that there is only ever one <code>GameSession</code> object active at any given time, we'll employ a pattern I used in a <a href='https://mcramm.com/posts/learning-to-make-games.html'>SkillShare course that I took</a>.</p><pre><code class="cs">public class GameSession : MonoBehaviour
@@ -34,7 +34,6 @@
     SceneManager.LoadScene&#40;nextSceneIndex&#41;;
   }
 }
-
 </code></pre><p>In my <code>DestroyBlockIfDead</code> method, I'll check to see if there are any other blocks remaining, and if not, I'll call the <code>LoadNextLevel</code> method on our <code>GameSession</code>.</p><pre><code class="cs">  private void DestroyBlockIfDead&#40;&#41; {
     if &#40;currentHealth &gt; 0&#41; {
       return;
@@ -55,7 +54,7 @@
   <entry>
     <id>https://mcramm.com/posts/destructable-blocks.html</id>
     <link href="https://mcramm.com/posts/destructable-blocks.html"/>
-    <title>Destructable Blocks</title>
+    <title>Breakout Clone 3: Destructable Blocks</title>
     <updated>2023-02-13T23:59:59+00:00</updated>
     <content type="html">
       <![CDATA[<p><div>   <img width="100%" src="/assets/images/destrucable_blocks_2023_01_27.gif"></img> </div></p><p>This one is pretty easy. Every time the ball collides with a block, we call a method on that block that destroys it. I may want to have blocks that take multiple hits before they're destroyed, so I'll call this method <code>TakeHit</code> and pass it a value representing how much "health" to take away from it.</p><p>In my <code>Ball.cs</code> script:<pre><code class="cs">  void OnCollisionEnter2D&#40;Collision2D collision&#41; {
@@ -110,7 +109,7 @@
   <entry>
     <id>https://mcramm.com/posts/colliders.html</id>
     <link href="https://mcramm.com/posts/colliders.html"/>
-    <title>Colliders!</title>
+    <title>Breakout Clone 2: Colliders!</title>
     <updated>2023-02-06T23:59:59+00:00</updated>
     <content type="html">
       <![CDATA[<p>Getting the ball to bounce correctly off blocks requires a bit more thinking than how we have it bouncing off of the walls or the top of the paddle. I also want to prevent the paddle from moving through walls so that it remains inside the play area.</p><p>The problem with the paddle is a tricky one. Both the paddle and the walls have colliders on them with the <code>isTrigger</code> flag set to true. This means that normal physics-based collisions, like one object being prevented from moving through another, will be ignored, and instead the <code>OnTriggerEnter2D</code> function will be called on the two objects. Since the ball in this game is the thing moving about the play area, interacting with other things, I attached this method to the ball object itself. See my  <a href='https://mcramm.com//posts/walls-a-ball-and-a-paddle.html'>previous post</a> where I used this method.</p><p>If I stick with my current approach, then I would need to add an <code>OnTriggerEnter2D</code> method to my paddle object, detect when the paddle is about to collide with the wall, and reset the paddle's position to just before that collision would occur. Since the position of the paddle object is at the center of the paddle itself, I would need to adjust the paddle position to be offset based on 50% of the width of the paddle, plus a little more space to ensure the colliders are out of the way. If I don't add a little extra space, then the objects will always be "colliding" and the paddle will essentially become frozen.</p><p>But wait! Isn't this what game engines are supposed to do for us?</p><p>In Unity, two game objects with the Rigidbody and Collider components will react in a relatively realistic manner. They'll even be affected by gravity. We don't need gravity in this game, but to get the collisions we want, I won't be able to use the <code>isTrigger</code> method anymore, which means I'll need to use a different method when detecting that ball is colliding with different surfaces. Thankfully Unity supports this, and instead of registering the <code>OnTriggerEnter2D</code> method on my ball object, I'll need to instead use <code>OnCollisionEnter2D</code>:</p><pre><code class="cs">  void OnCollisionEnter2D&#40;Collision2D collision&#41; {
@@ -138,7 +137,7 @@
   <entry>
     <id>https://mcramm.com/posts/walls-a-ball-and-a-paddle.html</id>
     <link href="https://mcramm.com/posts/walls-a-ball-and-a-paddle.html"/>
-    <title>Adding a ball, a paddle, and walls</title>
+    <title>Breakout Clone 1: Adding a ball, a paddle, and walls</title>
     <updated>2023-02-01T23:59:59+00:00</updated>
     <content type="html">
       <![CDATA[<p><div>   <img width="100%" src="/assets/images/walls_a_ball_and_a_paddle_2023_01_18.gif"></img> </div></p><p>The ball starts off with an initial velocity of (1, 1); up and to the right. Having it "bounce" off the walls and paddle is as simple as adding colliders to everything through Unity's interface, setting the <code>isTrigger</code> flag, and then adding an <code>OnTriggerEnter2D</code> method to a script attached to the Ball game object:</p><p><div>   <img width="100%" src="/assets/images/is_trigger_shot_2023_01_20.png"></img> </div></p><pre><code class="cs">  private void OnTriggerEnter2D &#40;Collider2D other&#41; {
@@ -185,7 +184,7 @@
   <entry>
     <id>https://mcramm.com/posts/a-breakout-clone.html</id>
     <link href="https://mcramm.com/posts/a-breakout-clone.html"/>
-    <title>A breakout clone</title>
+    <title>Breakout Clone 0: Making a Simple Game</title>
     <updated>2023-01-26T23:59:59+00:00</updated>
     <content type="html">
       <![CDATA[<p>My first mini project is to build a Breakout clone. I don't want to go crazy with this, but I do want to do as much as possible for it to be a complete game.</p><p>What do I mean by "complete"? Well, I want the basic game to be in place:</p><ul><li>A ball is moving around in the game area. If it hits the bottom of the game  area, then the player users.</li><li>The player has control over a paddle that can move left and right to prevent  the ball from getting past.</li><li>If the ball interacts with one of the blocks at the top of the screen, the  block is "destroyed" and the player gets some points.</li><li>Destroying all the blocks progresses the player to the next level.</li></ul><p><div>   <img width="100%" src="/assets/images/breakout_clone_mockup.png"></img> </div></p><p>Doing all of that will require some minor assets like images for the blocks, paddle, and ball, possibly even the sides of the game area. I'll also need sound effects for the ball bouncing off the sides of the game area, the blocks, and the paddle itself.</p><p>If I can do all that, then I'll also want:</p><ul><li>A main menu where a player can choose to start a new game, or close the game  all together.</li><li>Some options (like muting audio)</li><li>Some music for the game.</li><li>A leader board (which means I'll also need to have a way for a player to enter  their initials)</li></ul>]]>

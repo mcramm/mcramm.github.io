@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
 
-    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-02-18T16:49:29+00:00" />
-    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-02-18T16:49:29+00:00" />
+    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-02-19T19:22:46+00:00" />
+    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-02-19T19:22:46+00:00" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
@@ -34,7 +34,7 @@
       <a href="/atom.xml" target="_blank" rel="noopener">rss</a>
     </div>
     <div class="wrapper">
-      <h1>Colliders!</h1>
+      <h1>Breakout Clone 2: Colliders!</h1>
 <p>Getting the ball to bounce correctly off blocks requires a bit more thinking than how we have it bouncing off of the walls or the top of the paddle. I also want to prevent the paddle from moving through walls so that it remains inside the play area.</p><p>The problem with the paddle is a tricky one. Both the paddle and the walls have colliders on them with the <code>isTrigger</code> flag set to true. This means that normal physics-based collisions, like one object being prevented from moving through another, will be ignored, and instead the <code>OnTriggerEnter2D</code> function will be called on the two objects. Since the ball in this game is the thing moving about the play area, interacting with other things, I attached this method to the ball object itself. See my  <a href='https://mcramm.com//posts/walls-a-ball-and-a-paddle.html'>previous post</a> where I used this method.</p><p>If I stick with my current approach, then I would need to add an <code>OnTriggerEnter2D</code> method to my paddle object, detect when the paddle is about to collide with the wall, and reset the paddle's position to just before that collision would occur. Since the position of the paddle object is at the center of the paddle itself, I would need to adjust the paddle position to be offset based on 50% of the width of the paddle, plus a little more space to ensure the colliders are out of the way. If I don't add a little extra space, then the objects will always be "colliding" and the paddle will essentially become frozen.</p><p>But wait! Isn't this what game engines are supposed to do for us?</p><p>In Unity, two game objects with the Rigidbody and Collider components will react in a relatively realistic manner. They'll even be affected by gravity. We don't need gravity in this game, but to get the collisions we want, I won't be able to use the <code>isTrigger</code> method anymore, which means I'll need to use a different method when detecting that ball is colliding with different surfaces. Thankfully Unity supports this, and instead of registering the <code>OnTriggerEnter2D</code> method on my ball object, I'll need to instead use <code>OnCollisionEnter2D</code>:</p><pre><code class="cs">  void OnCollisionEnter2D&#40;Collision2D collision&#41; {
     string tag = collision.gameObject.tag;
 
