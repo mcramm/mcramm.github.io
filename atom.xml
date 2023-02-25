@@ -3,11 +3,80 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2023-02-19T19:22:47+00:00</updated>
+  <updated>2023-02-25T21:58:43+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
+  <entry>
+    <id>https://mcramm.com/posts/adding-some-sound.html</id>
+    <link href="https://mcramm.com/posts/adding-some-sound.html"/>
+    <title>Breakout Clone 5: Adding Some Sound</title>
+    <updated>2023-02-25T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>I often overlook the sound in games. I tend to notice things like the graphics, what the core gameplay is, or the writing, before I notice the sound. Imagine playing a game like last year's God of War: Ragnarok, but there are no sound effects when Kratos' axe smashes into an enemy. It would be weird!</p><p>So let's add some sound effects. I think I'll start with a component similar to the <code>GameSession</code> component that responsible for playing sounds.</p><pre><code class="cs">using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class SoundManager : MonoBehaviour
+{
+  public AudioSource sfxSource;
+  public static SoundManager instance = null;
+
+  &#91;SerializeField&#93; float lowPitchRange = 0.95f;
+  &#91;SerializeField&#93; float highPitchRange = 1.05f;
+
+  void Awake&#40;&#41; {
+    if &#40;instance == null&#41; {
+      instance = this;
+    } else if &#40;instance != this&#41; {
+      Destroy&#40;gameObject&#41;;
+    }
+
+    DontDestroyOnLoad&#40;gameObject&#41;;
+  }
+
+  public void PlayRandomSFX&#40;AudioClip&#91;&#93; clips&#41; {
+    int index = Random.Range&#40;0, clips.Length&#41;;
+    // slightly alter the pitch every time so that there
+    // seems to be a little more variety than there actually is.
+    float randomPitch = Random.Range&#40;lowPitchRange, highPitchRange&#41;;
+
+    sfxSource.pitch = randomPitch;
+    sfxSource.clip = clips&#91;index&#93;;
+    sfxSource.Play&#40;&#41;;
+  }
+}
+</code></pre><p>I want to play a sound whenever the ball hits a wall, a block, or the paddle. I'm already doing collision detection in <code>Ball.cs</code> anyways, so I may as wall add it there:</p><pre><code class="cs">  &#91;SerializeField&#93; AudioClip&#91;&#93; collisionClips; // &#42;NEW&#42;
+
+  void OnCollisionEnter2D&#40;Collision2D collision&#41; {
+    string tag = collision.gameObject.tag;
+
+    if &#40;tag == &quot;Block&quot; || tag == &quot;Wall&quot; || tag == &quot;Paddle&quot;&#41; {
+      Vector2 currentVelocity = rigidBody2D.velocity;
+
+      // A vector perpendicular to the surface we're colliding with
+      Vector2 normal = collision.GetContact&#40;0&#41;.normal;
+
+      // calculate the new, reflected velocity
+      Vector2 newVelocity = Vector2.Reflect&#40;currentVelocity, normal&#41;;
+
+      rigidBody2D.velocity = newVelocity;
+
+      SoundManager.instance.PlayRandomSFX&#40;collisionClips&#41;; // &#42;NEW&#42;
+    }
+
+    if &#40;tag == &quot;Block&quot;&#41; {
+      collision.gameObject.GetComponent&lt;Block&gt;&#40;&#41;.TakeHit&#40;1&#41;;
+    }
+
+    if &#40;tag == &quot;Bottom Wall&quot;&#41; {
+      BottomHit&#40;&#41;;
+    }
+  }
+</code></pre><p>The <code>collisionClips</code> property is a list of audio clips that I'll associate through the Unity editor. I could have found some clips to use on <a href='https://opengameart.org'>OpenGameArt</a>, but I decided to create my own using <a href='https://www.audacityteam.org'>Audacity</a>. If you're curious you can find the list of effects here: <a href='https://opengameart.org/content/blinksblonks'>https://opengameart.org/content/blinksblonks</a>.</p><p>I don't have a gif to show off this time since, well, gifs don't have sound. Next time I'm going to go a step further and add some music that plays while the game running.</p>]]>
+    </content>
+  </entry>
   <entry>
     <id>https://mcramm.com/posts/transitioning-levels.html</id>
     <link href="https://mcramm.com/posts/transitioning-levels.html"/>

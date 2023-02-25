@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
 
-    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-02-19T19:19:43+00:00" />
-    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-02-19T19:19:43+00:00" />
+    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-02-25T21:58:42+00:00" />
+    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-02-25T21:58:42+00:00" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
@@ -35,7 +35,7 @@
     </div>
     <div class="wrapper">
       <h1>Breakout Clone 5: Adding Some Sound</h1>
-<p>I often overlook the sound in games. I tend to notice things like the graphics, what the core gameplay is, or the writing of a game's characters, if they have any, before I notice the sound. Imagine playing a game like last year's God of War: Ragnarok, but there are no sound effects when Kratos' axe smashes into an enemy. It would be weird!</p><p>So let's add some sound effects. I think I'll start with a component similar to the <code>GameSession</code> component that responsible for playing sounds.</p><pre><code class="cs">using System.Collections;
+<p>I often overlook the sound in games. I tend to notice things like the graphics, what the core gameplay is, or the writing, before I notice the sound. Imagine playing a game like last year's God of War: Ragnarok, but there are no sound effects when Kratos' axe smashes into an enemy. It would be weird!</p><p>So let's add some sound effects. I think I'll start with a component similar to the <code>GameSession</code> component that responsible for playing sounds.</p><pre><code class="cs">using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -96,7 +96,7 @@ public class SoundManager : MonoBehaviour
     }
   }
 </code></pre><p>The <code>collisionClips</code> property is a list of audio clips that I'll associate through the Unity editor. I could have found some clips to use on <a href='https://opengameart.org'>OpenGameArt</a>, but I decided to create my own using <a href='https://www.audacityteam.org'>Audacity</a>. If you're curious you can find the list of effects here: <a href='https://opengameart.org/content/blinksblonks'>https://opengameart.org/content/blinksblonks</a>.</p><p>I don't have a gif to show off this time since, well, gifs don't have sound. Next time I'm going to go a step further and add some music that plays while the game running.</p>
-<div><em>Published: 2023-02-23</em></div>
+<div><em>Published: 2023-02-25</em></div>
 
 
 
