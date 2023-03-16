@@ -3,11 +3,46 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2023-03-16T01:34:33+00:00</updated>
+  <updated>2023-03-16T01:35:26+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
+  <entry>
+    <id>https://mcramm.com/posts/adding-some-music.html</id>
+    <link href="https://mcramm.com/posts/adding-some-music.html"/>
+    <title>Breakout Clone 6: Music</title>
+    <updated>2023-03-15T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>In my last post I added sound effects for the ball hitting the sides of play area, the blocks and the paddle.</p><p>Today I'm going to add some music. This won't take too long since most of the code is already in place.</p><p>First I'll add another <code>AudioSource</code> to the <code>SoundManager</code> and add a couple of methods to start & stop the music:</p><pre><code class="cs">public class SoundManager : MonoBehaviour
+{
+  public AudioSource sfxSource;
+  public AudioSource musicSource;
+  public static SoundManager instance = null;
+
+  &#91;SerializeField&#93; float lowPitchRange = 0.95f;
+  &#91;SerializeField&#93; float highPitchRange = 1.05f;
+
+  // I've omitted the Awake&#40;&#41; and PlayRandomSFX&#40;&#41;
+  // methods since they have not changed
+  
+  public void PlayMusic&#40;&#41; {
+    musicSource.Play&#40;&#41;;
+  }
+
+  public void StopMusic&#40;&#41; {
+    musicSource.Stop&#40;&#41;;
+  }
+</code></pre><p>These <code>AudioSource</code>s are components on my <code>GameSession</code> object that I've associated with the script by dragging-and-dropping them from the component, to the appropriate field in the UI. The sound effects didn't have an explicit <code>AudioClip</code> assigned since we were picking a random one in <code>PlayRandomSFX</code>. The music though <i>will</i> have an clip assigned to it, and I chose <a href='https://opengameart.org/content/battle-music'>this one</a>.</p><p>In my <code>GameSession</code> script, we'll start playing the music when the game begins;<pre><code class="cs">public class GameSession : MonoBehaviour
+{
+  // Awake and LoadNextLevel have not changed
+  void Start&#40;&#41; {
+    SoundManager.instance.PlayMusic&#40;&#41;;
+  }
+}
+</code></pre></p><p>This won't be the behavior for long. In my next post, I'm going to add in some screens to handle the main menu, a victory screen when the player has completed all the levels, and a failure screen when ball hits the bottom of the play area.</p>]]>
+    </content>
+  </entry>
   <entry>
     <id>https://mcramm.com/posts/adding-some-sound.html</id>
     <link href="https://mcramm.com/posts/adding-some-sound.html"/>
