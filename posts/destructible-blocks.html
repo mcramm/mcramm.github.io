@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
 
-    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-03-20T21:33:01+00:00" />
-    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-03-20T21:33:01+00:00" />
+    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-03-21T23:36:24+00:00" />
+    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-03-21T23:36:24+00:00" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
@@ -34,7 +34,7 @@
       <a href="/atom.xml" target="_blank" rel="noopener">rss</a>
     </div>
     <div class="wrapper">
-      <h1>Breakout Clone 3: Destructable Blocks</h1>
+      <h1>Breakout Clone 3: Destructible Blocks</h1>
 <p><div>   <img width="100%" src="/assets/images/destrucable_blocks_2023_01_27.gif"></img> </div></p><p>This one is pretty easy. Every time the ball collides with a block, we call a method on that block that destroys it. I may want to have blocks that take multiple hits before they're destroyed, so I'll call this method <code>TakeHit</code> and pass it a value representing how much "health" to take away from it.</p><p>In my <code>Ball.cs</code> script:<pre><code class="cs">  void OnCollisionEnter2D&#40;Collision2D collision&#41; {
     string tag = collision.gameObject.tag;
 

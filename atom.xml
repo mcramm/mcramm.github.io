@@ -3,11 +3,116 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2023-03-16T01:35:26+00:00</updated>
+  <updated>2023-03-21T23:36:25+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
+  <entry>
+    <id>https://mcramm.com/posts/start-victory-failure-screens.html</id>
+    <link href="https://mcramm.com/posts/start-victory-failure-screens.html"/>
+    <title>Breakout Clone 7: Start, Victory, and Failure Screens</title>
+    <updated>2023-03-21T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>I don't want the game to start immediately after the player launches it. Instead, I want to show a menu and let the player choose to start the game or close the application. We also want a screen to display when the player looses, (when the ball collides with the bottom of the screen below the paddle,) and when they "win", (when there are no more levels left to play.)</p><p>I don't want to over-design these screens. The whole point of making this game is to test myself and see if I have the basics down. What I'm picturing is very simple: two text elements for each screen, and a cursor that the player can control with the up & down arrows on the keyboard. The two text elements will be something like "Start Game" and "Close Game". When the player hits the enter key, we call the appropriate function. On the "victory" and "failure" screens, we'll show a third text element like "You won" or "You lost".</p><p>The complicated bit of this is going to be the cursor. The "Start" and "Close" options should be simple text objects on the page, but I'll need some kind of script to handle button presses and control the cursors current position.</p><p>Since this is all cursor-related logic, I created an object named <code>Cursor</code> and added a script to it. The selectable options will be an array of references to game objects that I can assign through Unity's UI. Instead of having a literal cursor like an arrow, I'll highlight each option as they're selected.</p><pre><code class="cs">using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro; // for TMP&#95;Text
+
+public class Cursor : MonoBehaviour
+{
+  &#91;SerializeField&#93; TMP&#95;Text&#91;&#93; items;
+
+  private int cursorPosition = 0;
+  private Color32 defaultColor = new Color32&#40;0, 0, 0, 255&#41;;
+  private Color32 highlightColor = new Color32&#40;140, 199, 64, 255&#41;;
+
+  void Start&#40;&#41;
+  {
+    items&#91;cursorPosition&#93;.color = highlightColor;
+  }
+
+  void Update&#40;&#41;
+  {
+    bool upOrDownPressed = Input.GetButtonDown&#40;&quot;Vertical&quot;&#41;;
+
+    if &#40;upOrDownPressed&#41; {
+      HandleUpOrDownPressed&#40;&#41;;
+    }
+
+    bool submitButtonPressed = Input.GetButtonDown&#40;&quot;Submit&quot;&#41;;
+    if &#40;submitButtonPressed&#41; {
+      SubmitCurrentItem&#40;items&#91;cursorPosition&#93;&#41;;
+    }
+
+  }
+
+  private void HandleUpOrDownPressed&#40;&#41; {
+    int vertical = 0;
+    vertical = &#40;int&#41; Input.GetAxisRaw&#40;&quot;Vertical&quot;&#41;;
+
+    items&#91;cursorPosition&#93;.color = defaultColor;
+
+    if &#40;vertical &gt; 0&#41; {
+      MoveCursorUp&#40;&#41;;
+    } else {
+      MoveCursorDown&#40;&#41;;
+    }
+
+    items&#91;cursorPosition&#93;.color = highlightColor;
+  }
+
+  private void MoveCursorUp&#40;&#41; {
+    if&#40;cursorPosition == 0&#41; {
+      cursorPosition = items.Length - 1;
+    } else {
+      cursorPosition -= 1;
+    }
+  }
+
+  private void MoveCursorDown&#40;&#41; {
+    if&#40;cursorPosition == items.Length - 1&#41; {
+      cursorPosition = 0;
+    } else {
+      cursorPosition += 1;
+    }
+  }
+
+  private void SubmitCurrentItem&#40;TMP&#95;Text menuItem&#41; {
+    GameSession gameSession = FindObjectOfType&lt;GameSession&gt;&#40;&#41;;
+
+    FindObjectOfType&lt;LeaderboardManager&gt;&#40;&#41;.UpdateBoard&#40;gameSession&#41;;
+
+    if &#40;menuItem.tag == &quot;StartMenuItem&quot;&#41; {
+      gameSession.StartGame&#40;&#41;;
+    } else if &#40;menuItem.tag == &quot;ExitMenuItem&quot;&#41; {
+      gameSession.EndGame&#40;&#41;;
+    }
+  }
+}
+</code></pre><p>I'm calling the <code>StartGame&#40;&#41;</code> and <code>EndGame&#40;&#41;</code> methods on <code>GameSession</code>, so I should define them:</p><pre><code class="cs">  // in GameSession.cs
+
+  public void StartGame&#40;&#41; {
+    SceneManager.LoadScene&#40;1&#41;;
+    // this is where we'll start playing the music!
+    SoundManager.instance.PlayMusic&#40;&#41;;
+  }
+
+  public void EndGame&#40;&#41; {
+    Application.Quit&#40;&#41;;
+  }
+</code></pre><p>Under File > Build Settings in Unity, I'll add the new scene to the list of Scenes In Build, and make sure it's the first one at index 0. I'll also make sure that my "Level 1" scene is at index 1.</p><p>Let's give it a try!</p><p>Note: between writing this post and making changes to the game, I also updated the sprites used for the paddle, ball, and blocks. These are visual changes only and I didn't think they were worth their own post.</p><p><div>   <img width="100%" src="/assets/images/start_screen_2023_03_15.gif"></img> </div></p><p>Looks good enough to me! All that's left is to add two more screens: one for when we run out of levels (the "Victory" screen) and one for when the player fails to prevent the ball from hitting the bottom of the screen (the "Failure" screen.)</p><p>I've put the victory screen after the last level so the game will transition to it by itself. The failure screen will be after the victory screen, but to see it, we'll need to transition to it from our GameSession object:</p><pre><code class="cs">  // in GameSession.cs
+  public void LostGame&#40;&#41; {
+    SceneManager.LoadScene&#40;&quot;Failure Level&quot;&#41;;
+  }
+</code></pre><p>We can then call it from our Ball object via the <code>BottomHit</code> method:<pre><code class="cs">  // in Ball.cs
+  private void BottomHit&#40;&#41; {
+    FindObjectOfType&lt;GameSession&gt;&#40;&#41;.LostGame&#40;&#41;;
+  }
+</code></pre></p><p>Now we have all the basics in place. Hey, it actually kinda looks like a game! </p><p>My next few posts will wrap up this series as I've already moved on to other projects. We'll need a few more levels, and I want to track some kind of score for the player as they move through them. Finally, I'll add in some items that drop randomly when the ball collides with a block.</p>]]>
+    </content>
+  </entry>
   <entry>
     <id>https://mcramm.com/posts/adding-some-music.html</id>
     <link href="https://mcramm.com/posts/adding-some-music.html"/>
@@ -156,9 +261,9 @@ public class SoundManager : MonoBehaviour
     </content>
   </entry>
   <entry>
-    <id>https://mcramm.com/posts/destructable-blocks.html</id>
-    <link href="https://mcramm.com/posts/destructable-blocks.html"/>
-    <title>Breakout Clone 3: Destructable Blocks</title>
+    <id>https://mcramm.com/posts/destructible-blocks.html</id>
+    <link href="https://mcramm.com/posts/destructible-blocks.html"/>
+    <title>Breakout Clone 3: Destructible Blocks</title>
     <updated>2023-02-13T23:59:59+00:00</updated>
     <content type="html">
       <![CDATA[<p><div>   <img width="100%" src="/assets/images/destrucable_blocks_2023_01_27.gif"></img> </div></p><p>This one is pretty easy. Every time the ball collides with a block, we call a method on that block that destroys it. I may want to have blocks that take multiple hits before they're destroyed, so I'll call this method <code>TakeHit</code> and pass it a value representing how much "health" to take away from it.</p><p>In my <code>Ball.cs</code> script:<pre><code class="cs">  void OnCollisionEnter2D&#40;Collision2D collision&#41; {
