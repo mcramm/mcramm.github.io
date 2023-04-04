@@ -3,11 +3,74 @@
   <title>MCRAMM.COM</title>
   <link href="https://mcramm.com/atom.xml" rel="self"/>
   <link href="https://mcramm.com"/>
-  <updated>2023-03-21T23:36:25+00:00</updated>
+  <updated>2023-04-04T01:22:40+00:00</updated>
   <id>https://mcramm.com</id>
   <author>
     <name>Michael Cramm</name>
   </author>
+  <entry>
+    <id>https://mcramm.com/posts/breakout-more-levels-and-score.html</id>
+    <link href="https://mcramm.com/posts/breakout-more-levels-and-score.html"/>
+    <title>Breakout Clone 8: Adding a few more levels and tracking score</title>
+    <updated>2023-04-03T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>The next couple of things I want to do are fairly simple, so I thought I could combine them into a single post.</p><h2>Adding a few more levels</h2><p>First we'll add a few more levels to the game. Unity calls these "Scenes".</p><p>This is fairly straightforward; all I did was duplicate the existing level a couple of times and add more blocks in different arrangements. In the project's build settings, I made sure that the levels appeared in the correct order. The victory scene should follow immediately after the last level, and the failure screen should be last level in the build.</p><p>We'll keep the logic for transitioning scenes on the <code>GameSession</code>:</p><pre><code>  public void LoadNextLevel&#40;&#41; {
+    int nextSceneIndex = SceneManager.GetActiveScene&#40;&#41;.buildIndex + 1;
+    SceneManager.LoadScene&#40;nextSceneIndex&#41;;
+  }
+</code></pre><p>And now we just need to call it.</p><p>In my <a href='/posts/destructible-blocks.html'>Destructible Blocks</a> post, I added a <code>DestroyBlockIfDead</code> method to the Block object that can detect when to destroy the game object. This the perfect place to check if there are any remaining Blocks on the screen, and transition to the next scene if there aren't any:<pre><code class="cs">   private void DestroyBlockIfDead&#40;&#41; {
+    if &#40;currentHealth &gt; 0&#41; {
+      return;
+    }
+
+    GameSession gameSession = FindObjectOfType&lt;GameSession&gt;&#40;&#41;; // NEW
+
+    int numberOfBlocksRemaining = GameObject.FindGameObjectsWithTag&#40;&quot;Block&quot;&#41;.Length - 1; // NEW
+    if&#40;numberOfBlocksRemaining == 0&#41; { // NEW
+      gameSession.LoadNextLevel&#40;&#41;; // NEW
+    } // NEW
+
+    Destroy&#40;gameObject&#41;;
+  }
+</code></pre></p><h2>Keeping track of the player's score</h2><p>Again, back in our Block object, lets add more logic to our <code>DestroyBlockIfDead</code> function:</p><pre><code class="cs">  // In Block.cs
+
+  // NEW This field will be the value of a particular block.
+  &#91;SerializeField&#93; int blockValue = 100;
+
+  private void DestroyBlockIfDead&#40;&#41; {
+    if &#40;currentHealth &gt; 0&#41; {
+      return;
+    }
+
+    GameSession gameSession = FindObjectOfType&lt;GameSession&gt;&#40;&#41;;
+    gameSession.AddToScore&#40;blockValue&#41;; // NEW
+
+    int numberOfBlocksRemaining = GameObject.FindGameObjectsWithTag&#40;&quot;Block&quot;&#41;.Length - 1;
+    if&#40;numberOfBlocksRemaining == 0&#41; {
+      gameSession.LoadNextLevel&#40;&#41;;
+    }
+
+    Destroy&#40;gameObject&#41;;
+  }
+</code></pre><p>And in <code>GameSession</code>, we'll now add the missing <code>AddToScore</code> function:<pre><code class="cs">  // in GameSession.cs
+
+  // The scoreText will be a reference to a text object on the screen
+  &#91;SerializeField&#93; int initialScore = 0;
+  &#91;SerializeField&#93; TMP&#95;Text scoreText; // from using UnityEngine.UI above
+
+  // NEW
+  public void AddToScore&#40;int amount&#41; {
+    currentScore += amount;
+    UpdateScoreUI&#40;&#41;;
+  }
+
+  // This will update the text being rendered inside the text object
+  private void UpdateScoreUI&#40;&#41; {
+    scoreText.text = &quot;Score: &quot; + currentScore;
+  }
+</code></pre></p><p>In order for this to work, we'll also need to add a text element to our game and hand our GameSession object a reference to it. Since it needs to persist across multiple scenes, I made sure to add the object as a <em>child</em> of the GameSession. That way it won't get destroyed as we transition scenes.</p><p>In my final post I'll add in a few items that can drop randomly when a block is destroyed.</p>]]>
+    </content>
+  </entry>
   <entry>
     <id>https://mcramm.com/posts/start-victory-failure-screens.html</id>
     <link href="https://mcramm.com/posts/start-victory-failure-screens.html"/>

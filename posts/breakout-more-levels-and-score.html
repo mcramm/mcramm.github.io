@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
 
-    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-03-21T23:28:28+00:00" />
-    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-03-21T23:28:28+00:00" />
+    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-04-04T01:22:39+00:00" />
+    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-04-04T01:22:39+00:00" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
@@ -35,11 +35,11 @@
     </div>
     <div class="wrapper">
       <h1>Breakout Clone 8: Adding a few more levels and tracking score</h1>
-<p>And that's a wrap!</p><p>After adding in the final screens, the last few things I wanted to get done were pretty easy: </p><h2>Adding a few more levels</h2><p>First we'll add a few more "levels" to the game. Unity calls these "Scenes". This is fairly strightforward; all I did was duplicate the my existing scene a couple of times, and add more blocks in different arrangements. In the project's build settings, I made sure that the levels appeared in the correct order, that the Victory scene followed immediately after the last level, and that the failure screen was the absolute last level in my build.</p><p>We'll keep the logic for transitioning scenes on the <code>GameSession</code>:</p><pre><code>  public void LoadNextLevel&#40;&#41; {
+<p>The next couple of things I want to do are fairly simple, so I thought I could combine them into a single post.</p><h2>Adding a few more levels</h2><p>First we'll add a few more levels to the game. Unity calls these "Scenes".</p><p>This is fairly straightforward; all I did was duplicate the existing level a couple of times and add more blocks in different arrangements. In the project's build settings, I made sure that the levels appeared in the correct order. The victory scene should follow immediately after the last level, and the failure screen should be last level in the build.</p><p>We'll keep the logic for transitioning scenes on the <code>GameSession</code>:</p><pre><code>  public void LoadNextLevel&#40;&#41; {
     int nextSceneIndex = SceneManager.GetActiveScene&#40;&#41;.buildIndex + 1;
     SceneManager.LoadScene&#40;nextSceneIndex&#41;;
   }
-</code></pre><p>And now we just need to call it.</p><p>In my Destructible Blocks post, I added a <code>DestroyBlockIfDead</code> method to the Block object that can detect when to destroy the gameObject. This seems like the perfect place to check if there are any remaining Blocks on the screen, and then we can transition to the next scene:<pre><code class="cs">   private void DestroyBlockIfDead&#40;&#41; {
+</code></pre><p>And now we just need to call it.</p><p>In my <a href='/posts/destructible-blocks.html'>Destructible Blocks</a> post, I added a <code>DestroyBlockIfDead</code> method to the Block object that can detect when to destroy the game object. This the perfect place to check if there are any remaining Blocks on the screen, and transition to the next scene if there aren't any:<pre><code class="cs">   private void DestroyBlockIfDead&#40;&#41; {
     if &#40;currentHealth &gt; 0&#41; {
       return;
     }
@@ -71,19 +71,11 @@
       gameSession.LoadNextLevel&#40;&#41;;
     }
 
-    // we want something to randomly happen here...
-    int randomNumber = Random.Range&#40;1, 100&#41;;
-
-    if &#40;randomNumber &lt; percentageChanceOfItemDrop&#41; {
-      DropItem&#40;gameSession&#41;;
-    }
-
     Destroy&#40;gameObject&#41;;
   }
 </code></pre><p>And in <code>GameSession</code>, we'll now add the missing <code>AddToScore</code> function:<pre><code class="cs">  // in GameSession.cs
 
-  // We'll add some new fields. The scoreText will be a reference to a text
-  /// object on the screen
+  // The scoreText will be a reference to a text object on the screen
   &#91;SerializeField&#93; int initialScore = 0;
   &#91;SerializeField&#93; TMP&#95;Text scoreText; // from using UnityEngine.UI above
 
@@ -98,7 +90,7 @@
     scoreText.text = &quot;Score: &quot; + currentScore;
   }
 </code></pre></p><p>In order for this to work, we'll also need to add a text element to our game and hand our GameSession object a reference to it. Since it needs to persist across multiple scenes, I made sure to add the object as a <em>child</em> of the GameSession. That way it won't get destroyed as we transition scenes.</p><p>In my final post I'll add in a few items that can drop randomly when a block is destroyed.</p>
-<div><em>Published: 2023-03-22</em></div>
+<div><em>Published: 2023-04-03</em></div>
 
 
 
