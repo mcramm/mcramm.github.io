@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/github.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
 
-    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-04-04T01:21:14+00:00" />
-    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-04-04T01:21:14+00:00" />
+    <link rel="stylesheet" href="/assets/css/normalize.css?version=2023-04-24T23:56:28+00:00" />
+    <link rel="stylesheet" href="/assets/css/styles.css?version=2023-04-24T23:56:28+00:00" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXZL3L7461"></script>
@@ -35,7 +35,7 @@
     </div>
     <div class="wrapper">
       <h1>Breakout Clone 9: Items</h1>
-<p>When a block is destroyed, I want there to be a small chance of an item dropping and falling towards the paddle. If the player's paddle collides with the item, the item's effect is applied to the game. In my experience with breakout-style games, I've seen three kinds of common items that can appear:</p><ul><li>An item that increases the players score (bonus points)</li><li>An item that makes the ball(s) currently on the screen "sticky". If these  balls collide with the paddle, then they'll freeze in place, and the player  now has the option to move the paddle and release the ball at an advantageous  position.</li><li>An item that spawns a new ball for every ball currently on the screen.</li></ul><p>Let's start with the code for spawning an item, then we can figure out what the items will actually look like and how to implement the logic behind their effects.</p><p>First, in <code>Block.cs</code> we'll add some lines that will call <code>DropItem</code> randomly when a block is destroyed.<pre><code class="cs">  // In Block.cs
+<p>When a block is destroyed, I want there to be a small chance of an item dropping and falling towards the paddle. If the player's paddle collides with the item, the item's effect is applied to the game. While playing some other breakout-style games, I've seen three kinds of common items that can appear:</p><ul><li>An item that increases the players score (bonus points)</li><li>An item that makes any balls currently on the screen "sticky". If these  balls collide with the paddle, then they'll stick to the paddle, and the player  has the option to move the paddle and release the ball at an advantageous  position.</li><li>An item that spawns a new ball for every ball currently on the screen.</li></ul><p>Let's start with the code for spawning an item, then we can figure out what the items will actually look like and how to implement the logic behind their effects.</p><p>First, in <code>Block.cs</code> we'll add some lines that will call a new <code>DropItem</code> function randomly when a block is destroyed.<pre><code class="cs">  // In Block.cs
   // &#42;NEW&#42; add an attribute that represnts how often an item will drop
   &#91;SerializeField&#93; int percentageChanceOfItemDrop = 30;
 
@@ -68,8 +68,6 @@
     GameObject item = Instantiate&#40;gameSession.PickItemToDrop&#40;&#41;, transform.position, Quaternion.identity&#41;;
     item.transform.SetParent&#40;null, true&#41;;
   }
-
-/
 </code></pre></p><p>We'll need to define <code>PickItemToDrop</code> on <code>GameSession</code>:</p><pre><code class="cs">  // in GameSession.cs
   // This field will contain our list of items
   &#91;SerializeField&#93; GameObject&#91;&#93; dropableItems;
@@ -77,7 +75,7 @@
   public GameObject PickItemToDrop&#40;&#41; {
     return dropableItems&#91;Random.Range&#40;0, dropableItems.Length&#41;&#93;;
   }
-</code></pre><p>Now we'll need to define a list of game objects to populate the <code>dropableItems</code> array with. Each item will have its unique "effect" that will be applied when they collide with the paddle, but there will be some shared logic too, so I think this is a good case for some inheritance.</p><p>First, I'll define a <code>FallingObject</code> script:</p><pre><code class="cs">using System.Collections;
+</code></pre><p>Now we'll need to define a list of game objects to populate the <code>dropableItems</code> field with. Each item will have its unique effect that will be applied when they collide with the paddle, but there will be some shared logic too, so I think this is a good case for some inheritance.</p><p>First, I'll define a <code>FallingItem</code> script:</p><pre><code class="cs">using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -86,14 +84,11 @@ public class FallingItem : MonoBehaviour
   private Rigidbody2D rigidBody2D;
   &#91;SerializeField&#93; Vector3 fallingVelocity = new Vector3&#40;0, -1f, 0&#41;;
 
-  void Awake&#40;&#41;
-  {
+  void Awake&#40;&#41; {
     rigidBody2D = GetComponent&lt;Rigidbody2D&gt;&#40;&#41;;
   }
 
-  // Start is called before the first frame update
-  void Start&#40;&#41;
-  {
+  void Start&#40;&#41; {
     rigidBody2D.velocity = fallingVelocity;
   }
 
@@ -114,8 +109,7 @@ using System.Collections.Generic;
 
 public class Bonus : FallingItem
 {
-    protected override void Apply&#40;&#41;
-    {
+    protected override void Apply&#40;&#41; {
       GameSession gameSession = FindObjectOfType&lt;GameSession&gt;&#40;&#41;;
       gameSession.AddToScore&#40;1000&#41;;
 
@@ -124,14 +118,13 @@ public class Bonus : FallingItem
     }
 }
 
-</code></pre></p><p>The next two are a bit more tricky. We'll need to define additional logic to our Ball script. </p><p>First, the <code>MultiBall</code> item that duplicates every other ball on the screen:<pre><code class="cs">using UnityEngine;
+</code></pre></p><p>The next two are a bit more tricky. We'll need to define additional logic on our Ball script. </p><p>First, the <code>MultiBall</code> item duplicates every other ball on the screen:<pre><code class="cs">using UnityEngine;
 using System;
 using System.Collections.Generic;
 
 public class MultiBall : FallingItem
 {
-  protected override void Apply&#40;&#41;
-  {
+  protected override void Apply&#40;&#41; {
     Ball&#91;&#93; balls = FindObjectsOfType&lt;Ball&gt;&#40;&#41;;
 
     foreach&#40;Ball ball in balls&#41; {
@@ -155,8 +148,7 @@ using System.Collections.Generic;
 
 public class Sticky : FallingItem
 {
-    protected override void Apply&#40;&#41;
-    {
+    protected override void Apply&#40;&#41; {
       Ball&#91;&#93; balls = FindObjectsOfType&lt;Ball&gt;&#40;&#41;;
 
       foreach&#40;Ball ball in balls&#41; {
@@ -201,29 +193,37 @@ public class Sticky : FallingItem
     }
   }
 
-</code></pre></p><p>Implementing the <code>PlaceBallOnPaddle</code> function was interesting. First, we want the ball to remain at the same position when it collided with the paddle, <i>and</i> remember what it's output vector will be when it is eventually released. Finally, we want the ball to travel with the paddle as the player re-positions it. Thankfully our collision detection is already keeping track of the ball's velocity (in <code>ballVelocity</code>), so we can use that when we release it. Keeping the ball stationary and tracking the paddle is as easy as setting the velocity of the RigidBody2D component to some stationary velocity, and setting the parent of the ball to the paddle. We'll also disable collisions on the ball since we don't need to perform those calculations while it's stuck:</p><pre><code class="cs">  private void PlaceBallOnPaddle&#40;&#41; {
+</code></pre></p><p>Implementing the <code>PlaceBallOnPaddle</code> function was interesting. First, we want the ball to remain at the same position when it collided with the paddle, <i>and</i> remember what it's output vector will be when it is eventually released. Finally, we want the ball to travel with the paddle as the player re-positions it. Thankfully our collision detection is already keeping track of the ball's velocity (in <code>ballVelocity</code>,) so we can use that when we release it. Keeping the ball stationary and tracking the paddle is as easy as setting the velocity of the RigidBody2D component to some stationary velocity, and setting the parent of the ball to the paddle. We'll also disable collisions on the ball since we don't need to perform those calculations while it's stuck:</p><pre><code class="cs">  private Vector2 stationaryVelocity = new Vector2&#40;0, 0&#41;;
+
+  private void PlaceBallOnPaddle&#40;&#41; {
     // disable collisions
     circleCollider2D.enabled = false;
+
     // make the ball stationary
     rigidBody2D.velocity = stationaryVelocity;
 
     // attach the ball to the paddle
     GameObject paddle = GameObject.FindGameObjectWithTag&#40;&quot;Paddle&quot;&#41;;
-
     transform.SetParent&#40;paddle.transform, true&#41;;
   }
 </code></pre><p>When we release the ball, we'll perform the operations in reverse order:<pre><code class="cs">  private void ReleaseBall&#40;&#41; {
     // detach the ball from the paddle
     transform.SetParent&#40;null, true&#41;;
-    // set the velocity of the ball to the saved velocity
+
+    // set the velocity of the ball to the saved velocity, making sure it's
+    // going &quot;up&quot;
     rigidBody2D.velocity = new Vector2&#40;ballVelocity.x, Mathf.Abs&#40;ballVelocity.y&#41;&#41;;
+
+    // enable collisions
     circleCollider2D.enabled = true;
   }
 </code></pre></p><p>This <i>kinda</i> worked, but I was hitting a bug where the ball would sometimes immediately re-collide with the paddle after being released. I fixed that by waiting half a second before re-enabling collision detection:</p><pre><code class="cs">  private void ReleaseBall&#40;&#41; {
     // detach the ball from the paddle
     transform.SetParent&#40;null, true&#41;;
+
     // set the velocity of the ball to the saved velocity
     rigidBody2D.velocity = new Vector2&#40;ballVelocity.x, Mathf.Abs&#40;ballVelocity.y&#41;&#41;;
+
     // enable collisions after a delay
     StartCoroutine&#40;AllowCollisions&#40;&#41;&#41;;
   }
@@ -232,15 +232,14 @@ public class Sticky : FallingItem
     yield return new WaitForSeconds&#40;0.5f&#41;;
     circleCollider2D.enabled = true;
   }
-</code></pre><p>Finally, we'll call <code>ReleaseBall</code> whenever the spacebar is pressed. This is the first and only change we'll make to the Ball object's <code>Update</code> method:<pre><code class="cs">  void Update&#40;&#41;
-  {
+</code></pre><p>Finally we'll call <code>ReleaseBall</code> whenever the spacebar is pressed. This is the first and only change we'll make to the Ball object's <code>Update</code> method:<pre><code class="cs">  void Update&#40;&#41; {
     bool spacePressed = Input.GetButtonDown&#40;&quot;Jump&quot;&#41;;
     if &#40;spacePressed&#41; {
       ReleaseBall&#40;&#41;;
     }
   }
-</code></pre></p>
-<div><em>Published: 2023-03-29</em></div>
+</code></pre></p><p>Whew, That was a lot! All that's left now is to create some game objects, find some art to represent our items, and fill in the <code>dropableItems</code> array on <code>GameSession</code>. This is all fairly standard Unity stuff - right click in the Hierarchy window and create a 2D sprite object, assign a Script component, assign a sprite, etc. Surprisingly the hardest part was actually deciding on sprites that represent our multi-ball, sticky, and bonus points items. </p><p>I decided to keep it simple and pick some letters. I found some <a href='https://opengameart.org/content/8-bit-personalized-alphabet-only-letter'>8-bit letters on OpenGameArt</a> and chose the M, S, and B letters:</p><p><div>   <img width="100%" src="/assets/images/breakout_items_2023_04_10.png"></img> </div></p><p>And that's it! Here are the item drops working in all their glory:</p><p><div>   <img width="100%" src="/assets/images/breakout_items_2023_04_10.gif"></img> </div></p>
+<div><em>Published: 2023-04-24</em></div>
 
 
 
